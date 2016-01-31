@@ -129,10 +129,17 @@ To the date of writing this thesis WhatsApp client doesn't offer discussed verif
 
 \subsubsection{Password generation}
 
-WhatsApp uses 
+WhatsApp uses lightly modified version of XMPP \cite{whatsapp-xmpp}. During the registration process it creates a username based on the user's phone number. In newer versions of the client the password is generated on server's side \cite{whatsapp-imei}. However, the previous Android versions used the phone's IMEI  number as password \cite{whatsapp-imei}\cite{whatsapp-imei2}.
+
+\begin{lstlisting}[caption={Pseudo-code of password generation on Android}]
+md5(revert('IMEI')) 
+\end{lstlisting}
+
+Any phone number -- IMEI pair was therefore all an attacker needed to send messages on victim's behalf. Numerous applications are collecting plenty of user data and the IMEI and phone numbers might be among them. For instance any database leak with such information would lead directly to large accounts abuse.
 
 \subsubsection{Messages encryption}
 
+TODO
 
 
 \subsection{Including Signal's protocol}
