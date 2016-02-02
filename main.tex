@@ -58,9 +58,8 @@ TODO
 
 \chapter{Current security status of major IMs}\label{compar}
 
-This chapter contains thorough description of five selected Instant Messengers and its security-related findings. The selection was based on criteria such as user base, license and overall security it claims to provide.
-
-*The Facebook Messenger?
+This chapter contains thorough description of five selected Instant Messengers and its security-related findings. The selection is based on criteria such as user base, license and overall security it claims to provide \footnote{Více rozepsat?}.
+\footnote{Napsat proč tu není Facebook Messenger anebo ho přidat}
 
 \begin{table}[htb]\centering
 	\caption{Messengers}
@@ -69,27 +68,38 @@ This chapter contains thorough description of five selected Instant Messengers a
 		\hline
 		 \textbf{Name} & \textbf{Authors} & \textbf{First realease} & \textbf{License} & \textbf{User base} \\ \hline
 		WhatsApp & WhatsApp Inc. & January 2010 & Proprietary & 990 million\tablefootnote{As of September 2015.} \cite{whatsappusers} \\ \hline
-		 Telegram & Telegram Messenger LLP  & August 2013  & GPLv2/GPLv3/Properietary*  & 60 million\tablefootnote{As of September 2015.} \\ \hline
+		 Telegram & Telegram Messenger LLP  & August 2013  & GPLv2/GPLv3/Properietary\tablefootnote{Rozepsat? Serverová verze je closed-source.}  & 60 million\tablefootnote{As of September 2015.} \\ \hline
 		 Signal & Open Whisper Systems & July 2014 & GPLv3 & 10 million\tablefootnote{*Predchudce a As of December 2013. Ma smysl porovnavat, kdyz je to 2 roky stare?} * \\ \hline
 		 Threema & 	Threema GmbH & 	December 2012  & Proprietary & 3.5 million  \tablefootnote{As of June 2015.} \\ \hline
 		 WeChat & Tencent & January 2011 & Proprietary & 600 million\tablefootnote{As of August 2015.} \\ \hline
 	\end{tabular}
 \end{table}
 
-% TODO: telegram NOTE server
-$  $
+The Electronic Frontier Foundation maintains a scoreboard of messaging applications' security. It evaluates messengers based on these seven criteria \cite{eff-score}:
+
+\begin{itemize}
+	\item Are messages encrypted in transit?
+	\item Are messages encrypted so the provider can’t read it?
+	\item Can user verify contacts’ identities?
+	\item Are past communications secure if keys stolen?
+	\item Is the code open to independent review?
+	\item Is security design properly documented?
+	\item Has there been any recent code audit?
+\end{itemize}
+
+At the end of each chapter dedicated to one messenger a small note about the received score is present.
 
 \section{WhatsApp}
 
-WhatsApp is a mobile text messaging application. Besides text it enables users to send pictures, videos, voice and locations. WhatsApp Messenger is available for iPhone, BlackBerry, Windows Phone, Android and Nokia\cite{whatsapphomepage}.
+WhatsApp is a mobile messaging application. Besides text it enables users to send pictures, videos, voice and locations. WhatsApp Messenger is available for iPhone, BlackBerry, Windows Phone, Android and Nokia\cite{whatsapphomepage}.
 
-In September 2015 WhatsApp has reached 900 million monthly users and was the most used messenger to that moment\cite{whatsappusers}.
+In February 2016 WhatsApp has reached 1 billion active users monthly and was the most used messenger to that moment \cite{whatsappusers}.
 
-The large user base and overall awareness of the application is one of the main reasons WhatsApp is included in this comparison.
+The large user base and overall popularity of the application is one of the main reasons WhatsApp is included in this comparison.
 
-WhatsApp Messenger is a proprietary software, currently own by Facebook\cite{facebookwhatsappbuy}. Becuase of that fact, the writer decided to omit Facebook Messenger, since it resembles WhatsApp closely**.
+WhatsApp Messenger is a proprietary software, currently own by Facebook Inc \cite{facebookwhatsappbuy}. Becuase of that fact, the writer decided to omit Facebook Messenger, since it resembles WhatsApp closely\footnote{Tohle je pravda tak napůl}.
 
-Following sections describe WhatsApp's security-related incidents ordered chronologically.
+Following section describes WhatsApp's security-related incidents and an attitude to its security in general.
 
 \subsection{Security-related incidents}
 
@@ -104,11 +114,11 @@ WhatsApp's user identity is bound to user's phone number. In order to verify the
 	\label{img:whatsapp_reg}
 \end{figure}
 
-Older version of WhatsApp offered an alternative verification process. Instead of the user waiting for a text message, he was rather supposed to send a SMS to one of WhatsApp's phone numbers where he included his email. WhatsApp later sent verification code to the email and user verified himself with this code \cite{whatsapp-shootingthemsg}.
+Older versions of WhatsApp offered an alternative verification process. Instead of the user waiting for a text message, he was rather supposed to send a SMS to one of WhatsApp's phone numbers where he included his email. WhatsApp later sent verification code to the email and user verified himself with this code \cite{whatsapp-shootingthemsg}.
 
-In 2011 research showed this method has serious drawbacks. To hijack user's account attacker first opted for this method. Then using SMS spoofing service\footnote{popsat co to je, nebo není třeba?} he sent SMS to WhatsApp's phone number pretending it originates from the victim. Attacker set the content of the message to an email he owned, leading to WhatsApp sending the verification code to the attacker. The attacker then simply entered the code from an email and successfully hijacked the victim's account \cite{whatsapp-hijack1}.
+In 2011 research showed this method had serious drawbacks. To hijack user's account attacker first opted for this method. Then using SMS spoofing service\footnote{popsat co to je, nebo není třeba?} he sent SMS to WhatsApp's phone number pretending it originates from the victim. Attacker set the content of the message to an email he owned, leading to WhatsApp sending the verification code to the attacker. The attacker then simply entered the code from an email and successfully hijacked the victim's account \cite{whatsapp-hijack1}.
 
-Following these findings another method to bypass the registration process was published. During the registration phase WhatsApp \footnote{opět přípomínat, že se jedná o starší verzi?} sent a request for the verification SMS to be sent to the client in HTTP request similiar to this: \cite{whatsapp-shootingthemsg}
+Following these findings another method to bypass the registration process was published. During the registration phase WhatsApp sent a request for the verification SMS to be sent to the client in HTTP request similiar to this \cite{whatsapp-shootingthemsg}:
 
 
 \begin{lstlisting}[caption={HTTP request to dispatch SMS}]
@@ -121,10 +131,9 @@ The request contained the final verification code in the GET parameter. That lea
 
 Attacker then created a fake HTTP OK response to let the messenger think the request was successful and entered retrieved verification code from the intercepted request. The attacker successfully hijacked the victim's WhatsApp identity and can both send and recieve all his messages.
 
-
 The author of the research notified WhatsApp developers beforehand and WhatsApp fixed this issue before the research was made public \cite{whatsapp-shootingthemsg}.
 
-To the date of writing this thesis WhatsApp client doesn't offer discussed verification method anymore.
+To the date of writing this thesis WhatsApp doesn't offer discussed verification method anymore.
 
 
 \subsubsection{Password generation}
@@ -135,20 +144,30 @@ WhatsApp uses lightly modified version of XMPP \cite{whatsapp-xmpp}. During the 
 md5(revert('IMEI')) 
 \end{lstlisting}
 
-Any phone number -- IMEI pair was therefore all an attacker needed to send messages on victim's behalf. Numerous applications are collecting plenty of user data and the IMEI and phone numbers might be among them. For instance any database leak with such information would lead directly to large accounts abuse.
+Any phone number -- IMEI pair was therefore all an attacker needed to send messages on victim's behalf. Numerous applications are collecting plenty of user data and the IMEI and phone number might be among them. Any database leak with such information would lead directly to large accounts abuse.
 
 \subsubsection{Messages encryption}
 
-TODO
+In former versions, WhatsApp did not use any message encryption. The messenger used port 443 (commonly used for HTTPS) to send content, however it did not encrypt anything \cite{whatsapp-plaintext}. Using a simple network sniffer like Wireshark attacker was able to read all user's messages \cite{whatsapp-plaintext}.
 
+On May 2012 an application called ``WhatsAppSniffer'' had been released. It abused described flaw and enabled attacker to see victim's messages in easy and lucid user interface \cite{whatsapp-sniffer}\cite{whatsapp-sniffer2}.\footnote{dodat obrazek?}
 
-\subsection{Including Signal's protocol}
+On August 2012 WhatsApp started to use some sort of encryption. The developers did not reveal which protocol they use or any other information. Reports showed that simple message sniffing, as described in previous chapter, seized to work \cite{whatsapp-sniffernomore}. Some sources claim the  RC4 stream cipher was used for encryption \cite{whatsapp-rc4}\cite{whatsapp-rc42}.
 
-On November 18, 2014, Open Whisper Systems, the creators behind Signal messenger, announced a partnership with WhatsApp. The partnership should have escalated into incorporating OWS' encryption protocol to WhatsApp bringing end-to-end encryption to all WhatsApp clients \cite{openwhisperwhatsapp}.
+On November 18, 2014, Open Whisper Systems, the creators behind Signal messenger, announced a partnership with WhatsApp. The partnership should have escalated into incorporating OWS' encryption protocol to WhatsApp bringing end-to-end encryption to all WhatsApp clients \cite{openwhisperwhatsapp}. Open Whisper Systems stated: \emph{``we are moving quickly towards a world where all WhatsApp users will get end-to-end encryption by default.''} \cite{openwhisperwhatsapp}.
 
-Open Whisper Systems stated: \emph{``we are moving quickly towards a world where all WhatsApp users will get end-to-end encryption by default.''} \cite{openwhisperwhatsapp}
+WhatsApp confirmed this partnership, however did not comment it any further nor offered any further information. No additional information from Open Whisper Systems' side had been released as well. WhatsApp's FAQ currently only briefly states \emph{''WhatsApp communication between your phone and our server is encrypted.``}\cite{whatsapp-faq}.
 
-WhatsApp confirmed this partnership, however did not comment it any further nor offered any further information\cite{x}. No additional information from Open Whisper Systems' side had been released as well. Therefore this thesis assumes WhatsApp shares no code base with Signal, since it can't be verified.
+On April 2015, \emph{heise.de} investigated the current state of WhatsApp's encryption. The journalists were sniffing messages using the Man-in-the-Middle technique. They showed that Android versions used end-to-end encryption and that the messages ``\emph{were encrypted according to the TextSecure protocol}''\cite{whatsapp-encstate}. However, during testing the iOS client they concluded the messages weren't protected in such manner. Finally, they concluded they are unsure whether end-to-end encryption was actually used in all cases \cite{whatsapp-encstate}.
+
+\subsubsection{APIs}
+
+\footnote{Napsat o Chat API a WhatsAPI?}
+
+\subsubsection{EFF's secure messaging score}
+
+At the time of writing WhatsApp has two points out of seven in the EFF's secure messaging scorecard \cite{eff-score}.
+
 
 \section{Telegram}
 
@@ -207,14 +226,6 @@ As of August 2015, WeChat has 600 million active users, vast majority of them lo
 \begin{conclusion}
 
 Zaver TODO
-
-
-\begin{itemize}
-	\item The algorithm assigns code to each source unit irrespective to its position (statistical compression methods).
-	\item The Markov's model of $n$-th order look at previous $n$ source units to assign code. The simplist of this codes, 0th order, are mentioned above.
-	\item The models based on finite automata.
-\end{itemize}
-
 	
 
 \end{conclusion}
