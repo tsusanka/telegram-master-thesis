@@ -18,6 +18,10 @@
 \usepackage{dirtree} %directory tree visualisation
 \usepackage{tablefootnote}
 
+\usepackage{pifont}% http://ctan.org/pkg/pifont
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+
 % list of acronyms
 % \usepackage[acronym,nonumberlist,toc,numberedsection=autolabel,nomain]{glossaries}
 %\iflanguage{czech}{\renewcommand*{\acronymname}{Seznam pou{\v z}it{\' y}ch zkratek}}{}
@@ -58,6 +62,11 @@ TODO
 
 \chapter{Current security status of major IMs}\label{compar}
 
+TODO: Popis, o čem bude tato kapitola.
+
+\section{Selection of IMs}
+TODO: lepší název sekce?
+
 This chapter contains thorough description of five selected Instant Messengers and its security-related findings. The selection is based on criteria such as user base, license and overall security it claims to provide \footnote{Více rozepsat?}.
 \footnote{Napsat proč tu není Facebook Messenger anebo ho přidat}
 
@@ -87,11 +96,11 @@ The Electronic Frontier Foundation maintains a scoreboard of messaging applicati
 	\item Has there been any recent code audit?
 \end{itemize}
 
-At the end of each chapter dedicated to one messenger a small note about the received score is present.
+At the end of each chapter dedicated to one messenger a small note about the received score will be made.
 
 \section{WhatsApp}
 
-WhatsApp is a mobile messaging application. Besides text it enables users to send pictures, videos, voice and locations. WhatsApp Messenger is available for iPhone, BlackBerry, Windows Phone, Android and Nokia\cite{whatsapphomepage}.
+WhatsApp is a mobile messaging application. Besides text it enables users to send pictures, videos, voice and locations. WhatsApp Messenger is available for iPhone, BlackBerry, Windows Phone, Android and Symbian\cite{whatsapphomepage}.
 
 In February 2016 WhatsApp has reached 1 billion active users monthly and was the most used messenger to that moment \cite{whatsappusers}.
 
@@ -121,7 +130,11 @@ In 2011 research showed this method had serious drawbacks. To hijack user's acco
 Following these findings another method to bypass the registration process was published. During the registration phase WhatsApp sent a request for the verification SMS to be sent to the client in HTTP request similiar to this \cite{whatsapp-shootingthemsg}:
 
 
-\begin{lstlisting}[caption={HTTP request to dispatch SMS}]
+\begin{lstlisting}[
+	caption={HTTP request to dispatch SMS},
+	basicstyle=\footnotesize,
+	breaklines=true
+]
 GET [..]?to=4915143[..]&auth=659&[..]
 HTTP/1.1
 User-Agent: WhatsApp/2.6.4 iPhone_OS/4.3.3 Device/iPhone_4
@@ -156,7 +169,7 @@ On August 2012 WhatsApp started to use some sort of encryption. The developers d
 
 On November 18, 2014, Open Whisper Systems, the creators behind Signal messenger, announced a partnership with WhatsApp. The partnership should have escalated into incorporating OWS' encryption protocol to WhatsApp bringing end-to-end encryption to all WhatsApp clients \cite{openwhisperwhatsapp}. Open Whisper Systems stated: \emph{``we are moving quickly towards a world where all WhatsApp users will get end-to-end encryption by default.''} \cite{openwhisperwhatsapp}.
 
-WhatsApp confirmed this partnership, however did not comment it any further nor offered any further information. No additional information from Open Whisper Systems' side had been released as well. WhatsApp's FAQ currently only briefly states \emph{''WhatsApp communication between your phone and our server is encrypted.``}\cite{whatsapp-faq}.
+WhatsApp confirmed this partnership, however did not comment it any further nor offered any further information. No additional information from Open Whisper Systems' side had been released as well. WhatsApp's FAQ currently only briefly states \emph{``WhatsApp communication between your phone and our server is encrypted.''}\cite{whatsapp-faq}.
 
 On April 2015, \emph{heise.de} investigated the current state of WhatsApp's encryption. The journalists were sniffing messages using the Man-in-the-Middle technique. They showed that Android versions used end-to-end encryption and that the messages ``\emph{were encrypted according to the TextSecure protocol}''\cite{whatsapp-encstate}. However, during testing the iOS client they concluded the messages weren't protected in such manner. Finally, they concluded they are unsure whether end-to-end encryption was actually used in all cases \cite{whatsapp-encstate}.
 
@@ -166,8 +179,23 @@ On April 2015, \emph{heise.de} investigated the current state of WhatsApp's encr
 
 \subsubsection{EFF's secure messaging score}
 
-At the time of writing WhatsApp has two points out of seven in the EFF's secure messaging scorecard \cite{eff-score}.
+At the time of writing, WhatsApp has two points out of seven in the EFF's secure messaging scorecard \cite{eff-score}.
 
+\begin{table}[htb]
+	\centering
+	\caption{WhatsApp's secure messaging score}
+	\label{my-label}
+	\begin{tabular}{|l|l|}
+		\hline
+		Are messages encrypted in transit? & \cmark \\\hline
+		Are messages encrypted so the provider can’t read it? & \xmark \\ \hline
+		Can user verify contacts’ identities? & \xmark \\ \hline
+		Are past communications secure if keys stolen? & \xmark \\ \hline
+		Is the code open to independent review? & \xmark \\ \hline
+		Is security design properly documented? & \xmark \\ \hline
+		Has there been any recent code audit? & \cmark \\ \hline
+	\end{tabular}
+\end{table}
 
 \section{Telegram}
 
@@ -175,16 +203,13 @@ Telegram is instant messaging service, enabling users to send messages, photos, 
 
 Similar to WhatsApp user can contact someone by his phone number. Telegram provides classical username approach as well. User needs to know the reciepent's phone number or Telegram username in order to communicate with him.
 
-All clients are licensed under GPLv2 or GPLv3 license, however the server-side part of Telegram is closed-sourced and proprietery. TODO overit
+All clients are licensed under GPLv2 or GPLv3 license, however the server-side part of Telegram is closed-sourced and proprietery \cite{telegram-server}.
 
-In 2015 Brazilian judiciary ordered WhatsApp to shut down for 48 hours \cite{whatsappbrazil}. During this event, which was finally lowered to only 12 hours, Telegram welcomed 5 million new users \cite{whatsappbrazil}. It may be therefore considered as a direct competitor to WhatsApp.
+In 2015 Brazilian judiciary ordered WhatsApp to shut down for 48 hours \cite{whatsappbrazil}. During this event, which was finally lowered to only 12 hours, Telegram welcomed 5 million new users \cite{whatsappbrazil}. It may be therefore considered as a direct competitor to WhatsApp.\footnote{vynechat?}
 
-In September 2015, Telegram officials stated announced it has 60 million active users.\cite{x}
+In May 2015 Telegram had 62 million active users \cite{telegram-users}.
 
-
-\subsection{Secret chats}
-
-Besides regular chat Telegram provides ``secret chats''. Secret chat messages are encrypted using end-to-end encryption and are not stored on Telegram's servers\cite{telegramfaq}.
+Telegram provides two modes of messaging. Besides the regular chat Telegram provides ``secret chats''. Secret chat messages are encrypted using end-to-end encryption and are not stored on Telegram's servers\cite{telegramfaq}.
 
 \subsection{Cracking Contest}
 
