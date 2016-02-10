@@ -114,12 +114,12 @@ For ease of comparison we've decided to select primarily messengers with support
 The Electronic Frontier Foundation maintains a scoreboard of messaging applications' security. It evaluates messengers based on these seven criteria \cite{eff-score}:
 
 \begin{itemize}
-	\item \textbf{Are messages encrypted in transit?} All user communication is required to be encrypted. Metadata's encryption is not required.
-	\item \textbf{Are messages encrypted so the provider can not access it?} All user messages need to be end-to-end encrypted. The private keys need to be generated at the endpoints, not on the centralized server. Any bulk data collection is therefore meaningless and no third-party may access the messages unless one party allows it.
+	\item \textbf{Are messages encrypted in transit?} All user communication is required to be encrypted. Encryption of metadata, such as phone numbers, usernames or dates, is not required.
+	\item \textbf{Are messages encrypted so the provider can not access it?} All user messages need to be end-to-end encrypted, from the moment user sends a message to the moment the other party recieves it. No decrypting  and re-encrypting may occur during that process. The private keys need to be generated at the endpoints, not on the centralized server. Any bulk data collection is therefore meaningless and no third-party may access the messages unless one party allows it.
 	\item \textbf{Can user verify contacts’ identity?} This requires a verification mechanism of the other side's identity to prevent Man-in-the-Middle attacks. 
 	\item \textbf{Are past communications secure if keys stolen?} All messages need to be encrypted with routinely changed keys. The forward secrecy minimizes consequences when a private key is stolen, becuase the key has only a short-time validity. This criterion requires end-to-end encryption, it is therefore directly dependent on the second criterion.
 	\item \textbf{Is the code open to independent review?} Sufficient amount of source-code needs to be available to perform an independent code review. This protects from unintentional encryption flaws, back doors or bugs.
-	\item \textbf{Is the crypto design properly documented?} The cryptography behind the application needs to be described in detailed documentation.
+	\item \textbf{Is the cryptography design properly documented?} The cryptography behind the application needs to be described in detailed documentation.
 	\item \textbf{Has there been any recent code audit?} An independent security review of the application is not older than 12 months. This does not require the audit to be publicly available.
 \end{itemize}
 
@@ -229,7 +229,7 @@ At the time of writing, WhatsApp has two points out of seven in the EFF's secure
 
 \section{Telegram}
 
-Telegram is instant messaging service, enabling users to send messages, photos, videos, stickers and files. Telegram describes itself as fast and secure solution for instant messaging and claims to be safer than WhatsApp. Compared to WhatsApp, Telegram is more cloud-based, it stores all messages on its servers and sync them with all user's devices.\cite{telegramfaq}
+Telegram is instant messaging service enabling users to send messages, photos, videos, stickers and files. Telegram describes itself as fast and secure solution for instant messaging and claims to be safer than WhatsApp. Compared to WhatsApp, Telegram is more cloud-based, it stores all messages on its servers and sync them with all user's devices.\cite{telegramfaq}
 
 Nikolaj and Pavel Durov are the authors of Telegram. After leaving the  social network VK Pavel Durov founded, they focused on creating safe forms of communication leading to Telegram.
 
@@ -254,7 +254,7 @@ Telegram provides two modes of messaging. Besides the regular chat Telegram prov
 	\caption{Telegram chat modes}
 \end{figure}
 
-Similar to WhatsApp user can contact someone using his phone number, but Telegram provides classical username approach as well. User needs to know the reciepent's phone number or Telegram username in order to communicate with him.
+Similar to WhatsApp user can contact someone using his phone number but Telegram provides classical username approach as well. User needs to know the reciepent's phone number or Telegram username in order to communicate with him.
 
 All clients are licensed under GPLv2 or GPLv3 license, the server-side part of Telegram is closed-sourced and proprietery \cite{telegram-server}.
 
@@ -268,25 +268,25 @@ Telegram was first released on August 14, 2013. The security-related history is 
 
 \subsubsection{Possibly unsafe fundamentals}
 
-Telegram authors decided to create a brand new encryption scheme called MTProto. In cryptography community this raised concerns and some commented the approach as ``\emph{not something that a cryptographer would use}''. \cite{telegram-cryptocomm} Some of the alleged imperfections are:
+Telegram authors decided to create a brand new encryption scheme called MTProto. In cryptography community this raised concerns and some commented the approach as ``\emph{not something that a cryptographer would use}''\cite{telegram-cryptocomm}. Some of the alleged imperfections are:
 
 \begin{itemize}
-	\item Telegram uses SHA-1, which is proven to be cryptographically broken \cite{telegram-sha1}.
+	\item Telegram uses SHA-1 which is proven to be cryptographically broken \cite{telegram-sha1}.
 	\item Telegram's authentication scheme is based on MAC-then-Encrypt approach instead of Encrypt-then-MAC.
-	\item It uses IGE (Infinite Garble Extension) mode in the AES encryption which is not well known. \footnote{Pokud bych dělal Telegram, tohle je něco co by stálo za prozkoumání? Něco podobného útoku Padding Oracle. Ve zkratce prozkoumat ten IGE a tu autentikaci.}
+	\item It uses IGE\footnote{Infinite Garble Extension} mode in the AES encryption which is not well known. \footnote{Pokud bych dělal Telegram, tohle je něco co by stálo za prozkoumání? Něco podobného útoku Padding Oracle. Prozkoumat ten IGE a tu autentikaci.}
 \end{itemize}
 
 Telegram FAQ contradicts it uses the primitives in a safe manner \cite{telegram-techfaq}.
 
 \subsubsection{IND-CCA insecurity}
 
-In Spring 2015 researchers from Aarhus University performed an independent audit of the protocol \cite{telegram-aarhus}. They concluded the encryption scheme is not IND-CCA secure, meaning any ciphertext can be altered into another ciphertext decrypting to the very same plaintext.
+In Spring 2015 researchers from Aarhus University performed an independent audit of the protocol \cite{telegram-aarhus}. They concluded the encryption scheme is not IND-CCA\footnote{Indistinguishability under Chosen Ciphertext} secure, meaning any ciphertext can be altered into another ciphertext decrypting to the very same plaintext.
 
 The researchers stressed the theoretical nature of the attack and that they ``\emph{do not see any way of turning the attack into a full plaintext-recovery attack}''\cite{telegram-aarhus}. Telegram's FAQ describes it as a minor issue unaffecting overall security. \cite{telegram-techfaq}
 
 \subsubsection{Secret chat and Man-in-the-Middle attack}
 
-The secret chat provides an option to display counterparty's encryption key. Telegram creates a white-blue box to visualise the key, as may be seen on \ref{img:telegram-keybox}. To make sure no malicious mediator is present, users are supposed to meet in person and verify the keys are identical.
+The secret chat provides an option to display counterparty's encryption key. Telegram creates a white-blue box to visualise the key as may be seen on \ref{img:telegram-keybox}. To make sure no malicious mediator is present users are supposed to meet in person and verify the keys are identical.
 
 \begin{figure}[htb]
 	\centering
@@ -295,11 +295,11 @@ The secret chat provides an option to display counterparty's encryption key. Tel
 	\label{img:telegram-keybox}
 \end{figure}
 
-The visualisation is based on a 128-bit fingerprint of the secret key. An~article presented in January 2015\cite{telegram-264} showed that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat, a MiM attack is possible only with $2^{64}$ operations, rather than $2^{128}$, based on the birthday paradox.\footnote{Nevím, jestli bych to měl rozepsat nějak více. Ten článek není nijak skvělý, možná stačí později, jen v případě, že si telegram vyberu?}
+The visualisation is based on a 128-bit fingerprint of the secret key. An~article presented in January 2015 showed\cite{telegram-264} that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat, a MiM attack is possible only with $2^{64}$ operations, rather than $2^{128}$, based on the birthday paradox.\footnote{Nevím, jestli bych to měl rozepsat nějak více. Ten článek není nijak skvělý, možná stačí později, jen v případě, že si telegram vyberu?}
 
 The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions USD. Telegram's FAQ addresses this issue and claimes its cost is around a trillion dollars to achieve a result in one month \cite{telegram-techfaq}.
 
-The article as well reasons that in real-world scenario the users don't meet up to verify. Most of them probably ignores the verification completely, some send the image via regular chat or using another channel.
+The article as well reasons that in real-world scenario the users don't meet up to verify the key. Most of them probably ignore the verification completely, some send the image via regular chat or using another channel.
 
 \subsubsection{Cracking Contest}
 
