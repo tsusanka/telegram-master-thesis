@@ -63,29 +63,29 @@ TODO
 
 \chapter{Current security status of major IMs}\label{compar}
 
-This chapter contains thorough description of five selected Instant Messengers and its security-related findings.
+This chapter contains thorough description of five selected Instant Messengers and its security related findings. Particular software versions are mostly an estimate based on a date some findings were published and the software changelog.
 
 \section{Selection}
 
-We selected the following five Instant Messenger applications.
+We selected the following five Instant Messenger applications. The selection was based on various criterions to create a diverse mixture of messengers. The criterions included user base, geographical origin, authors, proclaimed security, license, price and other. For ease of comparison we've decided to select messengers with support for mobile platforms. We've omitted Facebook Messenger, since it is owned by the very same company as WhatsApp, Facebook Inc \cite{facebookwhatsappbuy}.
 
-\subsection{WhatsApp}
+\subsection{WhatsApp\protect\footnote{https://www.whatsapp.com}}
 
 Large user base and overall popularity of the application is one of the main reasons WhatsApp is included. With 1 billion active users it is the most used messenger at the moment.\cite{whatsappusers}
 
-\subsection{Telegram}
+\subsection{Telegram\protect\footnote{https://www.telegram.org}}
 
 Telegram praises itself as safer than WhatsApp. It uses its own messaging protocol MTProto and argues for its security. Telegram's clients are open-source but the server side is proprietary. The authors of Russian social network VK, Nikolaj Durov and Pavel Durov, are the creators of Telegram.
 
-\subsection{Signal}
+\subsection{Signal\protect\footnote{https://www.whispersystems.org}}
 
 TODO
 
-\subsection{Threema}
+\subsection{Threema\protect\footnote{https://www.threema.ch}}
 
 TODO
 
-\subsection{WeChat}
+\subsection{WeChat\protect\footnote{https://www.wechat.com/en/}}
 
 TODO
 
@@ -103,11 +103,6 @@ TODO
 	\end{tabular}
 \end{table}
 
-
-TODO: dodat URL a poslední verzi do tabulky \\
-TODO: jak to udělat aby se to vešlo? rotace nepomůže. Na ležato? Rozdělit? \\
-
-For ease of comparison we've decided to select primarily messengers with support for mobile platforms. We've omitted Facebook Messenger, since it is owned by the very same company as WhatsApp, Facebook Inc \cite{facebookwhatsappbuy}.
 
 \section{Security aspects}
 
@@ -160,8 +155,7 @@ Following these findings another method to bypass the registration process was p
 	basicstyle=\footnotesize,
 	breaklines=true
 ]
-GET [..]?to=4915143[..]&auth=659&[..]
-HTTP/1.1
+GET [..]?to=4915143[..]&auth=659&[..] HTTP/1.1
 User-Agent: WhatsApp/2.6.4 iPhone_OS/4.3.3 Device/iPhone_4
 \end{lstlisting}
 
@@ -351,11 +345,31 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 
 \section{Signal}
 
-Signal is a voice calling and instant messaging application developped by Open Whisper Systems. It was brought to light by merging two applications - the voice calling RedPhone and the text messenger TextSecure both created by the very same company \cite{signalmerge}.
+Signal is a voice calling and instant messaging application developped by Open Whisper Systems. It was brought to light by the merge of two applications -- the voice calling RedPhone and the text messenger TextSecure both created by the very same company \cite{signalmerge}.
 
-Signal is completely open-sourced including its server side.
+Signal is completely open-sourced including its server side. Signal was endorsed by some well-known names such as Edward Snowden \cite{signal-snowden} or Bruce Schneier \cite{signal-schneier}.
 
 TODO
+
+\subsection{EFF's secure messaging score}
+
+
+\begin{table}[htb]
+	\centering
+	\caption{Signal's secure messaging score}
+	\label{tab:telegram-regular-eff}
+	\begin{tabular}{|l|l|}
+		\hline
+		Are messages encrypted in transit? & \cmark \\\hline
+		Are messages encrypted so the provider can not access it? & \cmark \\ \hline
+		Can user verify contacts’ identities? & \cmark \\ \hline
+		Are past communications secure if keys stolen? & \cmark \\ \hline
+		Is the code open to independent review? & \cmark \\ \hline
+		Is the cryptography design properly documented? & \cmark \\ \hline
+		Has there been any recent code audit? & \cmark \\ \hline
+	\end{tabular}
+\end{table}
+
 
 \section{Threema}
 
