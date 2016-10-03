@@ -18,8 +18,11 @@
 \usepackage{dirtree} %directory tree visualisation
 \usepackage{tablefootnote}
 \usepackage{subcaption}
-
+\usepackage{eurosym}
+\usepackage{amsmath} % to center math equations
 \usepackage{pifont}% http://ctan.org/pkg/pifont
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \newcommand{\cmark}{\ding{51}}%
 \newcommand{\xmark}{\ding{55}}%
 
@@ -36,7 +39,7 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 \department{Department of Computer Systems}
-\title{TODO}
+\title{Security Analysis of the Telegram IM}
 \authorGN{Tom{\' a}{\v s}} %author's given name/names
 \authorFN{Su{\v s}{\' a}nka} %author's surname
 \author{Tom{\' a}{\v s} Su{\v s}{\' a}nka} %author's name without academic degrees
@@ -56,7 +59,18 @@
 % \newacronym{RLE}{RLE}{Run-Length Encoding}
 
 \begin{introduction}
-TODO
+
+TODO TODO
+
+The human interaction and communication takes place more and more often in the digital world. This trend will most likely continue and the line between real and digital may one day disappear entirely. There is a plenty of communication solutions. Some claim themselves as very secure, some try to avoid such questions.
+
+Today's users are picky. Instant messengers are de facto required to have both mobile and web access and more advance capabilities, such as media, voice or location sharing and the list might continue.
+
+The surveillance disclosures emanating from the ex-NSA employee Edward Snowden showed the demand for a secure communication and number of solutions emerged. The more users share the more we realize the pitfalls of insecure communication. We shall not however forget that there is a distinction between security advertised and security actually achieved.
+
+TODO Telegram
+
+% This work will focus on five current Instant Messenger solutions. We will cover the messenger's history, origin, its security-related aspects and other information in order to provide the reader an insight into the security of today's modern Instant Messaging.
 \end{introduction}
 
 
@@ -67,27 +81,31 @@ This chapter contains thorough description of five selected Instant Messengers a
 
 \section{Selection}
 
-We selected the following five Instant Messenger applications. The selection was based on various criterions to create a diverse mixture of messengers. The criterions included user base, geographical origin, authors, proclaimed security, license, price and other. For ease of comparison we've decided to select messengers with support for mobile platforms. We've omitted Facebook Messenger, since it is owned by the very same company as WhatsApp, Facebook Inc \cite{facebookwhatsappbuy}.
+We selected the following five Instant Messenger applications. The selection was based on various criterions to create a diverse mixture of messengers. The criterions among others were user base, geographical origin, authors, proclaimed security, license and price. However, we did not want to simply sort the IMs by one of those criterions. We wanted to present an indeed diverse collection. That's why we've omitted Facebook Messenger and Apple's iMessage, since the first is owned by the very same company as WhatsApp~\cite{facebookwhatsappbuy} and the later is yet another US-based company.
+
+For ease of comparison we've decided to select messengers with support for mobile platforms. Particular software versions are mostly an estimate based on a date some findings were published and the software changelog.
+
 
 \subsection{WhatsApp\protect\footnote{https://www.whatsapp.com}}
 
 Large user base and overall popularity of the application is one of the main reasons WhatsApp is included. With 1 billion active users it is the most used messenger at the moment.\cite{whatsappusers}
 
+\subsection{Signal\protect\footnote{https://www.whispersystems.org}}
+
+Signal was endorsed by the community in several occasions and is by many considered as the most secure messenger. It's the only messenger completely open-sourced in this collection.
+
+\subsection{Threema\protect\footnote{https://www.threema.ch}}
+
+Threema is the only paid application in this selection. Furthermore Threema comes from Switzerland and may be therefore considered as an European alternative to the traditionally US-based services.
+
+\subsection{WeChat\protect\footnote{https://www.wechat.com/en/}}
+
+WeChat is with its 700 million active users the most used messenger in China~\cite{wechat-users}. As with Threema we include WeChat mainly for its distinct origin.
+
 \subsection{Telegram\protect\footnote{https://www.telegram.org}}
 
 Telegram praises itself as safer than WhatsApp. It uses its own messaging protocol MTProto and argues for its security. Telegram's clients are open-source but the server side is proprietary. The authors of Russian social network VK, Nikolaj Durov and Pavel Durov, are the creators of Telegram.
 
-\subsection{Signal\protect\footnote{https://www.whispersystems.org}}
-
-TODO
-
-\subsection{Threema\protect\footnote{https://www.threema.ch}}
-
-TODO
-
-\subsection{WeChat\protect\footnote{https://www.wechat.com/en/}}
-
-TODO
 
 \begin{table}[htb]\centering
 	\caption{Messengers}
@@ -95,11 +113,11 @@ TODO
 	\begin{tabular}{|l|l|l|l|l|}
 		\hline
 		 \textbf{Name} & \textbf{First release} & \textbf{License} & \textbf{User base} \\ \hline
-		WhatsApp & January 2010 & Proprietary & 990 million\tablefootnote{\label{foot-sep2015}As of September 2015.} \\ \hline
-		 Telegram & August 2013  & GPLv2/GPLv3/Proprietary & 60 million\footref{foot-sep2015} \\ \hline
+		WhatsApp & January 2010 & Proprietary & 1 billion\tablefootnote{\label{foot-sep2015}As of February 2016.} \\ \hline
+		 Telegram & August 2013 & GPLv2/GPLv3/Proprietary & 100 million\tablefootnote{As of February 2016} \\ \hline
 		 Signal & July 2014 & GPLv3 & 10 million\tablefootnote{Signal's predecessor TextSecure as of December 2013.} \\ \hline
 		 Threema & 	December 2012  & Proprietary & 3.5 million  \tablefootnote{As of June 2015.} \\ \hline
-		 WeChat & January 2011 & Proprietary & 600 million\tablefootnote{As of August 2015.} \\ \hline
+		 WeChat & January 2011 & Proprietary & 700 million\tablefootnote{As of April 2016.} \\ \hline
 	\end{tabular}
 \end{table}
 
@@ -110,9 +128,9 @@ The Electronic Frontier Foundation maintains a scoreboard of messaging applicati
 
 \begin{itemize}
 	\item \textbf{Are messages encrypted in transit?} All user communication is required to be encrypted. Encryption of metadata, such as phone numbers, usernames or dates, is not required.
-	\item \textbf{Are messages encrypted so the provider can not access it?} All user messages need to be end-to-end encrypted, from the moment user sends a message to the moment the other party recieves it. No decrypting  and re-encrypting may occur during that process. The private keys need to be generated at the endpoints, not on the centralized server. Any bulk data collection is therefore meaningless and no third-party may access the messages unless one party allows it.
-	\item \textbf{Can user verify contacts’ identity?} This requires a verification mechanism of the other side's identity to prevent Man-in-the-Middle attacks. 
-	\item \textbf{Are past communications secure if keys stolen?} All messages need to be encrypted with routinely changed keys. The forward secrecy minimizes consequences when a private key is stolen, becuase the key has only a short-time validity. This criterion requires end-to-end encryption, it is therefore directly dependent on the second criterion.
+	\item \textbf{Are messages encrypted so the provider can not access it?} All user messages need to be end-to-end encrypted, from the moment user sends a message to the moment the other party receives it. No decrypting  and re-encrypting may occur during that process. The private keys need to be generated at the endpoints, not on the centralized server. Any bulk data collection is therefore meaningless and no third-party may access the messages unless one party allows it.
+	\item \textbf{Can user verify contacts' identity?} This requires a verification mechanism of the other side's identity to prevent Man-in-the-Middle attacks. 
+	\item \textbf{Are past communications secure if keys stolen?} All messages need to be encrypted with routinely changed keys. The forward secrecy minimizes consequences when a private key is stolen, because the key has only a short-time validity. This criterion requires end-to-end encryption, it is therefore directly dependent on the second criterion.
 	\item \textbf{Is the code open to independent review?} Sufficient amount of source-code needs to be available to perform an independent code review. This protects from unintentional encryption flaws, back doors or bugs.
 	\item \textbf{Is the cryptography design properly documented?} The cryptography behind the application needs to be described in detailed documentation.
 	\item \textbf{Has there been any recent code audit?} An independent security review of the application is not older than 12 months. This does not require the audit to be publicly available.
@@ -120,7 +138,7 @@ The Electronic Frontier Foundation maintains a scoreboard of messaging applicati
 
 At the end of each chapter dedicated to one messenger a small note about the received score will be made.
 
-\section{WhatsApp}
+\section{WhatsApp}\label{whatsapp}
 
 WhatsApp is a mobile messaging application. Besides text it enables users to send pictures, videos, voice and locations. WhatsApp Messenger is available for iPhone, BlackBerry, Windows Phone, Android and Symbian\cite{whatsapphomepage}.
 
@@ -132,7 +150,7 @@ Following section describes WhatsApp's security-related incidents.
 
 \subsection{Security-related incidents}
 
-\subsubsection{Flaws in registration process}
+\subsubsection{Flaws in registration process}\label{whatsapp-registration}
 
 WhatsApp's user identity is bound to user's phone number. In order to verify the relationship user has to enter his phone number during the first start-up. WhatsApp server then sends SMS with verification code to such number. User submits the code from the received text message and WhatsApp creates his account.  
 
@@ -143,9 +161,9 @@ WhatsApp's user identity is bound to user's phone number. In order to verify the
 	\label{img:whatsapp_reg}
 \end{figure}
 
-Upto version 2.6.5 WhatsApp offered an alternative verification process. Instead of the user waiting for a text message, he was rather supposed to send a SMS to one of WhatsApp's phone numbers where he included his email. WhatsApp later sent verification code to the email and user verified himself with this code \cite{whatsapp-shootingthemsg}.
+Up to version 2.6.5 WhatsApp offered an alternative verification process. Instead of the user waiting for a text message, he was rather supposed to send a SMS to one of WhatsApp's phone numbers where he included his email. WhatsApp later sent verification code to the email and user verified himself with this code \cite{whatsapp-shootingthemsg}.
 
-Serious drawbacks were found in this method in 2011 \cite{whatsapp-hijack1}. To hijack user's account attacker first opted for this method. Then using SMS spoofing service he sent SMS to WhatsApp's phone number pretending it originates from the victim. Attacker set the content of the message to an email he owned, leading to WhatsApp sending the verification code to the attacker. The attacker then simply entered the code from an email and successfully hijacked the victim's account.
+Serious drawbacks were found in this method in 2011 \cite{whatsapp-hijack1}. To hijack user's account attacker first opted for this method. Then using SMS spoofing service he sent SMS to WhatsApp's phone number pretending it originates from the victim. Attacker set the content of the message to an email he owned leading to WhatsApp sending the verification code to the attacker. The attacker then simply entered the code from an email and successfully hijacked the victim's account.
 
 Following these findings another method to bypass the registration process was published. During the registration phase WhatsApp sent a request for the verification SMS to be sent to the client in HTTP request similiar to this \cite{whatsapp-shootingthemsg}:
 
@@ -159,16 +177,16 @@ GET [..]?to=4915143[..]&auth=659&[..] HTTP/1.1
 User-Agent: WhatsApp/2.6.4 iPhone_OS/4.3.3 Device/iPhone_4
 \end{lstlisting}
 
-The request contained the final verification code in the GET parameter. That leads to a conclusion the client created the verification code, not the server, and expected user's confirmation. An attacker could simply intercept the request, retrieved the verification code and made sure the request didn't arrive to WhatsApp's servers to let the victim unaware of malicous intentions.
+The request contained the final verification code in the GET parameter. That leads to a conclusion the client created the verification code, not the server, and expected user's confirmation. An attacker could simply intercept the request, retrieved the verification code and made sure the request didn't arrive to WhatsApp's servers to let the victim unaware of malicious intentions.
 
-Attacker then created a fake HTTP OK response to let the messenger think the request was successful and entered retrieved verification code from the intercepted request. The attacker successfully hijacked the victim's WhatsApp identity and can both send and recieve all his messages.
+Attacker then created a fake HTTP OK response to let the messenger think the request was successful and entered retrieved verification code from the intercepted request. The attacker successfully hijacked the victim's WhatsApp identity and could both send and receive all his messages.
 
 The author of the research notified WhatsApp developers beforehand and WhatsApp fixed this issue before the research was made public \cite{whatsapp-shootingthemsg}. To the date of writing this thesis WhatsApp doesn't offer discussed verification method anymore.
 
 
 \subsubsection{Password generation}
 
-WhatsApp uses lightly modified version of XMPP \cite{whatsapp-xmpp}. During the registration process it creates a username based on the user's phone number. In newer versions than 2.10 the password is generated on server's side \cite{whatsapp-imei}. However, older versions used the phone's IMEI  number as password \cite{whatsapp-imei}\cite{whatsapp-imei2}.
+WhatsApp uses lightly modified version of XMPP \cite{whatsapp-xmpp}. During the registration process it creates a username based on the user's phone number. In newer versions than 2.10 the password is generated on server's side \cite{whatsapp-imei}. However, older versions used the phone's IMEI  number as password \cite{whatsapp-imei, whatsapp-imei2}.
 
 \begin{lstlisting}[caption={Pseudo-code of password generation on Android}]
 md5(revert('IMEI')) 
@@ -187,7 +205,7 @@ On May 2012 an application called ``WhatsAppSniffer'' had been released  \cite{w
 	\centering
 	\includegraphics[width=0.4\textwidth]{whatsapp-sniffer.png}
 	\caption{WhatsAppSniffer \cite{whatsapp-sniffer2}}
-	\label{img:whatsapp_reg}
+	\label{img:whatsapp_sniffer}
 \end{figure}
 
 
@@ -212,13 +230,108 @@ At the time of writing, WhatsApp has two points out of seven in the EFF's secure
 		\hline
 		Are messages encrypted in transit? & \cmark \\\hline
 		Are messages encrypted so the provider can not access it? & \xmark \\ \hline
-		Can user verify contacts’ identities? & \xmark \\ \hline
+		Can user verify contacts' identities? & \xmark \\ \hline
 		Are past communications secure if keys stolen? & \xmark \\ \hline
 		Is the code open to independent review? & \xmark \\ \hline
 		Is the cryptography design properly documented? & \xmark \\ \hline
 		Has there been any recent code audit? & \cmark \\ \hline
 	\end{tabular}
 \end{table}
+
+
+\section{Signal}
+
+Signal is an open-source voice calling and messaging application. It is available for Android and iOS. Its messages are end-to-end encrypted. During a voice calls simple identity check is available when a given word is included by both sides in the call.
+
+Signal uses its own Signal Protocol (previously called \emph{Axolotl}) based on cryptographic primitives such as Elliptic Curves (Curve25519), AES and HMAC-SHA256. \cite{signal-bochum} As mentioned in Section~\ref{whatsapp} WhatsApp might use the very same protocol. TODO - od začátku 2016 ho opravdu ofiko používá
+
+\subsection{Security-related incidents}
+
+In late 2014 \emph{Der Spiegel} published articles claiming NSA considered Signal's encrypted voice calling used with other tools as a catastrophic to theirs surveilance missions.\cite{signal-spiegel} Edward Snowden recommended Signal on various occasions.\cite{signal-snowden}\cite{signal-snowden2}
+
+A research team from Ruhr University Bochum provided a security analysis \emph{``How Secure is TextSecure?''} of the former Signal version.\cite{signal-bochum} They came to a conclusion that the protocol is susceptible for an Unknown key-share attack and proposed a mitigation. If such patch applied they concluded Signal as secure.
+
+Up to this date no other security-related incidents or analysis of Signal messenger are known.
+
+\subsection{EFF's secure messaging score}
+
+Signal fulfilled all the requirments in the EFF's secure messaging scorecard and received a full score. \cite{eff-score}
+
+\begin{table}[htb]
+	\centering
+	\caption{Signal's secure messaging score}
+	\label{my-label}
+	\begin{tabular}{|l|l|}
+		\hline
+		Are messages encrypted in transit? & \cmark \\\hline
+		Are messages encrypted so the provider can not access it? & \cmark \\ \hline
+		Can user verify contacts' identities? & \cmark \\ \hline
+		Are past communications secure if keys stolen? & \cmark \\ \hline
+		Is the code open to independent review? & \cmark \\ \hline
+		Is the cryptography design properly documented? & \cmark \\ \hline
+		Has there been any recent code audit? & \cmark \\ \hline
+	\end{tabular}
+\end{table}
+
+
+\section{Threema}
+
+Threema is a paid IM application available for all three major platforms -- Android, iOS and Windows Phone. Text messaging, multimedia, locations, voice messages and file sharing are supported. Threema is developed in Switzerland and all servers are located in the very same place.
+
+Threema is a paid application. As of June 2016 the price was set to \euro2.5. Threema is using user IDs and linking user's phone number and email address is not required.
+
+\subsection{Security-related incidents}
+
+In August 2015, Threema was auditted by an external company. The Threema documentation states \cite{threema-audit}: \emph{``The result confirms that Threema's concepts fully meet the requirements for secure and trustworthy instant messaging.''} The full audit is available on Threema's web page.
+
+The main point of Threema's criticism is considered with its closed-source nature therefore the inability to verify its source code.
+
+There are no other security analysis.
+
+\subsection{EFF's secure messaging score}
+
+In the EFF's comparison Threema missed a single point for not completing an indenpendent code review. \cite{eff-score}
+
+\begin{table}[htb]
+	\centering
+	\caption{Threema's secure messaging score}
+	\label{my-label}
+	\begin{tabular}{|l|l|}
+		\hline
+		Are messages encrypted in transit? & \cmark \\\hline
+		Are messages encrypted so the provider can not access it? & \cmark \\ \hline
+		Can user verify contacts' identities? & \cmark \\ \hline
+		Are past communications secure if keys stolen? & \cmark \\ \hline
+		Is the code open to independent review? & \xmark \\ \hline
+		Is the cryptography design properly documented? & \cmark \\ \hline
+		Has there been any recent code audit? & \cmark \\ \hline
+	\end{tabular}
+\end{table}
+
+
+\section{WeChat}
+
+WeChat is a mobile messenger developed in China. It's available to all major mobile platforms including iOS, Android, Windows Phone and BlackBerry. Besides regular text messages WeChat offers media, location, video sharing and even games. As of May 2016, WeChat had 700 million active users \cite{wechat-users}.
+
+A special business versions of WeChat was introduced in April 2016 named Enterprise WeChat focused on companies communication offering few additional features.
+
+\subsection{Censorship}
+
+The Internet censorship of China blocks extensive amount of web sites including web giants such as Facebook, Twitter or Google \cite{china-twitter}\cite{china-facebook}.
+
+Since WeChat's servers are located in China it is subjected to such restrictions. Users are required to agree and obey specific rules such as \emph{``upholding the socialist system, social morality and authenticity of information''} \cite{china-imblocking}. The reasons for such actions are supposed to build a clean cyberspace and to ensure the national security \cite{china-blocking2}.
+
+\subsection{Security-related incidents}
+
+WeChat operators are capable of accessing messages, contacts and even user's location. Numerous states including United States, India and China itself expressed concerns over WeChat being a threat to their national security issues \cite{wechat-states}.
+
+\subsubsection{XcodeGhost malware}
+
+In 2015 Apple reported WeChat was infected with XcodeGhost malware \cite{wechat-xcodemalware}. The malware was able to obtain user device information, read clipboard, prompting alert dialog and others. Apple claimed the malware was not able to perform any real damage and could not access any user data. 
+
+\subsection{EFF's secure messaging score}
+
+Regrettably WeChat was not included in the EFF secure messaging survey.
 
 
 \section{Telegram}
@@ -248,56 +361,32 @@ Telegram provides two modes of messaging. Besides the regular chat Telegram prov
 	\caption{Telegram chat modes}
 \end{figure}
 
-Similar to WhatsApp user can contact someone using his phone number but Telegram provides classical username approach as well. User needs to know the reciepent's phone number or Telegram username in order to communicate with him.
+Similar to WhatsApp user can contact someone using his phone number but Telegram provides classical username approach as well. User needs to know the recipient's phone number or Telegram username in order to communicate with him.
 
 All clients are licensed under GPLv2 or GPLv3 license, the server-side part of Telegram is closed-sourced and proprietery \cite{telegram-server}.
 
-In 2015 Brazilian judiciary ordered WhatsApp to shut down for 48 hours. During this event, which was finally lowered to only 12 hours, Telegram welcomed 5 million new users.\cite{whatsappbrazil} It may be therefore considered as a direct competitor to WhatsApp.\footnote{Tohle je spíš taková zajímavost, tak si nejsem úplně jist na kolik to sem patří}
+In 2015 Brazilian judiciary ordered WhatsApp to shut down for 48 hours. During this event, which was finally lowered to only 12 hours, Telegram welcomed 5 million new users.\cite{whatsappbrazil} It may be therefore considered as a direct competitor to WhatsApp.
 
 In May 2015 Telegram had 62 million active users \cite{telegram-users}.
 
+
 \subsection{Security-related incidents}
 
-Telegram was first released on August 14, 2013. The security-related history is thus not as broad as WhatsApp's.
+\subsubsection{SMS authentication}
 
-\subsubsection{Possibly unsafe fundamentals}
+In Section~\ref{whatsapp-registration} we described how the WhatsApp's registration process using SMS works. Telegram works on a similar basis and allows as well logging in using just a simple SMS.
 
-Telegram authors decided to create a brand new encryption scheme called MTProto. In cryptography community this raised concerns and some commented the approach as ``\emph{not something that a cryptographer would use}''\cite{telegram-cryptocomm}. Some of the alleged imperfections are:
+Those are fully readable for mobile network operators which may and usually do cooperate with the corresponding government. Furthermore SMS can be intercepted using inexpensive IMSI catchers. If an attacker is able to steal the authenticating SMS he is able to login on his behalf. Worse, Telegram stores the whole user's message history, hence it allows the attacker to read old messages as well.
 
-\begin{itemize}
-	\item Telegram uses SHA-1 which is proven to be cryptographically broken \cite{telegram-sha1}.
-	\item Telegram's authentication scheme is based on MAC-then-Encrypt approach instead of Encrypt-then-MAC.
-	\item It uses IGE\footnote{Infinite Garble Extension} mode in the AES encryption which is not well known. \footnote{Pokud bych dělal Telegram, tohle je něco co by stálo za prozkoumání? Něco podobného útoku Padding Oracle. Prozkoumat ten IGE a tu autentikaci.}
-\end{itemize}
+Early 2016 was shown this was a legitimate concern \cite{telegram-smsiran}. Some Telegram users experienced their accounts being erased and blamed Telegram to enforce political censorship. Telegram denied. Russian activist Oleg Kozlovsky described in its Facebook post \cite{telegram-russia} how his account was allegedly hacked.
 
-Telegram FAQ contradicts it uses the primitives in a safe manner \cite{telegram-techfaq}.
+First the Russia's mobile operator disabled SMS service on Oleg's phone number. Upon the disconnection, the attacker tried to log into victim's Telegram account. Since intercepting the SMS is all the attacker needs he simply entered the authorization code he sniffed and got full access to Oleg's account. Telegram recommended to turn on two-factor authentication for additional security.
 
-\subsubsection{IND-CCA insecurity}
-
-In Spring 2015 researchers from Aarhus University performed an independent audit of the protocol \cite{telegram-aarhus}. They concluded the encryption scheme is not IND-CCA\footnote{Indistinguishability under Chosen Ciphertext} secure, meaning any ciphertext can be altered into another ciphertext decrypting to the very same plaintext.
-
-The researchers stressed the theoretical nature of the attack and that they ``\emph{do not see any way of turning the attack into a full plaintext-recovery attack}''\cite{telegram-aarhus}. Telegram's FAQ describes it as a minor issue unaffecting overall security. \cite{telegram-techfaq}
-
-\subsubsection{Secret chat and Man-in-the-Middle attack}
-
-The secret chat provides an option to display counterparty's encryption key. Telegram creates a white-blue box to visualise the key as may be seen on \ref{img:telegram-keybox}. To make sure no malicious mediator is present users are supposed to meet in person and verify the keys are identical.
-
-\begin{figure}[htb]
-	\centering
-	\includegraphics[width=0.4\textwidth]{telegram-keybox.png}
-	\caption{Encryption key visualisation}
-	\label{img:telegram-keybox}
-\end{figure}
-
-The visualisation is based on a 128-bit fingerprint of the secret key. An~article presented in January 2015 showed\cite{telegram-264} that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat, a MiM attack is possible only with $2^{64}$ operations, rather than $2^{128}$, based on the birthday paradox.\footnote{Nevím, jestli bych to měl rozepsat nějak více. Ten článek není nijak skvělý, možná stačí později, jen v případě, že si telegram vyberu?}
-
-The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions USD. Telegram's FAQ addresses this issue and claimes its cost is around a trillion dollars to achieve a result in one month \cite{telegram-techfaq}.
-
-The article as well reasons that in real-world scenario the users don't meet up to verify the key. Most of them probably ignore the verification completely, some send the image via regular chat or using another channel.
+These concerns raise serious questions if SMS authentication is a security-wise valid instrument.
 
 \subsubsection{Cracking Contest}
 
-On November 4, 2014, Telegram published contest with a winning price \$300,000 for cracking its encryption. The contest became quite known in the community and probably provided a bit of advertisiment for Telegram.
+On November 4, 2014, Telegram published contest with a winning price \$300,000 for cracking its encryption. The contest became quite known in the community and probably provided a bit of advertisement for Telegram.
 
 The contest remained unsolved until his closure. Number of authors considered it rigged and stated that the contest does not provide any prove of Telegram's overall security whatsoever.\cite{telegramcontestfail}\cite{telegramcontestfail2}
 
@@ -315,7 +404,7 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 		\hline
 		Are messages encrypted in transit? & \cmark \\\hline
 		Are messages encrypted so the provider can not access it? & \xmark \\ \hline
-		Can user verify contacts’ identities? & \xmark \\ \hline
+		Can user verify contacts' identities? & \xmark \\ \hline
 		Are past communications secure if keys stolen? & \xmark \\ \hline
 		Is the code open to independent review? & \xmark \\ \hline
 		Is the cryptography design properly documented? & \cmark \\ \hline
@@ -334,7 +423,7 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 		\hline
 		Are messages encrypted in transit? & \cmark \\\hline
 		Are messages encrypted so the provider can not access it? & \cmark \\ \hline
-		Can user verify contacts’ identities? & \cmark \\ \hline
+		Can user verify contacts' identities? & \cmark \\ \hline
 		Are past communications secure if keys stolen? & \cmark \\ \hline
 		Is the code open to independent review? & \cmark \\ \hline
 		Is the cryptography design properly documented? & \cmark \\ \hline
@@ -343,55 +432,151 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 \end{table}
 
 
-\section{Signal}
-
-Signal is a voice calling and instant messaging application developped by Open Whisper Systems. It was brought to light by the merge of two applications -- the voice calling RedPhone and the text messenger TextSecure both created by the very same company \cite{signalmerge}.
-
-Signal is completely open-sourced including its server side. Signal was endorsed by some well-known names such as Edward Snowden \cite{signal-snowden} or Bruce Schneier \cite{signal-schneier}.
-
-TODO
-
-\subsection{EFF's secure messaging score}
 
 
-\begin{table}[htb]
+
+\chapter{Cryptography behind Telegram}\label{telegramcrypto}
+
+Telegram authors decided to craft a brand new encryption scheme supposedly to achieve better delivery times and stability, MTProto. For simplicity we will focuse on Telegram's secret chats messaging. The analysis is mainly based on \cite{telegram-aarhus} and on the official Telegram documentation. 
+
+Upon the first lunch of Telegram application user needs to enter and verify its telephone number. Then the client establishes a secure connection with one of the Telegram's servers. This connection is based on RSA, simple proof-of-work calculation, Diffie-Hellman key exchange and finally AES-IGE encryption. This key is subsequently used for any client-server communication and regular chats. As mentioned, we want to focus primarily on secret chats, hence this key exchange is not described into more details.
+
+\subsubsection{Key exchange}
+
+Now we'll describe the key exchange during the secret end-to-end encrypted messaging. 
+
+The exchange performs traditional Diffie-Hellman key exchange (DHKE). Using this technique the master secret key is negotiated and later used for key derivation. We note this master key as \emph{auth\_key}.
+
+During the DHKE phase, both sides need to generate a random integer \emph{a} and \emph{b}. Worth mentioning, the client generates its \emph{a} in the following way:
+\begin{gather*} 
+a = r_{client} \oplus r_{server}
+\end{gather*}
+
+Where $r_{client}$ is a 2048-bit random integer generated on the client side and $r_{server}$ is 2048-bit random integer generated on the server side. These values are then XORed constructing the client's secret \emph{a} value. This is done to mitigate the client's poor capabilities to generate a cryptographically secure random number. 
+%This concerned Android back in August 2013 \cite{telegram-android-securerandom}.
+
+\begin{figure}[htb]
 	\centering
-	\caption{Signal's secure messaging score}
-	\label{tab:telegram-regular-eff}
-	\begin{tabular}{|l|l|}
-		\hline
-		Are messages encrypted in transit? & \cmark \\\hline
-		Are messages encrypted so the provider can not access it? & \cmark \\ \hline
-		Can user verify contacts’ identities? & \cmark \\ \hline
-		Are past communications secure if keys stolen? & \cmark \\ \hline
-		Is the code open to independent review? & \cmark \\ \hline
-		Is the cryptography design properly documented? & \cmark \\ \hline
-		Has there been any recent code audit? & \cmark \\ \hline
-	\end{tabular}
-\end{table}
+	\includegraphics[width=0.4\textwidth]{telegram-keybox.png}
+	\caption{Encryption key visualization}
+	\label{img:telegram-keybox}
+\end{figure}
+
+The DHKE by itself does not provide authentication of the communicating parties and is therefore susceptible to an active Man-in-the-Middle attack. To mitigate this issue the user is provided with an option to display counterpart's encryption key. Telegram creates a white-blue box to visualize the key as may be seen on Figure~\ref{img:telegram-keybox}. To make sure no malicious mediator is present users are supposed to meet in person and verify the keys are identical.
+
+The visualisation is based on a 128-bit fingerprint of the secret key. An~article presented in January 2015 showed\cite{telegram-264} that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat, a MiM attack is possible only with $2^{64}$ operations, rather than $2^{128}$, based on the Birthday paradox.
+
+The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions USD. Telegram's FAQ addresses this issue and claimes its cost is around a trillion dollars to achieve a result in one month \cite{telegram-techfaq}.
+
+The article as well reasons that in real-world scenario the users don't meet up to verify the key. Most of them probably ignore the verification completely, some send the image via regular chat or using another channel.
+
+\subsubsection{Encryption}\label{telegram-enc}
+
+With the key negotiated we may now focus on the message encryption itself. First, let's describe the content of a single message, further referred to as a payload. Figure \ref{img:telegram-payload} shows the payload is composed \cite{telegram-aarhus} of:
 
 
-\section{Threema}
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{telegram-payload.png}
+	\caption{Payload of single message \cite{telegram-aarhus}}
+	\label{img:telegram-payload}
+\end{figure}
 
-TODO napsat cenu
+\begin{itemize}
+	\item  \textbf{Length} The length of the payload excluding padding and the length itself.
+	\item  \textbf{Header} Each payload contains three headers all somehow related to the version of protocol or the type of attached media if any.
+	\item  \textbf{Random bits} Random bits generated by the sender.
+	\item  \textbf{Layer} Integer specifying the protocol version.
+	\item  \textbf{seq\_in} Message counter sent to the initiator of the chat.
+	\item  \textbf{seq\_out} Message counter sent from the initiator of the chat.
+	\item  \textbf{Random\_id} Random sequence of numbers generated by the initiator.
+	\item  \textbf{ttl} Time to live, an integer specifying the lifetime of a message in seconds. This concerns the so-called message self-destruct mechanism.
+	\item  \textbf{Message} The actual text of a message provided by the user.
+\end{itemize}
 
-Threema is paid proprietary instant messaging application. Users can send  photos, videos, voice messages, QR codes, polls and files \cite{threemahomepage}. TODO: citovani homepage?
 
-It provides end-to-end encryption and claims to prevent collection of any metadata \cite{threemahomepage}.
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{telegram-encflow-ed.png}
+	\caption{MTProto encryption flow \cite{telegram-aarhus}}
+	\label{img:telegram-encflow}
+\end{figure}
 
-Threema does not use phone numbers or usernames. It generates a random ID for user identification. Phone number and email are not required, no personal information are therefore needed.
 
-As of June 2015, Threema had 3.5 million active users, mostly in german-speaking countries.\cite{threemausers}
+Figure \ref{img:telegram-encflow} shows the overall scheme of MTProto encryption process. The described payload is hashed with SHA-1 algorithm producing so called \emph{msg\_key}. This key is later used for integrity check.
 
-\section{WeChat}
+From the \emph{msg\_key} and the master \emph{auth\_key} an~AES encryption key and IV value are derived. With those parameters AES in IGE mode is used for encryption. The final content to be sent consists of:
 
-WeChat is properietary application. It was released in January 2011 and allows users to send text messages, voice messages, communicate via phone or video calls, it provides location sharing functions and other various functions \cite{wechatfeatures}.
+\begin{itemize}
+	\item  \textbf{auth\_key\_id} A fingerprint of the master secret \emph{auth\_key} made up of the last 64 bits of SHA-1 hashed \emph{auth\_key}.
+	\item  \textbf{msg\_key} SHA-1 hash of the payload.
+	\item  \textbf{encrypted data}
+\end{itemize}
 
-As of August 2015, WeChat has 600 million active users, vast majority of them located in China.\cite{wechatusers}
+
+\subsubsection{Decryption}
+
+Before the decryption process is started the \emph{auth\_key\_id} is checked. The receiver's \emph{auth\_key\_id} is derived in the very same way as described earlier and then compared to the sender's. If those value differ the whole message is discarded.
+
+The rest of the decryption process is lucidly visualized on Figure \ref{img:telegram-decflow}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{telegram-decflow.png}
+	\caption{MTProto decryption flow \cite{telegram-aarhus}}
+	\label{img:telegram-decflow}
+\end{figure}
+
+\subsubsection{Infinite Garble Extension}
+
+Infinite Garble Extension (IGE) is a block cipher mode. It is shown on Figure \ref{img:telegram-ige-enc} and defined by the following formula \cite{telegram-openssl-ige}:
+
+\begin{gather*} 
+y_i = f_K(x_i \oplus y_{i-1}) \oplus x_{i-1}
+\end{gather*}
+
+where $f_K$ stands for the encrypting function with key $K$ (AES in the Telegram's case) and $i$ goes from 1 to $n$ -- the number of plaintext blocks.
+
+Careful reader notices that for the first output block we need two initialisation values $x_0$ and $y_0$ that correspond to the Initialisation Vector (IV) in more traditionally used block modes. The original paper described $x_0$ as a random block and $y_0$ its encrypted counterpart. The OpenSSL implementation however, uses a more general implementation where both $x_0$ and $y_0$ are provided by the user \cite{telegram-openssl-ige}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{telegram-ige-enc.png}
+	\caption{IGE mode of operation \cite{telegram-aarhus}}
+	\label{img:telegram-ige-enc}
+\end{figure}
+
+
+\subsubsection{SHA-1}
+
+Telegram architects chosed to use SHA-1 because of its low resource consumption. SHA-1 is however, cryptographically broken in some scenarios \cite{telegram-sha1}. The Bruce Schneier's blog claims \cite{telegram-sha1}: \emph{``A collision attack is therefore well within the range of what an organized crime syndicate can practically budget by 2018, and a university research project by 2021.''}
+
+Let's investigate what the consequences would be if any collisions are found.
+
+As mentioned in Section \ref{telegram-enc} \emph{auth\_key\_id} is made of the last 64-bit SHA-1 hash of the master secret \emph{auth\_key}. Becuase of the truncation finding another input which hashes to the \emph{auth\_key\_id} is significantly easier. On the other hand we need to perform a preimage attack which is harder than a collision attack, hence the quoted findings are not applicable.
+
+The SHA-1 is applied in MTProto as well to calculate the integrity check \emph{msg\_key}. If an attacker would find a message $m'$ that yields the same \emph{msg\_key} as for message $m$ she could theoretically forge the message. However, the \emph{msg\_key} is hash of the plaintext, which as per Telegram's FAQ \cite{telegram-techfaq} mitigates the risks.
+
+\subsubsection{IND-CCA insecurity}
+
+In Spring 2015 researchers from Aarhus University performed an independent audit of the protocol \cite{telegram-aarhus}. They concluded the encryption scheme is not IND-CCA\footnote{Indistinguishability under Chosen Ciphertext} secure, meaning any ciphertext can be altered into another ciphertext decrypting to the very same plaintext.
+
+The researchers stressed the theoretical nature of the attack and that they ``\emph{do not see any way of turning the attack into a full plaintext-recovery attack}''\cite{telegram-aarhus}. Telegram's FAQ describes it as a minor issue unaffecting overall security. \cite{telegram-techfaq}
+
+
+
 
 \begin{conclusion}
 
-Zaver TODO
+TODO TODO TODO
+
+Instant messengers are especially by young generation considered as a crucial tool of theirs everyday life. Today's users share many of their intimate moments using one of many messengers available. That said, we should devote our time to investigate messenger's security.
+
+We've analyzed many security incidents and presented their impact on the end user. We noted how the messengers respond to such incidents and if they try to improve their security. We presented the collaboration between WhatsApp and Open Whisper Systems delivering the Signal's protocol to WhatsApp. From such cooperation users may only benefit.
+
+There are still number of security related problems remaining. Many messengers are closed-source thus not providing an opportunity for an independent code review. Insufficient or completely missing documentation raises questions as well.
+
+Finally, the reader should have received an insight into Telegram's inner operations. We described Telegram's encryption and decryption process and described some of the cryptographical primitives.
 
 \end{conclusion}
 
