@@ -361,52 +361,28 @@ Telegram provides two modes of messaging. Besides the regular chat Telegram prov
 	\caption{Telegram chat modes}
 \end{figure}
 
-Similar to WhatsApp user can contact someone using his phone number but Telegram provides classical username approach as well. User needs to know the reciepent's phone number or Telegram username in order to communicate with him.
+Similar to WhatsApp user can contact someone using his phone number but Telegram provides classical username approach as well. User needs to know the recipient's phone number or Telegram username in order to communicate with him.
 
 All clients are licensed under GPLv2 or GPLv3 license, the server-side part of Telegram is closed-sourced and proprietery \cite{telegram-server}.
 
-In 2015 Brazilian judiciary ordered WhatsApp to shut down for 48 hours. During this event, which was finally lowered to only 12 hours, Telegram welcomed 5 million new users.\cite{whatsappbrazil} It may be therefore considered as a direct competitor to WhatsApp.\footnote{Tohle je spíš taková zajímavost, tak si nejsem úplně jist na kolik to sem patří}
+In 2015 Brazilian judiciary ordered WhatsApp to shut down for 48 hours. During this event, which was finally lowered to only 12 hours, Telegram welcomed 5 million new users.\cite{whatsappbrazil} It may be therefore considered as a direct competitor to WhatsApp.
 
 In May 2015 Telegram had 62 million active users \cite{telegram-users}.
 
+
 \subsection{Security-related incidents}
 
-Telegram was first released on August 14, 2013. The security-related history is thus not as broad as WhatsApp's.
+\subsubsection{SMS authentication}
 
-\subsubsection{Possibly unsafe fundamentals}
+In Section~\ref{whatsapp-registration} we described how the WhatsApp's registration process using SMS works. Telegram works on a similar basis and allows as well logging in using just a simple SMS.
 
-Telegram authors decided to create a brand new encryption scheme called MTProto. In cryptography community this raised concerns and some commented the approach as ``\emph{not something that a cryptographer would use}''\cite{telegram-cryptocomm}. Some of the alleged imperfections are:
+Those are fully readable for telecom operators which may and usually do cooparate with the corresponding goverment. Furthermore SMS can be intercepted using inexpensive IMSI catchers. If an attacker is able to steal the authenticating SMS he is able to login on his behalf. Worse, Telegram stores the whole user's message history, hence it allows the attacker to read old messages as well.
 
-\begin{itemize}
-	\item Telegram uses SHA-1 which is proven to be cryptographically broken \cite{telegram-sha1}.
-	\item Telegram's authentication scheme is based on MAC-then-Encrypt approach instead of Encrypt-then-MAC.
-	\item It uses IGE\footnote{Infinite Garble Extension} mode in the AES encryption which is not well known. \footnote{Pokud bych dělal Telegram, tohle je něco co by stálo za prozkoumání? Něco podobného útoku Padding Oracle. Prozkoumat ten IGE a tu autentikaci.}
-\end{itemize}
+Early 2016 was shown this was a legitimate concern \cite{telegram-smsiran}. Some Telegram users experienced their accounts being erased and blamed Telegram to enforce political censorship. Telegram denied. Russian activist Oleg Kozlovsky described in its Facebook post \cite{telegram-russia} how his account was allegedly hacked.
 
-Telegram FAQ contradicts it uses the primitives in a safe manner \cite{telegram-techfaq}.
+First the Russia's mobile operator disabled SMS service on Oleg's phone number. Upon the disconnection, the attacker tried to log into victim's Telegram account. Since intercepting the SMS is all the attacker needs he simply entered the authorization code he sniffed and got full access to Oleg's account. Telegram recommended to turn on two-factor authentication for additional security.
 
-\subsubsection{IND-CCA insecurity}
-
-In Spring 2015 researchers from Aarhus University performed an independent audit of the protocol \cite{telegram-aarhus}. They concluded the encryption scheme is not IND-CCA\footnote{Indistinguishability under Chosen Ciphertext} secure, meaning any ciphertext can be altered into another ciphertext decrypting to the very same plaintext.
-
-The researchers stressed the theoretical nature of the attack and that they ``\emph{do not see any way of turning the attack into a full plaintext-recovery attack}''\cite{telegram-aarhus}. Telegram's FAQ describes it as a minor issue unaffecting overall security. \cite{telegram-techfaq}
-
-\subsubsection{Secret chat and Man-in-the-Middle attack}
-
-The secret chat provides an option to display counterparty's encryption key. Telegram creates a white-blue box to visualise the key as may be seen on \ref{img:telegram-keybox}. To make sure no malicious mediator is present users are supposed to meet in person and verify the keys are identical.
-
-\begin{figure}[htb]
-	\centering
-	\includegraphics[width=0.4\textwidth]{telegram-keybox.png}
-	\caption{Encryption key visualisation}
-	\label{img:telegram-keybox}
-\end{figure}
-
-The visualisation is based on a 128-bit fingerprint of the secret key. An~article presented in January 2015 showed\cite{telegram-264} that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat, a MiM attack is possible only with $2^{64}$ operations, rather than $2^{128}$, based on the birthday paradox.\footnote{Nevím, jestli bych to měl rozepsat nějak více. Ten článek není nijak skvělý, možná stačí později, jen v případě, že si telegram vyberu?}
-
-The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions USD. Telegram's FAQ addresses this issue and claimes its cost is around a trillion dollars to achieve a result in one month \cite{telegram-techfaq}.
-
-The article as well reasons that in real-world scenario the users don't meet up to verify the key. Most of them probably ignore the verification completely, some send the image via regular chat or using another channel.
+These concerns raise serious questions if SMS authentication is a security-wise valid instrument.
 
 \subsubsection{Cracking Contest}
 
@@ -454,6 +430,140 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 		Has there been any recent code audit? & \cmark \\ \hline
 	\end{tabular}
 \end{table}
+
+
+
+
+
+\chapter{Cryptography behind Telegram}\label{telegramcrypto}
+
+Telegram authors decided to craft a brand new encryption scheme supposedly to achieve better delivery times and stability, MTProto. For simplicity we will focuse on Telegram's secret chats messaging. The analysis is mainly based on \cite{telegram-aarhus} and on the official Telegram documentation. 
+
+Upon the first lunch of Telegram application user needs to enter and verify its telephone number. Then the client establishes a secure connection with one of the Telegram's servers. This connection is based on RSA, simple proof-of-work calculation, Diffie-Hellman key exchange and finally AES-IGE encryption. This key is subsequently used for any client-server communication and regular chats. As mentioned, we want to focus primarily on secret chats, hence this key exchange is not described into more details.
+
+\subsubsection{Key exchange}
+
+Now we'll describe the key exchange during the secret end-to-end encrypted messaging. 
+
+The exchange performs traditional Diffie-Hellman key exchange (DHKE). Using this technique the master secret key is negotiated and later used for key derivation. We note this master key as \emph{auth\_key}.
+
+During the DHKE phase, both sides need to generate a random integer \emph{a} and \emph{b}. Worth mentioning, the client generates its \emph{a} in the following way:
+\begin{gather*} 
+a = r_{client} \oplus r_{server}
+\end{gather*}
+
+Where $r_{client}$ is a 2048-bit random integer generated on the client side and $r_{server}$ is 2048-bit random integer generated on the server side. These values are then XORed constructing the client's secret \emph{a} value. This is done to mitigate the client's poor capabilities to generate a cryptographically secure random number. 
+%This concerned Android back in August 2013 \cite{telegram-android-securerandom}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.4\textwidth]{telegram-keybox.png}
+	\caption{Encryption key visualisation}
+	\label{img:telegram-keybox}
+\end{figure}
+
+The DHKE by itself does not provide authentication of the communicating parties and is therefore susceptible to an active Man-in-the-Middle attack. To mitigate this issue the user is provided with an option to display counterpart's encryption key. Telegram creates a white-blue box to visualize the key as may be seen on Figure~\ref{img:telegram-keybox}. To make sure no malicious mediator is present users are supposed to meet in person and verify the keys are identical.
+
+The visualisation is based on a 128-bit fingerprint of the secret key. An~article presented in January 2015 showed\cite{telegram-264} that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat, a MiM attack is possible only with $2^{64}$ operations, rather than $2^{128}$, based on the Birthday paradox.
+
+The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions USD. Telegram's FAQ addresses this issue and claimes its cost is around a trillion dollars to achieve a result in one month \cite{telegram-techfaq}.
+
+The article as well reasons that in real-world scenario the users don't meet up to verify the key. Most of them probably ignore the verification completely, some send the image via regular chat or using another channel.
+
+\subsubsection{Encryption}\label{telegram-enc}
+
+With the key negotiated we may now focus on the message encryption itself. First, let's describe the content of a single message, further referred to as a payload. Figure \ref{img:telegram-payload} shows the payload is composed \cite{telegram-aarhus} of:
+
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{telegram-payload.png}
+	\caption{Payload of single message \cite{telegram-aarhus}}
+	\label{img:telegram-payload}
+\end{figure}
+
+\begin{itemize}
+	\item  \textbf{Length} The length of the payload excluding padding and the length itself.
+	\item  \textbf{Header} Each payload contains three headers all somehow related to the version of protocol or the type of attached media if any.
+	\item  \textbf{Random bits} Random bits generated by the sender.
+	\item  \textbf{Layer} Integer specifying the protocol version.
+	\item  \textbf{seq\_in} Message counter sent to the initiator of the chat.
+	\item  \textbf{seq\_out} Message counter sent from the initiator of the chat.
+	\item  \textbf{Random\_id} Random sequence of numbers generated by the initiator.
+	\item  \textbf{ttl} Time to live, an integer specifying the lifetime of a message in seconds. This concerns the so-called message self-destruct mechanism.
+	\item  \textbf{Message} The actual text of a message provided by the user.
+\end{itemize}
+
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{telegram-encflow-ed.png}
+	\caption{MTProto encryption flow \cite{telegram-aarhus}}
+	\label{img:telegram-encflow}
+\end{figure}
+
+
+Figure \ref{img:telegram-encflow} shows the overall scheme of MTProto encryption process. The described payload is hashed with SHA-1 algorithm producing so called \emph{msg\_key}. This key is later used for integrity check.
+
+From the \emph{msg\_key} and the master \emph{auth\_key} an~AES encryption key and IV value are derived. With those parameters AES in IGE mode is used for encryption. The final content to be sent consists of:
+
+\begin{itemize}
+	\item  \textbf{auth\_key\_id} A fingerprint of the master secret \emph{auth\_key} made up of the last 64 bits of SHA-1 hashed \emph{auth\_key}.
+	\item  \textbf{msg\_key} SHA-1 hash of the payload.
+	\item  \textbf{encrypted data}
+\end{itemize}
+
+
+\subsubsection{Decryption}
+
+Before the decryption process is started the \emph{auth\_key\_id} is checked. The receiver's \emph{auth\_key\_id} is derived in the very same way as described earlier and then compared to the sender's. If those value differ the whole message is discarded.
+
+The rest of the decryption process is lucidly visualized on Figure \ref{img:telegram-decflow}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{telegram-decflow.png}
+	\caption{MTProto decryption flow \cite{telegram-aarhus}}
+	\label{img:telegram-decflow}
+\end{figure}
+
+\subsubsection{Infinite Garble Extension}
+
+Infinite Garble Extension (IGE) is a block cipher mode. It is shown on Figure \ref{img:telegram-ige-enc} and defined by the following formula \cite{telegram-openssl-ige}:
+
+\begin{gather*} 
+y_i = f_K(x_i \oplus y_{i-1}) \oplus x_{i-1}
+\end{gather*}
+
+where $f_K$ stands for the encrypting function with key $K$ (AES in the Telegram's case) and $i$ goes from 1 to $n$ -- the number of plaintext blocks.
+
+Careful reader notices that for the first output block we need two initialisation values $x_0$ and $y_0$ that correspond to the Initialisation Vector (IV) in more traditionally used block modes. The original paper described $x_0$ as a random block and $y_0$ its encrypted counterpart. The OpenSSL implementation however, uses a more general implementation where both $x_0$ and $y_0$ are provided by the user \cite{telegram-openssl-ige}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{telegram-ige-enc.png}
+	\caption{IGE mode of operation \cite{telegram-aarhus}}
+	\label{img:telegram-ige-enc}
+\end{figure}
+
+
+\subsubsection{SHA-1}
+
+Telegram architects chosed to use SHA-1 because of its low resource consumption. SHA-1 is however, cryptographically broken in some scenarios \cite{telegram-sha1}. The Bruce Schneier's blog claims \cite{telegram-sha1}: \emph{``A collision attack is therefore well within the range of what an organized crime syndicate can practically budget by 2018, and a university research project by 2021.''}
+
+Let's investigate what the consequences would be if any collisions are found.
+
+As mentioned in Section \ref{telegram-enc} \emph{auth\_key\_id} is made of the last 64-bit SHA-1 hash of the master secret \emph{auth\_key}. Becuase of the truncation finding another input which hashes to the \emph{auth\_key\_id} is significantly easier. On the other hand we need to perform a preimage attack which is harder than a collision attack, hence the quoted findings are not applicable.
+
+The SHA-1 is applied in MTProto as well to calculate the integrity check \emph{msg\_key}. If an attacker would find a message $m'$ that yields the same \emph{msg\_key} as for message $m$ she could theoretically forge the message. However, the \emph{msg\_key} is hash of the plaintext, which as per Telegram's FAQ \cite{telegram-techfaq} mitigates the risks.
+
+\subsubsection{IND-CCA insecurity}
+
+In Spring 2015 researchers from Aarhus University performed an independent audit of the protocol \cite{telegram-aarhus}. They concluded the encryption scheme is not IND-CCA\footnote{Indistinguishability under Chosen Ciphertext} secure, meaning any ciphertext can be altered into another ciphertext decrypting to the very same plaintext.
+
+The researchers stressed the theoretical nature of the attack and that they ``\emph{do not see any way of turning the attack into a full plaintext-recovery attack}''\cite{telegram-aarhus}. Telegram's FAQ describes it as a minor issue unaffecting overall security. \cite{telegram-techfaq}
+
+
 
 
 \begin{conclusion}
