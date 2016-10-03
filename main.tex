@@ -18,8 +18,11 @@
 \usepackage{dirtree} %directory tree visualisation
 \usepackage{tablefootnote}
 \usepackage{subcaption}
-
+\usepackage{eurosym}
+\usepackage{amsmath} % to center math equations
 \usepackage{pifont}% http://ctan.org/pkg/pifont
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \newcommand{\cmark}{\ding{51}}%
 \newcommand{\xmark}{\ding{55}}%
 
@@ -36,7 +39,7 @@
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 \department{Department of Computer Systems}
-\title{TODO}
+\title{Security Analysis of the Telegram IM}
 \authorGN{Tom{\' a}{\v s}} %author's given name/names
 \authorFN{Su{\v s}{\' a}nka} %author's surname
 \author{Tom{\' a}{\v s} Su{\v s}{\' a}nka} %author's name without academic degrees
@@ -56,7 +59,18 @@
 % \newacronym{RLE}{RLE}{Run-Length Encoding}
 
 \begin{introduction}
-TODO
+
+TODO TODO
+
+The human interaction and communication takes place more and more often in the digital world. This trend will most likely continue and the line between real and digital may one day disappear entirely. There is a plenty of communication solutions. Some claim themselves as very secure, some try to avoid such questions.
+
+Today's users are picky. Instant messengers are de facto required to have both mobile and web access and more advance capabilities, such as media, voice or location sharing and the list might continue.
+
+The surveillance disclosures emanating from the ex-NSA employee Edward Snowden showed the demand for a secure communication and number of solutions emerged. The more users share the more we realize the pitfalls of insecure communication. We shall not however forget that there is a distinction between security advertised and security actually achieved.
+
+TODO Telegram
+
+% This work will focus on five current Instant Messenger solutions. We will cover the messenger's history, origin, its security-related aspects and other information in order to provide the reader an insight into the security of today's modern Instant Messaging.
 \end{introduction}
 
 
@@ -67,27 +81,31 @@ This chapter contains thorough description of five selected Instant Messengers a
 
 \section{Selection}
 
-We selected the following five Instant Messenger applications. The selection was based on various criterions to create a diverse mixture of messengers. The criterions included user base, geographical origin, authors, proclaimed security, license, price and other. For ease of comparison we've decided to select messengers with support for mobile platforms. We've omitted Facebook Messenger, since it is owned by the very same company as WhatsApp, Facebook Inc \cite{facebookwhatsappbuy}.
+We selected the following five Instant Messenger applications. The selection was based on various criterions to create a diverse mixture of messengers. The criterions among others were user base, geographical origin, authors, proclaimed security, license and price. However, we did not want to simply sort the IMs by one of those criterions. We wanted to present an indeed diverse collection. That's why we've omitted Facebook Messenger and Apple's iMessage, since the first is owned by the very same company as WhatsApp~\cite{facebookwhatsappbuy} and the later is yet another US-based company.
+
+For ease of comparison we've decided to select messengers with support for mobile platforms. Particular software versions are mostly an estimate based on a date some findings were published and the software changelog.
+
 
 \subsection{WhatsApp\protect\footnote{https://www.whatsapp.com}}
 
 Large user base and overall popularity of the application is one of the main reasons WhatsApp is included. With 1 billion active users it is the most used messenger at the moment.\cite{whatsappusers}
 
+\subsection{Signal\protect\footnote{https://www.whispersystems.org}}
+
+Signal was endorsed by the cryptographic community in several occasions and is by many considered as the most secure messenger. It's the only messenger completely open-sourced in this collection.
+
+\subsection{Threema\protect\footnote{https://www.threema.ch}}
+
+Threema is the only paid application in this selection. Furthermore Threema comes from Switzerland and may be therefore considered as an European alternative to the traditionally US-based services.
+
+\subsection{WeChat\protect\footnote{https://www.wechat.com/en/}}
+
+WeChat is with its 700 million active users the most used messenger in China~\cite{wechat-users}. As with Threema we include WeChat mainly for its distinct origin.
+
 \subsection{Telegram\protect\footnote{https://www.telegram.org}}
 
 Telegram praises itself as safer than WhatsApp. It uses its own messaging protocol MTProto and argues for its security. Telegram's clients are open-source but the server side is proprietary. The authors of Russian social network VK, Nikolaj Durov and Pavel Durov, are the creators of Telegram.
 
-\subsection{Signal\protect\footnote{https://www.whispersystems.org}}
-
-TODO
-
-\subsection{Threema\protect\footnote{https://www.threema.ch}}
-
-TODO
-
-\subsection{WeChat\protect\footnote{https://www.wechat.com/en/}}
-
-TODO
 
 \begin{table}[htb]\centering
 	\caption{Messengers}
@@ -95,11 +113,11 @@ TODO
 	\begin{tabular}{|l|l|l|l|l|}
 		\hline
 		 \textbf{Name} & \textbf{First release} & \textbf{License} & \textbf{User base} \\ \hline
-		WhatsApp & January 2010 & Proprietary & 990 million\tablefootnote{\label{foot-sep2015}As of September 2015.} \\ \hline
-		 Telegram & August 2013  & GPLv2/GPLv3/Proprietary & 60 million\footref{foot-sep2015} \\ \hline
+		WhatsApp & January 2010 & Proprietary & 1 billion\tablefootnote{\label{foot-sep2015}As of February 2016.} \\ \hline
+		 Telegram & August 2013 & GPLv2/GPLv3/Proprietary & 100 million\tablefootnote{As of February 2016} \\ \hline
 		 Signal & July 2014 & GPLv3 & 10 million\tablefootnote{Signal's predecessor TextSecure as of December 2013.} \\ \hline
 		 Threema & 	December 2012  & Proprietary & 3.5 million  \tablefootnote{As of June 2015.} \\ \hline
-		 WeChat & January 2011 & Proprietary & 600 million\tablefootnote{As of August 2015.} \\ \hline
+		 WeChat & January 2011 & Proprietary & 700 million\tablefootnote{As of April 2016.} \\ \hline
 	\end{tabular}
 \end{table}
 
