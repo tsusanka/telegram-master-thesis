@@ -138,7 +138,7 @@ The Electronic Frontier Foundation maintains a scoreboard of messaging applicati
 
 At the end of each chapter dedicated to one messenger a small note about the received score will be made.
 
-\section{WhatsApp}
+\section{WhatsApp}\label{whatsapp}
 
 WhatsApp is a mobile messaging application. Besides text it enables users to send pictures, videos, voice and locations. WhatsApp Messenger is available for iPhone, BlackBerry, Windows Phone, Android and Symbian\cite{whatsapphomepage}.
 
@@ -150,7 +150,7 @@ Following section describes WhatsApp's security-related incidents.
 
 \subsection{Security-related incidents}
 
-\subsubsection{Flaws in registration process}
+\subsubsection{Flaws in registration process}\label{whatsapp-registration}
 
 WhatsApp's user identity is bound to user's phone number. In order to verify the relationship user has to enter his phone number during the first start-up. WhatsApp server then sends SMS with verification code to such number. User submits the code from the received text message and WhatsApp creates his account.  
 
@@ -161,9 +161,9 @@ WhatsApp's user identity is bound to user's phone number. In order to verify the
 	\label{img:whatsapp_reg}
 \end{figure}
 
-Upto version 2.6.5 WhatsApp offered an alternative verification process. Instead of the user waiting for a text message, he was rather supposed to send a SMS to one of WhatsApp's phone numbers where he included his email. WhatsApp later sent verification code to the email and user verified himself with this code \cite{whatsapp-shootingthemsg}.
+Up to version 2.6.5 WhatsApp offered an alternative verification process. Instead of the user waiting for a text message, he was rather supposed to send a SMS to one of WhatsApp's phone numbers where he included his email. WhatsApp later sent verification code to the email and user verified himself with this code \cite{whatsapp-shootingthemsg}.
 
-Serious drawbacks were found in this method in 2011 \cite{whatsapp-hijack1}. To hijack user's account attacker first opted for this method. Then using SMS spoofing service he sent SMS to WhatsApp's phone number pretending it originates from the victim. Attacker set the content of the message to an email he owned, leading to WhatsApp sending the verification code to the attacker. The attacker then simply entered the code from an email and successfully hijacked the victim's account.
+Serious drawbacks were found in this method in 2011 \cite{whatsapp-hijack1}. To hijack user's account attacker first opted for this method. Then using SMS spoofing service he sent SMS to WhatsApp's phone number pretending it originates from the victim. Attacker set the content of the message to an email he owned leading to WhatsApp sending the verification code to the attacker. The attacker then simply entered the code from an email and successfully hijacked the victim's account.
 
 Following these findings another method to bypass the registration process was published. During the registration phase WhatsApp sent a request for the verification SMS to be sent to the client in HTTP request similiar to this \cite{whatsapp-shootingthemsg}:
 
@@ -179,14 +179,14 @@ User-Agent: WhatsApp/2.6.4 iPhone_OS/4.3.3 Device/iPhone_4
 
 The request contained the final verification code in the GET parameter. That leads to a conclusion the client created the verification code, not the server, and expected user's confirmation. An attacker could simply intercept the request, retrieved the verification code and made sure the request didn't arrive to WhatsApp's servers to let the victim unaware of malicous intentions.
 
-Attacker then created a fake HTTP OK response to let the messenger think the request was successful and entered retrieved verification code from the intercepted request. The attacker successfully hijacked the victim's WhatsApp identity and can both send and recieve all his messages.
+Attacker then created a fake HTTP OK response to let the messenger think the request was successful and entered retrieved verification code from the intercepted request. The attacker successfully hijacked the victim's WhatsApp identity and could both send and recieve all his messages.
 
 The author of the research notified WhatsApp developers beforehand and WhatsApp fixed this issue before the research was made public \cite{whatsapp-shootingthemsg}. To the date of writing this thesis WhatsApp doesn't offer discussed verification method anymore.
 
 
 \subsubsection{Password generation}
 
-WhatsApp uses lightly modified version of XMPP \cite{whatsapp-xmpp}. During the registration process it creates a username based on the user's phone number. In newer versions than 2.10 the password is generated on server's side \cite{whatsapp-imei}. However, older versions used the phone's IMEI  number as password \cite{whatsapp-imei}\cite{whatsapp-imei2}.
+WhatsApp uses lightly modified version of XMPP \cite{whatsapp-xmpp}. During the registration process it creates a username based on the user's phone number. In newer versions than 2.10 the password is generated on server's side \cite{whatsapp-imei}. However, older versions used the phone's IMEI  number as password \cite{whatsapp-imei, whatsapp-imei2}.
 
 \begin{lstlisting}[caption={Pseudo-code of password generation on Android}]
 md5(revert('IMEI')) 
@@ -205,7 +205,7 @@ On May 2012 an application called ``WhatsAppSniffer'' had been released  \cite{w
 	\centering
 	\includegraphics[width=0.4\textwidth]{whatsapp-sniffer.png}
 	\caption{WhatsAppSniffer \cite{whatsapp-sniffer2}}
-	\label{img:whatsapp_reg}
+	\label{img:whatsapp_sniffer}
 \end{figure}
 
 
