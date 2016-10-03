@@ -239,6 +239,41 @@ At the time of writing, WhatsApp has two points out of seven in the EFF's secure
 \end{table}
 
 
+\section{Signal}
+
+Signal is an open-source voice calling and messaging application. It is available for Android and iOS. Its messages are end-to-end encrypted. During a voice calls simple identity check is available when a given word is included by both sides in the call.
+
+Signal uses its own Signal Protocol (previously called \emph{Axolotl}) based on cryptographic primitives such as Elliptic Curves (Curve25519), AES and HMAC-SHA256. \cite{signal-bochum} As mentioned in Section~\ref{whatsapp} WhatsApp might use the very same protocol. TODO - od začátku 2016 ho opravdu ofiko používá
+
+\subsection{Security-related incidents}
+
+In late 2014 \emph{Der Spiegel} published articles claiming NSA considered Signal's encrypted voice calling used with other tools as a catastrophic to theirs surveilance missions.\cite{signal-spiegel} Edward Snowden recommended Signal on various occasions.\cite{signal-snowden}\cite{signal-snowden2}
+
+A research team from Ruhr University Bochum provided a security analysis \emph{``How Secure is TextSecure?''} of the former Signal version.\cite{signal-bochum} They came to a conclusion that the protocol is susceptible for an Unknown key-share attack and proposed a mitigation. If such patch applied they concluded Signal as secure.
+
+Up to this date no other security-related incidents or analysis of Signal messenger are known.
+
+\subsection{EFF's secure messaging score}
+
+Signal fulfilled all the requirments in the EFF's secure messaging scorecard and received a full score. \cite{eff-score}
+
+\begin{table}[htb]
+	\centering
+	\caption{Signal's secure messaging score}
+	\label{my-label}
+	\begin{tabular}{|l|l|}
+		\hline
+		Are messages encrypted in transit? & \cmark \\\hline
+		Are messages encrypted so the provider can not access it? & \cmark \\ \hline
+		Can user verify contacts’ identities? & \cmark \\ \hline
+		Are past communications secure if keys stolen? & \cmark \\ \hline
+		Is the code open to independent review? & \cmark \\ \hline
+		Is the cryptography design properly documented? & \cmark \\ \hline
+		Has there been any recent code audit? & \cmark \\ \hline
+	\end{tabular}
+\end{table}
+
+
 \section{Telegram}
 
 Telegram is instant messaging service enabling users to send messages, photos, videos, stickers and files. Telegram describes itself as fast and secure solution for instant messaging and claims to be safer than WhatsApp. Compared to WhatsApp, Telegram is more cloud-based, it stores all messages on its servers and sync them with all user's devices.\cite{telegramfaq}
@@ -348,34 +383,6 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 	\centering
 	\caption{Telegram secret chat's secure messaging score}
 	\label{tab:telegram-secret-eff}
-	\begin{tabular}{|l|l|}
-		\hline
-		Are messages encrypted in transit? & \cmark \\\hline
-		Are messages encrypted so the provider can not access it? & \cmark \\ \hline
-		Can user verify contacts’ identities? & \cmark \\ \hline
-		Are past communications secure if keys stolen? & \cmark \\ \hline
-		Is the code open to independent review? & \cmark \\ \hline
-		Is the cryptography design properly documented? & \cmark \\ \hline
-		Has there been any recent code audit? & \cmark \\ \hline
-	\end{tabular}
-\end{table}
-
-
-\section{Signal}
-
-Signal is a voice calling and instant messaging application developped by Open Whisper Systems. It was brought to light by the merge of two applications -- the voice calling RedPhone and the text messenger TextSecure both created by the very same company \cite{signalmerge}.
-
-Signal is completely open-sourced including its server side. Signal was endorsed by some well-known names such as Edward Snowden \cite{signal-snowden} or Bruce Schneier \cite{signal-schneier}.
-
-TODO
-
-\subsection{EFF's secure messaging score}
-
-
-\begin{table}[htb]
-	\centering
-	\caption{Signal's secure messaging score}
-	\label{tab:telegram-regular-eff}
 	\begin{tabular}{|l|l|}
 		\hline
 		Are messages encrypted in transit? & \cmark \\\hline
