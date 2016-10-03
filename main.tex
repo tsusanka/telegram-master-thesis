@@ -274,6 +274,41 @@ Signal fulfilled all the requirments in the EFF's secure messaging scorecard and
 \end{table}
 
 
+\section{Threema}
+
+Threema is a paid IM application available for all three major platforms -- Android, iOS and Windows Phone. Text messaging, multimedia, locations, voice messages and file sharing are supported. Threema is developed in Switzerland and all servers are located in the very same place.
+
+Threema is a paid application. As of June 2016 the price was set to \euro2.5. Threema is using user IDs and linking user's phone number and email address is not required.
+
+\subsection{Security-related incidents}
+
+In August 2015, Threema was auditted by an external company. The Threema documentation states \cite{threema-audit}: \emph{``The result confirms that Threema's concepts fully meet the requirements for secure and trustworthy instant messaging.''} The full audit is available on Threema's web page.
+
+The main point of Threema's criticism is considered with its closed-source nature therefore the inability to verify its source code.
+
+There are no other security analysis.
+
+\subsection{EFF's secure messaging score}
+
+In the EFF's comparison Threema missed a single point for not completing an indenpendent code review. \cite{eff-score}
+
+\begin{table}[htb]
+	\centering
+	\caption{Threema's secure messaging score}
+	\label{my-label}
+	\begin{tabular}{|l|l|}
+		\hline
+		Are messages encrypted in transit? & \cmark \\\hline
+		Are messages encrypted so the provider can not access it? & \cmark \\ \hline
+		Can user verify contacts' identities? & \cmark \\ \hline
+		Are past communications secure if keys stolen? & \cmark \\ \hline
+		Is the code open to independent review? & \xmark \\ \hline
+		Is the cryptography design properly documented? & \cmark \\ \hline
+		Has there been any recent code audit? & \cmark \\ \hline
+	\end{tabular}
+\end{table}
+
+
 \section{Telegram}
 
 Telegram is instant messaging service enabling users to send messages, photos, videos, stickers and files. Telegram describes itself as fast and secure solution for instant messaging and claims to be safer than WhatsApp. Compared to WhatsApp, Telegram is more cloud-based, it stores all messages on its servers and sync them with all user's devices.\cite{telegramfaq}
@@ -395,18 +430,6 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 	\end{tabular}
 \end{table}
 
-
-\section{Threema}
-
-TODO napsat cenu
-
-Threema is paid proprietary instant messaging application. Users can send  photos, videos, voice messages, QR codes, polls and files \cite{threemahomepage}. TODO: citovani homepage?
-
-It provides end-to-end encryption and claims to prevent collection of any metadata \cite{threemahomepage}.
-
-Threema does not use phone numbers or usernames. It generates a random ID for user identification. Phone number and email are not required, no personal information are therefore needed.
-
-As of June 2015, Threema had 3.5 million active users, mostly in german-speaking countries.\cite{threemausers}
 
 \section{WeChat}
 
