@@ -92,7 +92,7 @@ Large user base and overall popularity of the application is one of the main rea
 
 \subsection{Signal\protect\footnote{https://www.whispersystems.org}}
 
-Signal was endorsed by the cryptographic community in several occasions and is by many considered as the most secure messenger. It's the only messenger completely open-sourced in this collection.
+Signal was endorsed by the community in several occasions and is by many considered as the most secure messenger. It's the only messenger completely open-sourced in this collection.
 
 \subsection{Threema\protect\footnote{https://www.threema.ch}}
 
@@ -128,9 +128,9 @@ The Electronic Frontier Foundation maintains a scoreboard of messaging applicati
 
 \begin{itemize}
 	\item \textbf{Are messages encrypted in transit?} All user communication is required to be encrypted. Encryption of metadata, such as phone numbers, usernames or dates, is not required.
-	\item \textbf{Are messages encrypted so the provider can not access it?} All user messages need to be end-to-end encrypted, from the moment user sends a message to the moment the other party recieves it. No decrypting  and re-encrypting may occur during that process. The private keys need to be generated at the endpoints, not on the centralized server. Any bulk data collection is therefore meaningless and no third-party may access the messages unless one party allows it.
-	\item \textbf{Can user verify contacts’ identity?} This requires a verification mechanism of the other side's identity to prevent Man-in-the-Middle attacks. 
-	\item \textbf{Are past communications secure if keys stolen?} All messages need to be encrypted with routinely changed keys. The forward secrecy minimizes consequences when a private key is stolen, becuase the key has only a short-time validity. This criterion requires end-to-end encryption, it is therefore directly dependent on the second criterion.
+	\item \textbf{Are messages encrypted so the provider can not access it?} All user messages need to be end-to-end encrypted, from the moment user sends a message to the moment the other party receives it. No decrypting  and re-encrypting may occur during that process. The private keys need to be generated at the endpoints, not on the centralized server. Any bulk data collection is therefore meaningless and no third-party may access the messages unless one party allows it.
+	\item \textbf{Can user verify contacts' identity?} This requires a verification mechanism of the other side's identity to prevent Man-in-the-Middle attacks. 
+	\item \textbf{Are past communications secure if keys stolen?} All messages need to be encrypted with routinely changed keys. The forward secrecy minimizes consequences when a private key is stolen, because the key has only a short-time validity. This criterion requires end-to-end encryption, it is therefore directly dependent on the second criterion.
 	\item \textbf{Is the code open to independent review?} Sufficient amount of source-code needs to be available to perform an independent code review. This protects from unintentional encryption flaws, back doors or bugs.
 	\item \textbf{Is the cryptography design properly documented?} The cryptography behind the application needs to be described in detailed documentation.
 	\item \textbf{Has there been any recent code audit?} An independent security review of the application is not older than 12 months. This does not require the audit to be publicly available.
@@ -177,9 +177,9 @@ GET [..]?to=4915143[..]&auth=659&[..] HTTP/1.1
 User-Agent: WhatsApp/2.6.4 iPhone_OS/4.3.3 Device/iPhone_4
 \end{lstlisting}
 
-The request contained the final verification code in the GET parameter. That leads to a conclusion the client created the verification code, not the server, and expected user's confirmation. An attacker could simply intercept the request, retrieved the verification code and made sure the request didn't arrive to WhatsApp's servers to let the victim unaware of malicous intentions.
+The request contained the final verification code in the GET parameter. That leads to a conclusion the client created the verification code, not the server, and expected user's confirmation. An attacker could simply intercept the request, retrieved the verification code and made sure the request didn't arrive to WhatsApp's servers to let the victim unaware of malicious intentions.
 
-Attacker then created a fake HTTP OK response to let the messenger think the request was successful and entered retrieved verification code from the intercepted request. The attacker successfully hijacked the victim's WhatsApp identity and could both send and recieve all his messages.
+Attacker then created a fake HTTP OK response to let the messenger think the request was successful and entered retrieved verification code from the intercepted request. The attacker successfully hijacked the victim's WhatsApp identity and could both send and receive all his messages.
 
 The author of the research notified WhatsApp developers beforehand and WhatsApp fixed this issue before the research was made public \cite{whatsapp-shootingthemsg}. To the date of writing this thesis WhatsApp doesn't offer discussed verification method anymore.
 
@@ -230,7 +230,7 @@ At the time of writing, WhatsApp has two points out of seven in the EFF's secure
 		\hline
 		Are messages encrypted in transit? & \cmark \\\hline
 		Are messages encrypted so the provider can not access it? & \xmark \\ \hline
-		Can user verify contacts’ identities? & \xmark \\ \hline
+		Can user verify contacts' identities? & \xmark \\ \hline
 		Are past communications secure if keys stolen? & \xmark \\ \hline
 		Is the code open to independent review? & \xmark \\ \hline
 		Is the cryptography design properly documented? & \xmark \\ \hline
@@ -265,7 +265,7 @@ Signal fulfilled all the requirments in the EFF's secure messaging scorecard and
 		\hline
 		Are messages encrypted in transit? & \cmark \\\hline
 		Are messages encrypted so the provider can not access it? & \cmark \\ \hline
-		Can user verify contacts’ identities? & \cmark \\ \hline
+		Can user verify contacts' identities? & \cmark \\ \hline
 		Are past communications secure if keys stolen? & \cmark \\ \hline
 		Is the code open to independent review? & \cmark \\ \hline
 		Is the cryptography design properly documented? & \cmark \\ \hline
@@ -376,7 +376,7 @@ In May 2015 Telegram had 62 million active users \cite{telegram-users}.
 
 In Section~\ref{whatsapp-registration} we described how the WhatsApp's registration process using SMS works. Telegram works on a similar basis and allows as well logging in using just a simple SMS.
 
-Those are fully readable for telecom operators which may and usually do cooparate with the corresponding goverment. Furthermore SMS can be intercepted using inexpensive IMSI catchers. If an attacker is able to steal the authenticating SMS he is able to login on his behalf. Worse, Telegram stores the whole user's message history, hence it allows the attacker to read old messages as well.
+Those are fully readable for mobile network operators which may and usually do cooperate with the corresponding government. Furthermore SMS can be intercepted using inexpensive IMSI catchers. If an attacker is able to steal the authenticating SMS he is able to login on his behalf. Worse, Telegram stores the whole user's message history, hence it allows the attacker to read old messages as well.
 
 Early 2016 was shown this was a legitimate concern \cite{telegram-smsiran}. Some Telegram users experienced their accounts being erased and blamed Telegram to enforce political censorship. Telegram denied. Russian activist Oleg Kozlovsky described in its Facebook post \cite{telegram-russia} how his account was allegedly hacked.
 
@@ -386,7 +386,7 @@ These concerns raise serious questions if SMS authentication is a security-wise 
 
 \subsubsection{Cracking Contest}
 
-On November 4, 2014, Telegram published contest with a winning price \$300,000 for cracking its encryption. The contest became quite known in the community and probably provided a bit of advertisiment for Telegram.
+On November 4, 2014, Telegram published contest with a winning price \$300,000 for cracking its encryption. The contest became quite known in the community and probably provided a bit of advertisement for Telegram.
 
 The contest remained unsolved until his closure. Number of authors considered it rigged and stated that the contest does not provide any prove of Telegram's overall security whatsoever.\cite{telegramcontestfail}\cite{telegramcontestfail2}
 
@@ -404,7 +404,7 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 		\hline
 		Are messages encrypted in transit? & \cmark \\\hline
 		Are messages encrypted so the provider can not access it? & \xmark \\ \hline
-		Can user verify contacts’ identities? & \xmark \\ \hline
+		Can user verify contacts' identities? & \xmark \\ \hline
 		Are past communications secure if keys stolen? & \xmark \\ \hline
 		Is the code open to independent review? & \xmark \\ \hline
 		Is the cryptography design properly documented? & \cmark \\ \hline
@@ -423,7 +423,7 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 		\hline
 		Are messages encrypted in transit? & \cmark \\\hline
 		Are messages encrypted so the provider can not access it? & \cmark \\ \hline
-		Can user verify contacts’ identities? & \cmark \\ \hline
+		Can user verify contacts' identities? & \cmark \\ \hline
 		Are past communications secure if keys stolen? & \cmark \\ \hline
 		Is the code open to independent review? & \cmark \\ \hline
 		Is the cryptography design properly documented? & \cmark \\ \hline
@@ -458,7 +458,7 @@ Where $r_{client}$ is a 2048-bit random integer generated on the client side and
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.4\textwidth]{telegram-keybox.png}
-	\caption{Encryption key visualisation}
+	\caption{Encryption key visualization}
 	\label{img:telegram-keybox}
 \end{figure}
 
@@ -568,7 +568,15 @@ The researchers stressed the theoretical nature of the attack and that they ``\e
 
 \begin{conclusion}
 
-Zaver TODO
+TODO TODO TODO
+
+Instant messengers are especially by young generation considered as a crucial tool of theirs everyday life. Today's users share many of their intimate moments using one of many messengers available. That said, we should devote our time to investigate messenger's security.
+
+We've analyzed many security incidents and presented their impact on the end user. We noted how the messengers respond to such incidents and if they try to improve their security. We presented the collaboration between WhatsApp and Open Whisper Systems delivering the Signal's protocol to WhatsApp. From such cooperation users may only benefit.
+
+There are still number of security related problems remaining. Many messengers are closed-source thus not providing an opportunity for an independent code review. Insufficient or completely missing documentation raises questions as well.
+
+Finally, the reader should have received an insight into Telegram's inner operations. We described Telegram's encryption and decryption process and described some of the cryptographical primitives.
 
 \end{conclusion}
 
