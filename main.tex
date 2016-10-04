@@ -60,7 +60,7 @@
 
 \begin{introduction}
 
-TODO TODO
+TODO TODO zduraznit motivaci
 
 The human interaction and communication takes place more and more often in the digital world. This trend will most likely continue and the line between real and digital may one day disappear entirely. There is a plenty of communication solutions. Some claim themselves as very secure, some try to avoid such questions.
 
@@ -217,6 +217,7 @@ WhatsApp confirmed this partnership, however did not comment it any further nor 
 
 On April 2015, \emph{heise.de} investigated the current state of WhatsApp's encryption. The journalists were sniffing messages using the Man-in-the-Middle technique. They showed that Android versions used end-to-end encryption and that the messages ``\emph{were encrypted according to the TextSecure protocol}''\cite{whatsapp-encstate}. However, during testing the iOS client they concluded the messages weren't protected in such manner. Finally, they concluded they are unsure whether end-to-end encryption was actually used in all cases.
 
+TODO WhatsApp released white paper
 
 \subsection{EFF's secure messaging score}
 
@@ -435,9 +436,11 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 
 
 
+
+
 \chapter{Cryptography behind Telegram}\label{telegramcrypto}
 
-Telegram authors decided to craft a brand new encryption scheme supposedly to achieve better delivery times and stability, MTProto. For simplicity we will focuse on Telegram's secret chats messaging. The analysis is mainly based on \cite{telegram-aarhus} and on the official Telegram documentation. 
+Telegram authors decided to craft a brand new encryption scheme supposedly to achieve better delivery times and stability, MTProto. For simplicity we will focuse on Telegram's secret chats messaging only. The analysis is mainly based on \cite{telegram-aarhus} and on the official Telegram documentation. 
 
 Upon the first lunch of Telegram application user needs to enter and verify its telephone number. Then the client establishes a secure connection with one of the Telegram's servers. This connection is based on RSA, simple proof-of-work calculation, Diffie-Hellman key exchange and finally AES-IGE encryption. This key is subsequently used for any client-server communication and regular chats. As mentioned, we want to focus primarily on secret chats, hence this key exchange is not described into more details.
 
@@ -469,6 +472,8 @@ The visualisation is based on a 128-bit fingerprint of the secret key. An~articl
 The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions USD. Telegram's FAQ addresses this issue and claimes its cost is around a trillion dollars to achieve a result in one month \cite{telegram-techfaq}.
 
 The article as well reasons that in real-world scenario the users don't meet up to verify the key. Most of them probably ignore the verification completely, some send the image via regular chat or using another channel.
+
+TODO Trust on first use?
 
 \subsubsection{Encryption}\label{telegram-enc}
 
@@ -523,7 +528,7 @@ The rest of the decryption process is lucidly visualized on Figure \ref{img:tele
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{telegram-decflow.png}
-	\caption{MTProto decryption flow \cite{telegram-aarhus}}
+	\caption{MTProto decryption flow \cite{telegram-aarhus} TODO vice popsat}
 	\label{img:telegram-decflow}
 \end{figure}
 
@@ -579,6 +584,7 @@ There are still number of security related problems remaining. Many messengers a
 Finally, the reader should have received an insight into Telegram's inner operations. We described Telegram's encryption and decryption process and described some of the cryptographical primitives.
 
 \end{conclusion}
+
 
 \bibliographystyle{iso690}
 \bibliography{ref}
