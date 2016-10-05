@@ -461,13 +461,13 @@ The exchange performs traditional Diffie-Hellman key exchange (DH). The DH param
 	\item $g$ generates a cyclic subgroup of prime order $\frac{p-1}{2}$
 \end{itemize}
 
-Suppose user $A$ initiates secret chat with $B$:
+Now suppose user $A$ initiates secret chat with $B$:
 
 \begin{enumerate}
 	\item $A$ computes a random 2048-bit number $a$ and sets $g_a = g^a \bmod p$\label{enum:DH-a}
 	\item $B$ receives the request on all of its authorized devices and an exclusive one accepts it
 	\item $B$ generates random $b$ and sets $g_b = g^b \bmod p$\label{enum:DH-b}
-	\item Both users deduce the master key $K = g_a^b \bmod p = g_b^a \bmod p$, we note the master key \emph{auth\_key}
+	\item Both users calculate the master key $K = g_a^b \bmod p = g_b^a \bmod p$. We denote this master key \emph{auth\_key}
 \end{enumerate}
 
 If the length of \emph{auth\_key} is lower than 2048 bits, leading zeros are added as padding.
