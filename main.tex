@@ -456,10 +456,12 @@ Now we'll describe the key exchange during the secret end-to-end encrypted messa
 The exchange performs traditional Diffie-Hellman key exchange (DH). The DH parameters are received from the servers using the connection described previously in \ref{crypto-initialization}. The client receives $p$ and $g$ and should check the following conditions are met:
 
 \begin{itemize}
-	\item $p$ is a safe prime, meaning both $p$ and $\frac{p-1}{2}$ are primes
+	\item $p$ is a safe prime, meaning $q = \frac{p-1}{2}$ needs to be prime as well
 	\item $2^{2047} < p < 2^{2048}$
-	\item $g$ generates a cyclic subgroup of prime order $\frac{p-1}{2}$
+	\item $g$ generates a cyclic subgroup of prime order $q$
 \end{itemize}
+
+We compared these requirements with the FIPS 186-4 publication concerning Digital Signature Algorithm and concluded the Telegram requires similar conditions with only minor distinctions.
 
 Now suppose user $A$ initiates secret chat with $B$:
 
