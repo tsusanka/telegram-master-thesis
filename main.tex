@@ -449,7 +449,7 @@ Telegram authors decided to craft a brand new encryption scheme supposedly to ac
 Upon the first lunch of Telegram application user needs to enter and verify its telephone number. Then the client establishes a secure connection with one of the Telegram's servers. This connection is based on RSA, simple proof-of-work calculation, Diffie-Hellman key exchange and finally AES-IGE encryption. This key is subsequently used for any client-server communication and regular chats. As mentioned, we want to focus primarily on secret chats, hence this key exchange is not described into more details.
 
 
-\subsection{Key exchange}
+\subsection{Key exchange}\label{crypto-keyexchange}
 
 Now we'll describe the key exchange during the secret end-to-end encrypted messaging.
 
@@ -469,10 +469,10 @@ Now suppose user $A$ initiates secret chat with $B$:
 	\item $A$ computes a random 2048-bit number $a$ and sets $g_a = g^a \bmod p$\label{enum:DH-a}
 	\item $B$ receives the request on all of its authorized devices and an exclusive one accepts it
 	\item $B$ generates random $b$ and sets $g_b = g^b \bmod p$\label{enum:DH-b}
-	\item Both users calculate the master key $K = g_a^b \bmod p = g_b^a \bmod p$. We denote this master key \emph{auth\_key}
+	\item Both users calculate the master key $K = g_a^b \bmod p = g_b^a \bmod p$. We denote this master key \texttt{auth\_key}
 \end{enumerate}
 
-If the length of \emph{auth\_key} is lower than 2048 bits, leading zeros are added as padding.
+If the length of \texttt{auth\_key} is lower than 2048 bits, leading zeros are added as padding.
 
 In the steps \ref{enum:DH-a} and \ref{enum:DH-b} both clients are to check $1 < g_a, g_b < p-1$ and is recommended to verify $2^{2048-64} < g_a, g_b < p - 2^{2048-64}$ as well. Worth mentioning, the client generates its \emph{a} (\emph{b} respectively) in the following way:
 \begin{gather*}
@@ -543,17 +543,18 @@ This payload is then serialized as an array of bytes and prepared to be encrypte
 
 \subsection{Encryption}\label{telegram-enc}
 
+First, the message key \texttt{msg\_key} is calculated. It is composed of the first 128 least significant bits of the SHA-1 hash of the byte array to be encrypted. Next, the array is padded with 0-96 random bits in order to be divisible by the AES block size -- 128 bits.
+
+This \texttt{msg\_key} with \texttt{auth\_key} described in Section \ref{crypto-keyexchange} is taken as input into the Key Derivation Function which performs number of SHA-1 hashes and truncation yielding two 256-bit values, the AES key used for encrypting this particular message and the IV value needed for the IGE mode used.
+
+The encrypted data are completed with two other values, the \texttt{msg\_key} described earlier and an \texttt{auth\_key\_id}. This value is a fingerprint of the master secret \texttt{auth\_key} and is created from the last 64 bits of SHA-1(\texttt{auth\_key}).
+
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{telegram-encflow-ed.png}
 	\caption{MTProto encryption flow \cite{telegram-aarhus}}
 	\label{img:telegram-encflow}
 \end{figure}
-
-
-Figure \ref{img:telegram-encflow} shows the overall scheme of MTProto encryption process. The described payload is hashed with SHA-1 algorithm producing so called \emph{msg\_key}. This key is later used for integrity check.
-
-From the \emph{msg\_key} and the master \emph{auth\_key} an~AES encryption key and IV value are derived. With those parameters AES in IGE mode is used for encryption. The final content to be sent consists of:
 
 \begin{itemize}
 	\item  \textbf{auth\_key\_id} A fingerprint of the master secret \emph{auth\_key} made up of the last 64 bits of SHA-1 hashed \emph{auth\_key}.
