@@ -490,15 +490,16 @@ Where $r_{client}$ is a 2048-bit random integer generated on the client side and
 
 The DH by itself does not provide any authentication of the communicating parties and is therefore susceptible to an active Man-in-the-Middle attack. To mitigate this issue the user is provided with an option to display counterpart's encryption key. Telegram creates a white-blue box to visualize the key as may be seen on Figure~\ref{img:telegram-keybox}. To make sure no malicious mediator is present users are supposed to meet in person and verify the keys are identical.
 
-The visualisation is based on a 128-bit fingerprint of the secret key. An~article presented in January 2015 showed \cite{telegram-264} that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat, a MiM attack is possible only with $2^{64}$ operations, rather than $2^{128}$, based on the Birthday paradox.
-
-The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions USD. Telegram's FAQ addresses this issue and claimes its cost is around a trillion dollars to achieve a result in one month \cite{telegram-techfaq}.
+The visualisation used to be based on a 128-bit fingerprint\footnote{Not to be confused with the 64-bit \texttt{auth\_key\_id} fingerprint.} of the secret key. An~article presented in January 2015 showed \cite{telegram-264} that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat, a MiM attack is possible only with $2^{64}$ operations, rather than $2^{128}$, based on the Birthday paradox. The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions USD. Telegram's FAQ addresses this issue and states its cost is around a trillion dollars to achieve a result in one month. Nevertheless, Telegram later decided to use additional 160 bits from the key summing up to 288 bits \cite{telegram-techfaq}. This improvement should make this attack impossible.
 
 The article as well reasons that in real-world scenario the users don't actually meet to verify the key. Most of them probably ignore the verification whatsoever, some send the image via regular chat or using another -- possibly insecure -- channel.
 
 To accomplish the Perfect Forward Secrecy model the key is renegotiated each time it has been used for more than 100 messages or has been used for more than one week. For the renegotiation the already established chat is used in order to send the $g_a$ and $g_b$ values. The server does not help with the randomness here and the same DH parameters are used. The \emph{auth\_key} visualization does not change and is therefore based on the first negotiated key.
 
+Finally, a fingerprint of the exchanged \texttt{auth\_key} is created labeled as \texttt{auth\_key\_id}. It is crafted from the last 64 bits of SHA-1(\texttt{auth\_key}).
+
 TODO Trust on first use?
+
 
 \subsection{Payload}
 
@@ -514,14 +515,13 @@ The cornerstone of the payload is the \textbf{decryptedMessage} object depicted 
 \end{figure}
 
 \begin{itemize}
-	\item \texttt{random\_id} assigned by the author to identify the message
+	\item \texttt{random\_id} random value assigned by the author to identify the message; also sent as a plaintext
 	\item \texttt{ttl} message lifetime\footnote{User may set a message lifetime. After such time passes Telegram deletes it.}
 	\item \texttt{message} the actual text of a message
 	\item \texttt{media} header used for media transfers
 \end{itemize}
 
-
-Throughout this paper we assume that no media attachments are present and therefore the \texttt{media} attribute is empty. The \texttt{decryptedMessage} object is further wrapped in \texttt{decryptedMessageLayer} which adds the following fields:
+Throughout this paper we assume that no media attachments are present and therefore the \texttt{media} attribute is always empty. The \texttt{decryptedMessage} object is further wrapped in \texttt{decryptedMessageLayer} which adds the following fields:
 
 \begin{figure}[htb]
 	\centering
@@ -543,25 +543,24 @@ This payload is then serialized as an array of bytes and prepared to be encrypte
 
 \subsection{Encryption}\label{telegram-enc}
 
-First, the message key \texttt{msg\_key} is calculated. It is composed of the first 128 least significant bits of the SHA-1 hash of the byte array to be encrypted. Next, the array is padded with 0-96 random bits in order to be divisible by the AES block size -- 128 bits.
+First, the message key \texttt{msg\_key} is calculated. It is composed of the first 128 least significant bits of the SHA-1 hash of the payload to be encrypted. Next, the array is padded with 0-96 random bits in order to be divisible by the AES block size -- 128 bits.
 
-This \texttt{msg\_key} with \texttt{auth\_key} described in Section \ref{crypto-keyexchange} is taken as input into the Key Derivation Function which performs number of SHA-1 hashes and truncation yielding two 256-bit values, the AES key used for encrypting this particular message and the IV value needed for the IGE mode used.
-
-The encrypted data are completed with two other values, the \texttt{msg\_key} described earlier and an \texttt{auth\_key\_id}. This value is a fingerprint of the master secret \texttt{auth\_key} and is created from the last 64 bits of SHA-1(\texttt{auth\_key}).
+This \texttt{msg\_key} along with the \texttt{auth\_key} described in Section \ref{crypto-keyexchange} are taken as input into the Key Derivation Function (KDF) which performs number of SHA-1 hashes and truncation yielding two 256-bit values: the AES key and the IGE initialization value (IV) used for encrypting this particular message.
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=1\textwidth]{telegram-encflow-ed.png}
+	\includegraphics[width=1\textwidth]{mtproto-encflow.pdf}
 	\caption{MTProto encryption flow \cite{telegram-aarhus}}
 	\label{img:telegram-encflow}
 \end{figure}
 
-\begin{itemize}
-	\item  \textbf{auth\_key\_id} A fingerprint of the master secret \emph{auth\_key} made up of the last 64 bits of SHA-1 hashed \emph{auth\_key}.
-	\item  \textbf{msg\_key} SHA-1 hash of the payload.
-	\item  \textbf{encrypted data}
-\end{itemize}
+Two other values are added at the top of the encrypted data array: the already mentioned \texttt{msg\_key} and the \texttt{auth\_key\_id} described in Section \ref{crypto-keyexchange}. The client sends the message via the \textbf{messages.sendEncrypted} method providing these three parameters:
 
+\begin{itemize}
+	\item \texttt{peer} secret chat ID to identify the users
+	\item \texttt{random\_id} unique client message ID sent encrypted in the \textbf{decryptedMessage} object as well	
+	\item \texttt{data} the encrypted data including \texttt{msg\_key} and \texttt{auth\_key\_id}
+\end{itemize}
 
 \subsection{Decryption}
 
