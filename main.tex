@@ -558,20 +558,27 @@ Two other values are added at the top of the encrypted data array: the already m
 
 \begin{itemize}
 	\item \texttt{peer} secret chat ID to identify the users
-	\item \texttt{random\_id} unique client message ID sent encrypted in the \textbf{decryptedMessage} object as well	
+	\item \texttt{random\_id} unique client message ID sent encrypted in the \textbf{decryptedMessage} object as well
 	\item \texttt{data} the encrypted data including \texttt{msg\_key} and \texttt{auth\_key\_id}
 \end{itemize}
 
 \subsection{Decryption}
 
-Before the decryption process is started the \emph{auth\_key\_id} is checked. The receiver's \emph{auth\_key\_id} is derived in the very same way as described earlier and then compared to the sender's. If those value differ the whole message is discarded.
-
-The rest of the decryption process is lucidly visualized on Figure \ref{img:telegram-decflow}.
+Before the decryption process starts the \texttt{auth\_key\_id} is validated. The receiver's \texttt{auth\_key\_id} needs to match the value the sender appended to the byte array. If the values differ the whole message is discarded.
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=1\textwidth]{telegram-decflow.png}
-	\caption{MTProto decryption flow \cite{telegram-aarhus} TODO vice popsat}
+	\includegraphics[width=0.9\textwidth]{mtproto-auth-key.pdf}
+	\caption{Before the decryption process starts the \texttt{auth\_key\_id} values are checked.}
+	\label{img:telegram-decflow}
+\end{figure}
+
+The decryption process is plainly the encryption process in reverse. The KDF yields the AES key and IV values used for decrypting the data. The padding is stripped and the SHA-1 of the payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'}. The whole process is lucidly visualized on Figure \ref{img:telegram-decflow}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{mtproto-decflow.pdf}
+	\caption{The KDF produces the AES key and IV from the \texttt{auth\_key} and received \texttt{msg\_key'}. The SHA-1 of the decrypted payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'} and only then accepted.}
 	\label{img:telegram-decflow}
 \end{figure}
 
