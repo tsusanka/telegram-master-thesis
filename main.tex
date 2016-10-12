@@ -545,7 +545,7 @@ This payload is then serialized as an array of bytes and prepared to be encrypte
 
 First, the message key \texttt{msg\_key} is calculated. It is composed of the first 128 least significant bits of the SHA-1 hash of the payload to be encrypted. Next, the array is padded with 0-96 random bits in order to be divisible by the AES block size -- 128 bits.
 
-This \texttt{msg\_key} along with the \texttt{auth\_key} described in Section \ref{crypto-keyexchange} are taken as input into the Key Derivation Function (KDF) which performs number of SHA-1 hashes and truncation yielding two 256-bit values: the AES key and the IGE initialization value (IV) used for encrypting this particular message.
+This \texttt{msg\_key} along with the \texttt{auth\_key} described in Section \ref{crypto-keyexchange} are taken as input into the Key Derivation Function (KDF) which performs number of SHA-1 hashes and truncation yielding two 256-bit values: the AES key and the IGE initialization vector (IV) used for encrypting this particular message.
 
 \begin{figure}[htb]
 	\centering
@@ -578,7 +578,7 @@ c_i = f_K(m_i \oplus c_{i-1}) \oplus m_{i-1}
 
 where $f_K$ stands for the encrypting function with key $K$ (AES in our case) and $i$ goes from 1 to $n$ -- the number of plaintext blocks.
 
-Careful reader notices that for the first output block we need two initialisation values $m_0$ and $c_0$. Both values are taken from the IV described earlier. The original paper described $m_0$ as a random block and $c_0$ its encrypted counterpart. The OpenSSL implementation however, uses a more general implementation where both $m_0$ and $c_0$ are provided by the user \cite{telegram-openssl-ige}.
+Careful reader notices that for the first output block we need two initialisation values $m_0$ and $c_0$. Both are taken from the IV values described earlier. The original paper described $m_0$ as a random block and $c_0$ its encrypted counterpart. The OpenSSL implementation however, uses a more general implementation where both $m_0$ and $c_0$ are provided by the user \cite{telegram-openssl-ige}.
 
 \begin{figure}[htb]
 	\centering
