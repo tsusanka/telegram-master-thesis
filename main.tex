@@ -559,8 +559,34 @@ Two other values are added at the top of the encrypted data array: the already m
 \begin{itemize}
 	\item \texttt{peer} secret chat ID to identify the users
 	\item \texttt{random\_id} unique client message ID sent encrypted in the \textbf{decryptedMessage} object as well
-	\item \texttt{data} the encrypted data including \texttt{msg\_key} and \texttt{auth\_key\_id}
+	\item \texttt{data} the encrypted data, \texttt{msg\_key} and \texttt{auth\_key\_id} combined in one byte array
 \end{itemize}
+
+\subsubsection{Advanced Encryption Standard}
+
+The Advanced Encryption Standard (AES) is a symmetric block cipher with key lengths of 128, 192 and 256 bits respectively and block size of 128 bits. Telegram uses 256 bit key. AES is currently the most widely used symmetric cipher and is used in many internet standards such as IPsec, TLS, SSH and many others.
+
+AES was selected through a worldwide open competition and finally defined in the FIPS-197 publication by the US National Institute of Standards and Technology (NIST) in 2001. As of today, AES is secure against brute-force attacks and no reasonable analytic attacks are currently known \cite{understanding-crypto}.
+
+\subsubsection{Infinite Garble Extension}
+
+Infinite Garble Extension (IGE) is a lesser-known block cipher mode. It is shown on Figure \ref{img:telegram-ige-enc} and defined by the following formula \cite{telegram-openssl-ige}:
+
+\begin{gather*}
+c_i = f_K(m_i \oplus c_{i-1}) \oplus m_{i-1}
+\end{gather*}
+
+where $f_K$ stands for the encrypting function with key $K$ (AES in our case) and $i$ goes from 1 to $n$ -- the number of plaintext blocks.
+
+Careful reader notices that for the first output block we need two initialisation values $m_0$ and $c_0$. Both values are taken from the IV described earlier. The original paper described $m_0$ as a random block and $c_0$ its encrypted counterpart. The OpenSSL implementation however, uses a more general implementation where both $m_0$ and $c_0$ are provided by the user \cite{telegram-openssl-ige}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{telegram-ige-enc.png}
+	\caption{IGE mode of operation \cite{telegram-aarhus}}
+	\label{img:telegram-ige-enc}
+\end{figure}
+
 
 \subsection{Decryption}
 
@@ -582,25 +608,7 @@ The decryption process is plainly the encryption process in reverse. The KDF yie
 	\label{img:telegram-decflow}
 \end{figure}
 
-\subsection{Infinite Garble Extension}
-
-Infinite Garble Extension (IGE) is a block cipher mode. It is shown on Figure \ref{img:telegram-ige-enc} and defined by the following formula \cite{telegram-openssl-ige}:
-
-\begin{gather*} 
-y_i = f_K(x_i \oplus y_{i-1}) \oplus x_{i-1}
-\end{gather*}
-
-where $f_K$ stands for the encrypting function with key $K$ (AES in the Telegram's case) and $i$ goes from 1 to $n$ -- the number of plaintext blocks.
-
-Careful reader notices that for the first output block we need two initialisation values $x_0$ and $y_0$ that correspond to the Initialisation Vector (IV) in more traditionally used block modes. The original paper described $x_0$ as a random block and $y_0$ its encrypted counterpart. The OpenSSL implementation however, uses a more general implementation where both $x_0$ and $y_0$ are provided by the user \cite{telegram-openssl-ige}.
-
-\begin{figure}[htb]
-	\centering
-	\includegraphics[width=1\textwidth]{telegram-ige-enc.png}
-	\caption{IGE mode of operation \cite{telegram-aarhus}}
-	\label{img:telegram-ige-enc}
-\end{figure}
-
+\chapter{TODO}
 
 \subsection{SHA-1}
 
