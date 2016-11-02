@@ -441,13 +441,42 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 
 \chapter{Cryptography behind Telegram}\label{telegramcrypto}
 
-Telegram authors decided to craft a brand new encryption scheme supposedly to achieve better delivery times and stability, MTProto. For simplicity we will focuse on Telegram's secret chats messaging only. The analysis is mainly based on \cite{telegram-aarhus} and on the official Telegram documentation. 
+Telegram authors decided to craft a brand new encryption scheme supposedly to achieve better delivery times and stability, MTProto. In this section we describe into details how the protocol should work based \cite{telegram-aarhus} and the official Telegram documentation.
 
 
-\subsection{Initialization}\label{crypto-initialization}
+\section{Initialization}\label{crypto-initialization}
 
-Upon the first lunch of Telegram application user needs to enter and verify its telephone number. Then the client establishes a secure connection with one of the Telegram's servers. This connection is based on RSA, simple proof-of-work calculation, Diffie-Hellman key exchange and finally AES-IGE encryption. This key is subsequently used for any client-server communication and regular chats. As mentioned, we want to focus primarily on secret chats, hence this key exchange is not described into more details.
+During the first lunch of Telegram application user needs to enter and verify its telephone number. The verification is done by sending a five digit code to the phone via SMS. The user then enters the code into the app and therefore verifies its phone number. When this process is done the registration process begins as follows. Some details may be omitted for simplification.
 
+Suppose a client $C$ is registering to server $S$:
+
+\begin{enumerate}
+	\item $C$ sends a 128-bit random integer \emph{nonce} to $S$.
+	\item $S$ responds with another 128-bit random integer \emph{server\_nonce}, composite number \emph{pq} and a fingerprint of a RSA public key.
+	\item $C$ provides a proof of work by decomposing \emph{pq} into prime factors \emph{p} and \emph{q} such that $\emph{p} < \emph{q}$.
+	\item $C$ has several RSA public keys stored locally and chooses the appropriate one based on the received fingerprint.
+	\item $C$ crafts a payload of \emph{p}, \emph{q}, \emph{pq}, \emph{nonce}, \emph{server\_nonce} and another new 256-bit random integer \emph{new\_nonce}. The payload including its hash is then encrypted by the RSA key and sent to $S$.
+	\item The $S$ responds with $g$, $g_a$ and $p$ encrypted AES-IGE using a key derived from \emph{new\_nonce} and \emph{server\_nonce}.\label{initialization-6}
+	\item $C$ generates random 2048-bit $b$ and computes $g_b = g^b \bmod p$ and $K = g_a^b \bmod p$. The $g_b$ value is sent to $S$ encrypted in the way as in previous point.
+	\item $S$ calculates $K = g_b^a \bmod p$ and both $C$ and $S$ now share a common key $K$ noted as \texttt{auth\_key}.
+\end{enumerate}
+
+In Point \ref{initialization-6} the client should check that $p$ and $g$ follow these requirements:
+
+\begin{itemize}
+	\item $p$ is a safe prime, meaning $q = \frac{p-1}{2}$ needs to be prime as well
+	\item $2^{2047} < p < 2^{2048}$
+	\item $g$ is equal to 2, 3, 4, 5, 6 or 7 and it generates a cyclic subgroup of prime order $q$
+\end{itemize}
+
+We compared these requirements with the FIPS 186-4 publication concerning Digital Signature Algorithm and concluded the Telegram requires similar conditions with only minor distinctions. TODO mozna jinam?
+
+This \texttt{auth\_key} is used for all client-server communication and regular chats, in secret chats another key is negotiated as described in \ref{secretchats}.
+
+
+
+
+\section{Secret chats}\label{secretchats}
 
 \subsection{Key exchange}\label{crypto-keyexchange}
 
