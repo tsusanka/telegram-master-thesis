@@ -502,9 +502,10 @@ First, let's describe the content of a single message, further referred to as a 
 	\item \texttt{message} text of the actual message
 \end{itemize}
 
+
 \subsection{Encryption}\label{crypto-regular-enc}
 
-The whole encryption process is visualized on Figure \ref{img:regular-enc}.
+The whole encryption process is visualized on Figure \ref{img:crypto-regular-enc}.
 
 First, the message key \texttt{msg\_key} is calculated. It is composed of the first 128 least significant bits of the SHA-1 hash of the payload to be encrypted. Next, the array is padded with 0-120 random bits in order to be divisible by the AES block size -- 128 bits.
 
@@ -514,7 +515,7 @@ This \texttt{msg\_key} along with the \texttt{auth\_key} described in Section \r
 	\centering
 	\includegraphics[width=1\textwidth]{mtproto-encflow.pdf}
 	\caption{MTProto encryption flow \cite{telegram-aarhus}}
-	\label{img:regular-enc}
+	\label{img:crypto-regular-enc}
 \end{figure}
 
 Finally, two other values are added at the top of the encrypted data array: the already mentioned \texttt{msg\_key} and the \texttt{auth\_key\_id} described in Section \ref{crypto-initialization}. This data array is then ready to be transported to the server.
@@ -527,7 +528,7 @@ AES was selected through a worldwide open competition and finally defined in the
 
 \subsubsection{Infinite Garble Extension}
 
-Infinite Garble Extension (IGE) is a lesser-known block cipher mode. It is shown on Figure \ref{img:telegram-ige-enc} and defined by the following formula \cite{telegram-openssl-ige}:
+Infinite Garble Extension (IGE) is a lesser-known block cipher mode. It is shown on Figure \ref{img:crypto-regular-ige-enc} and defined by the following formula \cite{telegram-openssl-ige}:
 
 \begin{gather*}
 c_i = f_K(m_i \oplus c_{i-1}) \oplus m_{i-1}
@@ -539,24 +540,44 @@ Careful reader notices that for the first output block we need two initialisatio
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=1\textwidth]{telegram-ige-enc.png}
+	\includegraphics[width=1\textwidth]{ige-enc.pdf}
 	\caption{IGE mode of operation \cite{telegram-aarhus}}
-	\label{img:telegram-ige-enc}
+	\label{img:crypto-regular-ige-enc}
+\end{figure}
+
+
+\subsection{Decryption}\label{crypto-regular-dec}
+
+Before the decryption process starts the \texttt{auth\_key\_id} is validated. The receiver's \texttt{auth\_key\_id} needs to match the value the sender appended to the byte array. If the values differ the whole message is discarded.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.9\textwidth]{mtproto-auth-key.pdf}
+	\caption{Before the decryption process starts the \texttt{auth\_key\_id} values are checked.}
+	\label{img:crypto-regular-dec}
+\end{figure}
+
+The decryption process is plainly the encryption process in reverse. The KDF yields the AES key and IV values used for decrypting the data. The padding is stripped and the SHA-1 of the payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'}. The whole process is lucidly visualized on Figure \ref{img:telegram-decflow}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{mtproto-decflow.pdf}
+	\caption{The KDF produces the AES key and IV from the \texttt{auth\_key} and received \texttt{msg\_key'}. The SHA-1 of the decrypted payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'} and only then accepted.}
+	\label{img:telegram-decflow}
 \end{figure}
 
 
 
 
+\section{Secret chats}\label{crypto-secret}
 
-\section{Secret chats}\label{secretchats}
+Secret chats are designed to bring an extra level of security compared to regular chats. Secret chat may be initiated between two particular devices only and therefore the messages may be read only on those devices.
 
-Secret chats are designed to bring an extra level of security compared to regular chats. Secret chat may be initiated between two particular devices only and therefore the messages may be read only on those.
-
-It is crucial to note that all secret chat communication is done using the connection described previously in \ref{crypto-initialization}. All data as described in the following sections are considered as input to the MTProto protocol for regular chats. Hence the data are actually encrypted twice. More on that in TODO
+It is crucial to note that all secret chat communication is done using the connection described previously in \ref{crypto-initialization}. All data described as follows are considered as input into the MTProto protocol for regular chats. Hence the data are actually encrypted twice.% More on that in TODO
 
 \subsection{Key exchange}\label{crypto-keyexchange}
 
-The exchange performs traditional Diffie-Hellman key exchange (DH). The DH parameters are received from the Telegram server and the client verifies them in the very same manner as described in Section \ref{prime-req}.
+The exchange performs traditional Diffie-Hellman key exchange (DH). The DH parameters are received from the Telegram server and the client verifies them in the very same manner as described in Section \ref{crypto-prime-req}.
 
 Now suppose user $A$ initiates secret chat with $B$:\footnote{Vynechat?}
 
@@ -649,24 +670,7 @@ The client sends the message via the \textbf{messages.sendEncrypted} method prov
 
 \subsection{Decryption}
 
-Before the decryption process starts the \texttt{auth\_key\_id} is validated. The receiver's \texttt{auth\_key\_id} needs to match the value the sender appended to the byte array. If the values differ the whole message is discarded.
-
-\begin{figure}[htb]
-	\centering
-	\includegraphics[width=0.9\textwidth]{mtproto-auth-key.pdf}
-	\caption{Before the decryption process starts the \texttt{auth\_key\_id} values are checked.}
-	\label{img:telegram-decflow}
-\end{figure}
-
-The decryption process is plainly the encryption process in reverse. The KDF yields the AES key and IV values used for decrypting the data. The padding is stripped and the SHA-1 of the payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'}. The whole process is lucidly visualized on Figure \ref{img:telegram-decflow}.
-
-\begin{figure}[htb]
-	\centering
-	\includegraphics[width=1\textwidth]{mtproto-decflow.pdf}
-	\caption{The KDF produces the AES key and IV from the \texttt{auth\_key} and received \texttt{msg\_key'}. The SHA-1 of the decrypted payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'} and only then accepted.}
-	\label{img:telegram-decflow}
-\end{figure}
-
+TODO
 
 
 
