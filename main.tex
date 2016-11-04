@@ -496,18 +496,18 @@ First, let's describe the content of a single message, further referred to as a 
 \end{figure}
 
 \begin{itemize}
-	\item \texttt{salt} periodically changed number used for replay attacks protection and other
-	\item \texttt{session\_id} to identify the user and its device
-	\item \texttt{msg\_id} unique ID of the message within a session
-	\item \texttt{seq\_no} message sequence counter
-	\item \texttt{length} length of the actual message
-	\item \texttt{message} text of the actual message
+	\item \textbf{salt} Periodically changed number used for replay attacks protection and other.
+	\item \textbf{session\_id} Unique number to identify the user and its device.
+	\item \textbf{msg\_id} Unique ID of the message within a session.
+	\item \textbf{seq\_no} Message sequence counter.
+	\item \textbf{length} Length of the actual message.
+	\item \textbf{message} Text of the actual message.
 \end{itemize}
 
 
 \subsection{Encryption}\label{crypto-regular-enc}
 
-The whole encryption process is visualized on Figure \ref{img:crypto-regular-enc}.
+The whole encryption process is visualized in Figure \ref{img:crypto-regular-enc}.
 
 First, the message key \texttt{msg\_key} is calculated. It is composed of the first 128 least significant bits of the SHA-1 hash of the payload to be encrypted. Next, the array is padded with 0-120 random bits in order to be divisible by the AES block size -- 128 bits.
 
@@ -559,7 +559,7 @@ Before the decryption process starts the \texttt{auth\_key\_id} is validated. Th
 	\label{img:crypto-regular-dec}
 \end{figure}
 
-The decryption process is plainly the encryption process in reverse. The KDF yields the AES key and IV values used for decrypting the data. The padding is stripped and the SHA-1 of the payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'}. The whole process is lucidly visualized on Figure \ref{img:telegram-decflow}.
+The decryption process is plainly the encryption process in reverse. The KDF yields the AES key and IV values used for decrypting the data. The padding is stripped and the SHA-1 of the payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'}. The whole process is lucidly visualized in Figure \ref{img:telegram-decflow}.
 
 \begin{figure}[htb]
 	\centering
