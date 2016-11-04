@@ -626,7 +626,7 @@ With the key negotiated we may now focus on the message encryption itself. Let's
 	\centering
 	\includegraphics[width=0.95\textwidth]{secret-payload.pdf}
 	\caption{Payload of a single message in secret chat \cite{telegram-aarhus}.}
-	\label{img:telegram-payload}
+	\label{img:crypto-secret-payload}
 \end{figure}
 
 \begin{itemize}
@@ -637,7 +637,7 @@ With the key negotiated we may now focus on the message encryption itself. Let's
 	\item  \textbf{in\_seq} Message counter for incoming messages.
 	\item  \textbf{out\_seq} Message counter for outgoing messages.
 	\item  \textbf{message type} Header related to the protocol version and the message type.
-	\item  \textbf{serialized message object} Containing other values and the message itself as depicted in Figure \ref{img:decrypted-message}.
+	\item  \textbf{serialized message object} Containing other values and the message itself as depicted in Figure \ref{img:crypto-secret-messageobject}.
 \end{itemize}
 
 Both payload and message type are not described into much details in the documentation. \cite{telegram-aarhus} states they're both \emph{''headers related to the version of the protocol``}. The serialized message object contains four subsequent values:
@@ -646,7 +646,7 @@ Both payload and message type are not described into much details in the documen
 	\centering
 	\includegraphics[width=1\textwidth]{decrypted-message.pdf}
 	\caption{The message object containing the message itself, random integer, time to live settings and media header.}
-	\label{img:decrypted-message}
+	\label{img:crypto-secret-messageobject}
 \end{figure}
 
 \begin{itemize}
@@ -658,26 +658,19 @@ Both payload and message type are not described into much details in the documen
 
 Throughout this paper we assume that no media attachments are present and therefore the \texttt{media} attribute is always empty. This payload is then serialized as an array of bytes and prepared to be encrypted.
 
-\subsection{Encryption}\label{secret-enc}
+\subsection{Encryption}\label{crypto-secret-enc}
 
-TODO
+The encryption process is the same as seen in Figure \ref{img:crypto-regular-enc}. As mentioned at the beginning the outcome of the encryption then servers as an input to MTProto regular communication.
 
-The client sends the message via the \textbf{messages.sendEncrypted} method providing these three parameters:
+\subsection{Decryption}\label{crypto-secret-dec}
 
-\begin{itemize}
-	\item \texttt{peer} secret chat ID to identify the users
-	\item \texttt{random\_id} unique client message ID sent encrypted in the \textbf{decryptedMessage} object as well
-	\item \texttt{data} the encrypted data, \texttt{msg\_key} and \texttt{auth\_key\_id} combined in one byte array
-\end{itemize}
-
-
-\subsection{Decryption}
-
-TODO
+Decryption is the same as well. First the \texttt{auth\_key\_id}s are validated.  Then the decryption process starts exactly in the same way as in Figure \ref{img:crypto-regular-dec}.
 
 
 
-\chapter{new?}\label{code}
+
+
+\chapter{Code analysis}\label{code}
 
 The official Telegram application for Android is publicly available on Github \cite{github-telegram} with the first commit dating back to late October 2013.
 
