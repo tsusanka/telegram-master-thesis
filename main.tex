@@ -461,15 +461,17 @@ Suppose a client $C$ is registering to server $S$:
 	\item $S$ calculates $K = g_b^a \bmod p$. Both $C$ and $S$ now share a common key $K$ noted as \texttt{auth\_key}.
 \end{enumerate}
 
-Some details may be omitted for simplification. In Point \ref{crypto-initialization-6} the client should check that $p$ and $g$ follow these requirements:\label{crypto-prime-req}
+Some details may be omitted for simplification. During the exchange the client should check following requirements:\label{crypto-prime-req}
 
 \begin{itemize}
 	\item $p$ is a safe prime, meaning $q = \frac{p-1}{2}$ needs to be prime as well
 	\item $2^{2047} < p < 2^{2048}$
 	\item $g$ is equal to 2, 3, 4, 5, 6 or 7 and it generates a cyclic subgroup of prime order $q$
+	\item $1 < g_a, g_b < p-1$
+	\item and is recommended to check $2^{2048-64} < g_a, g_b < p - 2^{2048-64}$
 \end{itemize}
 
-The requirements check might be cached and the client is as well allowed to hard-code already checked $p$ and $q$ values into the application.
+The requirements check might be cached and the client is as well allowed to hard-code the already checked $p$ and $q$ values into the application.
 
 We compared these requirements with the FIPS 186-4 publication concerning Digital Signature Algorithm and concluded it requires similar conditions as Telegram with only minor distinctions.
 
@@ -577,9 +579,7 @@ It is crucial to note that all secret chat communication is done using the conne
 
 \subsection{Key exchange}\label{crypto-keyexchange}
 
-The exchange performs traditional Diffie-Hellman key exchange (DH). The DH parameters are received from the Telegram server and the client verifies them in the very same manner as described in Section \ref{crypto-prime-req}.
-
-Now suppose user $A$ initiates secret chat with $B$:\footnote{Vynechat?}
+The exchange performs traditional Diffie-Hellman key exchange (DH). The DH parameters are received from the Telegram server and the client verifies them in the very same manner as in Section \ref{crypto-prime-req}. The exchange proceeds similarly as earlier, however with the connection already established is a little more straightforward. Suppose user $A$ initiates secret chat with $B$:
 
 \begin{enumerate}
 	\item $A$ computes a random 2048-bit number $a$ and sets $g_a = g^a \bmod p$\label{enum:DH-a}
@@ -588,9 +588,7 @@ Now suppose user $A$ initiates secret chat with $B$:\footnote{Vynechat?}
 	\item Both users calculate the master key $K = g_a^b \bmod p = g_b^a \bmod p$. We denote this master key \texttt{auth\_key}
 \end{enumerate}
 
-If the length of \texttt{auth\_key} is lower than 2048 bits, leading zeros are added as padding.
-
-In the steps \ref{enum:DH-a} and \ref{enum:DH-b} both clients are to check $1 < g_a, g_b < p-1$ and is recommended to verify $2^{2048-64} < g_a, g_b < p - 2^{2048-64}$ as well. Worth mentioning, the client generates its \emph{a} (\emph{b} respectively) in the following way:
+Worth mentioning, in secret chats key exchange the client generates its \emph{a} (\emph{b} respectively) in the following way:
 \begin{gather*}
 a = r_{client} \oplus r_{server}
 \end{gather*}
@@ -604,7 +602,7 @@ Where $r_{client}$ is a 2048-bit random integer generated on the client side and
 	\label{img:telegram-keybox}
 \end{figure}
 
-The DH by itself does not provide any authentication of the communicating parties and is therefore susceptible to an active Man-in-the-Middle attack. To mitigate this issue the user is provided with an option to display counterpart's encryption key. Telegram creates a white-blue box to visualize the key as may be seen on Figure~\ref{img:telegram-keybox}. To make sure no malicious mediator is present users are supposed to meet in person and verify the keys are identical.
+The DH by itself does not provide any authentication of the communicating parties and is therefore susceptible to an active Man-in-the-Middle attack. To mitigate this issue the user is provided with an option to display counterpart's encryption key. Telegram creates a white-blue box to visualize the key as may be seen on Figure~\ref{img:telegram-keybox}. To make sure no malicious mediator is present users are supposed to meet in person and verify the keys are identical. There is no such mechanism in regular chats.
 
 The visualisation used to be based on a 128-bit fingerprint\footnote{Not to be confused with the 64-bit \texttt{auth\_key\_id} fingerprint.} of the secret key. An~article presented in January 2015 showed \cite{telegram-264} that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat, a MiM attack is possible only with $2^{64}$ operations, rather than $2^{128}$, based on the Birthday paradox. The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions USD. Telegram's FAQ addresses this issue and states its cost is around a trillion dollars to achieve a result in one month. Nevertheless, Telegram later decided to use additional 160 bits from the key summing up to 288 bits \cite{telegram-techfaq}. This improvement should make this attack impossible.
 
