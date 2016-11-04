@@ -672,13 +672,13 @@ Decryption is the same as well. First the \texttt{auth\_key\_id}s are validated.
 
 \chapter{Code analysis}\label{code}
 
-The official Telegram application for Android is publicly available on Github \cite{github-telegram} with the first commit dating back to late October 2013.
+In this chapter we look closely into the official Telegram application for Android and primarily into its code.
 
-This thesis concerns the latest Telegram version 3.13.1 as up to date in October 2016, the \texttt{64e8ec3} commit in particular.
+The application is publicly available on Github \cite{github-telegram} with the first commit dating back to late October 2013. This thesis is concerned with the latest Telegram version 3.13.1 as up to date in October 2016, the \texttt{64e8ec3} commit in particular.
 
 The application's main programming language is Java but it uses the Java Native Interface (JNI) to incorporate C libraries such as borringssl, ffmpeg, sqlite and others. Since the 3.2.2 version Telegram moved a significant portion of logic into a separate C library called \emph{tgnet}. The library is responsible for many connection-related actions including communication with the server and sending messages. The code base closely resembles the previous Java code. The secret messages are still dealt within the Java part of the application.
 
-It should be noted that since this was introduced in the 3.2.2 version (September 2015) where the \cite{telegram-aarhus} analysis is based on 2.7.0 (April 2015) and therefore wasn't concerned with the tgnet library whatsoever.
+It should be noted that since this was introduced in the 3.2.2 version (September 2015) where the \cite{telegram-aarhus} analysis is based on 2.7.0 (April 2015) and therefore wasn't concerned with the \emph{tgnet} library whatsoever.
 
 
 % bordel prisel ve verzi 3.7.0. a7513b3ba1923113840e78799c4c4132cc7f3116
