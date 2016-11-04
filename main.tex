@@ -516,7 +516,7 @@ This \texttt{msg\_key} along with the \texttt{auth\_key} described in Section \r
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{mtproto-encflow.pdf}
-	\caption{MTProto encryption flow \cite{telegram-aarhus}}
+	\caption{The AES key a IV is derived from the \texttt{auth\_key} and SHA-1 hash of the payload \texttt{msg\_key}. Using these values the padded payload is encrypted. The encrypted data along with \texttt{auth\_key\_id} and \texttt{msg\_key} are ready to be transported \cite{telegram-aarhus}.}
 	\label{img:crypto-regular-enc}
 \end{figure}
 
@@ -543,10 +543,15 @@ Careful reader notices that for the first output block we need two initialisatio
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{ige-enc.pdf}
-	\caption{IGE mode of operation \cite{telegram-aarhus}}
+	\caption{IGE mode of operation with two Initialization Vectors \cite{telegram-aarhus} used with AES.}
 	\label{img:crypto-regular-ige-enc}
 \end{figure}
 
+\subsubsection{SHA-1}
+
+SHA-1 is a cryptographic hash function and most widely used one \cite{understanding-crypto}. It produces 160-bit digest of a message. The authors opted for SHA-1 because of its low resource consumption.
+
+Some experts consider SHA-1 as outdated and recommended to be replaced by SHA-2 or SHA-3. % TODO consequences for Telegram tady nebo jinde?
 
 \subsection{Decryption}\label{crypto-regular-dec}
 
@@ -564,7 +569,7 @@ The decryption process is plainly the encryption process in reverse. The KDF yie
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{mtproto-decflow.pdf}
-	\caption{The KDF produces the AES key and IV from the \texttt{auth\_key} and received \texttt{msg\_key'}. The SHA-1 of the decrypted payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'} and only then accepted.}
+	\caption{The KDF produces the AES key and IV from the \texttt{auth\_key} and received \texttt{msg\_key'}. The SHA-1 of the decrypted payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'} and only then accepted \cite{telegram-aarhus}.}
 	\label{img:telegram-decflow}
 \end{figure}
 
@@ -620,7 +625,7 @@ With the key negotiated we may now focus on the message encryption itself. Let's
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.95\textwidth]{secret-payload.pdf}
-	\caption{Payload of a single message \cite{telegram-aarhus} in secret chat.}
+	\caption{Payload of a single message in secret chat \cite{telegram-aarhus}.}
 	\label{img:telegram-payload}
 \end{figure}
 
