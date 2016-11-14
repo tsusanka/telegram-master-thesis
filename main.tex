@@ -23,6 +23,7 @@
 \usepackage{pifont}% http://ctan.org/pkg/pifont
 \usepackage{enumitem}
 
+
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \newcommand{\cmark}{\ding{51}}%
 \newcommand{\xmark}{\ding{55}}%
@@ -36,6 +37,12 @@
 \newcommand{\cotg}{\mathop{\mathrm{cotg}}} %cesky cotangens
 
 \graphicspath{ {images/} }
+\lstset{
+  basicstyle=\ttfamily,
+  columns=flexible,
+  breaklines=true,                       % sets automatic line breaking
+  breakatwhitespace=true
+}
 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
 % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % % 
@@ -680,8 +687,75 @@ The application's main programming language is Java but it uses the Java Native 
 
 It should be noted that since this was introduced in the 3.2.2 version (September 2015) where the \cite{telegram-aarhus} analysis is based on 2.7.0 (April 2015) and therefore wasn't concerned with the \emph{tgnet} library whatsoever.
 
+\section{Analysis setup}\label{code-setup}
+
+In this section we briefly describe how we proceeded during the code analysis. First, obviously, we cloned the official Telegram repository. Since we realized a simple code exploration is not satisfactory due to the poor code quality we installed the following software.
+
+To run and potentially debug the application Android SDK is needed. Further, the Android NDK is required as well, since Telegram uses the JNI as mentioned earlier. For a complete developer-like experience the Android Studio was installed. Android Studio is the official IDE for Android platform and is based on the popular IntelliJ IDEA platform \cite{android-studio}.
+
+A mobile phone running rooted Android operating system was connected to a computer with such software. The Android Studio itself deals with the phone-computer connection (using the \emph{adb} software) and performs building, compiling and transferring the final .apk file to the phone. It as well enables the developer to debug the software which was crucial here for better understanding of the Telegram's code.
+
+In addition to that the phone was connected via wireless network to the computer which set up a hotstop exclusively for this use. Wireshark was then used to sniff the data sent from the mobile phone.
 
 % bordel prisel ve verzi 3.7.0. a7513b3ba1923113840e78799c4c4132cc7f3116
+
+\section{Code quality}
+
+We decided to analyze the code quality using static code analysis tools to avoid opinion-based reviews. Android Studio itself comes with a code scanning tool \emph{lint} \cite{android-studio-lint}. The tool seeks for potential bugs, optimization improvements, security, performance and other.
+
+Lint was run using the default settings and yielded 20 errors and 286 warnings. The full output is attached in appendix. % TODO
+
+Android Studio can as well perform code inspections. It runs lint and adds number of checks such as error handling, security, code style, javadoc, spelling etc. It found over 650 000 issues. The results are as well available in the appendix. % TODO
+
+It is important to note that the code analysis concerns the project as whole meaning it includes all the dependencies. Some issues may therefore relate to the libraries Telegram uses not to Telegram itself.
+
+\section{Undocumented obfuscation}\label{code-obf}
+
+One of the main findings is the obfuscation method Telegram uses before sending the data to its severs. This functioning is not documented at all in any way on the Telegram web page or in other sources.
+
+The final data to be sent should follow Figure \ref{img:crypto-regular-enc} as official documentation states. However, before sending the data are encrypted one more time with a random key attached in front of the data. Interestingly using AES Counter mode encryption instead of the IGE endorsed by Telegram. This is done in the \texttt{Connection::sendData} function in \path{TMessagesProj/jni/tgnet/Connection.cpp} file. The detailed description follows.
+
+\subsection{Terminology}
+
+Telegram doesn't practise a great job naming variables. We believe a better terminology is needed, hence we are introducing following titles to add a little more clarity. Since the variables are explained into more details in the following sections, reader may skip this list and use it as a reference later on.
+
+\begin{itemize}
+	\item \textbf{obf\_enc\_key\_bytes} 64 random bytes storing \textbf{obf\_enc\_key} and \textbf{obf\_enc\_iv} used for obfuscation. Telegram calls this plainly \emph{bytes}.
+	\item \textbf{obf\_enc\_key} The key used for encryption to obfuscate data.
+	\item \textbf{obf\_enc\_iv} The IV used for encryption to obfuscate data.
+	\item \textbf{obf\_dec\_key\_bytes} 64 bytes derived from \textbf{obf\_enc\_key\_bytes} storing the server's encryption key and IV. Labeled in Telegram as \emph{temp}.
+\end{itemize}
+
+\subsection{Temporary encryption key}\label{code-obf-enc-key}
+
+The process starts by generating 64 random bytes \texttt{obf\_enc\_key\_bytes}. The first 8 bytes are unused. The bytes 8 -- 40 are used as an encryption key and bytes 41 -- 56 as an IV. Bytes 57 -- 64 are composed of the last 8 bytes of \texttt{obf\_enc\_key\_bytes} encryption of itself. It is unclear what are those bytes used for.
+
+The array is further appended with the length of the packet, yet again encrypted. The final \texttt{obf\_enc\_key\_bytes} to be sent is visualized in Figure \ref{img:code-obfuscation-bytes-sent}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{bytes-sent.pdf}
+	\caption{The \texttt{obf\_enc\_key\_bytes} containing random bytes and its usage for the obfuscation encryption.}
+	\label{img:code-obfuscation-bytes-sent}
+\end{figure}
+
+This array of bytes is sent to the server. The real data to be transmitted as expected from the official documentation are then AES-CTR encrypted using the \texttt{obf\_enc\_key} and \texttt{obf\_enc\_iv} and sent.
+
+\subsection{Temporary decryption key}
+
+Besides the \texttt{obf\_enc\_key\_bytes} setup the very same function deals with setting up the \texttt{obf\_dec\_key\_bytes}, noted in Telegram as \emph{temp}. This temporary key is used for decrypting incoming traffic.
+
+The \texttt{obf\_dec\_key\_bytes} is derived from the \texttt{obf\_enc\_key\_bytes}. Totally 48 bytes are reversed from \texttt{obf\_enc\_key\_bytes} starting at position 8. This may be seen in Figure \ref{lst:code-obf-dec}. The first 32 bytes are then set as a decryption key for incoming traffic and next 16 bytes for IV.
+
+\begin{lstlisting}[language=C,label=lst:code-obf-dec,caption=Temporary decryption key deduction.]
+   for (int a = 0; a < 48; a++) {
+      temp[a] = bytes[55 - a];
+   }     
+\end{lstlisting}
+
+
+We believe Telegram server receives the \texttt{obf\_enc\_key\_bytes}, tampers them in a way described in this section and finally encrypts its response with \texttt{obf\_dec\_key\_bytes}. As mentioned earlier, this is officially not documented whatsoever.
+
 
 \chapter{TODO}
 
