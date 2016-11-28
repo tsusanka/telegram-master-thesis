@@ -677,9 +677,63 @@ Decryption is the same as well. First the \texttt{auth\_key\_id}s are validated.
 
 
 
-\chapter{Code analysis}\label{code}
+\chapter{The Analysis}\label{analysis}
 
-In this chapter we look closely into the official Telegram application for Android and primarily into its code.
+In this chapter we present our approach and share some of the findings we discovered. These findings are based primarily on these three sources:
+
+\begin{itemize}
+	\item The official open-sourced Telegram application for Android
+	\item The official Telegram documentation
+	\item The already cited \cite{telegram-aarhus}
+\end{itemize}
+
+We commenced by installing Telegram for Android and analyzing it with various tools in order to perform comparison with the other sources. The following section describes our actions.
+
+\section{Setup}\label{analysis-setup}
+
+First, we cloned the official Telegram repository. Since we realized a simple code exploration is not satisfactory due to both complexity and poor code quality we installed the following software.
+
+To run and potentially debug the application Android SDK is needed. Further, the Android NDK is required as well, since Telegram uses the JNI as mentioned earlier. For a complete developer-like experience the Android Studio was installed. Android Studio is the official IDE for Android platform and is based on the popular IntelliJ IDEA platform \cite{android-studio}.
+
+A mobile phone running rooted Android operating system was connected to a computer with such software. The Android Studio itself deals with the phone-computer connection (using the \emph{adb} software) and performs building, compiling and transferring the final .apk file to the phone. It as well enables the developer to debug the software which was crucial here for better understanding of the Telegram's code.
+
+Further, we wanted to sniff the data sent from the application. To achieve that two approaches were used.
+
+\subsection{Sniffing using wireless hotspot}
+
+In the first scenario we set up a wireless network on the computer and instruct the mobile to connect to it. Even though this does require the victim to connect to the network, there are ways to achieve this by using special dedicated devices \cite{pineapple}. The Diagram \ref{img:analysis-setup-hotspot} shows this setup.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{setup-hotspot.pdf}
+	\caption{Computer running analysis software is connected to the internet on one interface and creating WiFi hotspot using the other one. Mobile phone running Telegram connects to the computer's WiFi and all data are therefore routed through the computer.}
+	\label{img:analysis-setup-hotspot}
+\end{figure}
+
+This scenario is easy to setup because most Operating Systems support this functionality out of the box. The only downside is that we need two network interfaces -- one for creating the hotspot and another to connect to the internet.
+
+
+\subsection{Sniffing using ARP Poisoning}
+
+To demonstrate we may omit the hotspot setup and perform the analysis without forcing the mobile to change its network we're introducing second scenario shown in Figure \ref{img:analysis-setup-arp}. In this case the computer and the mobile phone are in the same network.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{setup-arp.pdf}
+	\caption{Both computer and mobile are connected to the same network. Computer runs ARP Poisoning software inducing the mobile to send traffic through the computer.}
+	\label{img:analysis-setup-arp}
+\end{figure}
+
+
+By using Ettercap, a \emph{``comprehensive suite for man in the middle attacks''} \cite{ettercap-homepage} available in Kali Linux, we lunched an ARP Poisoning attack against the phone.
+
+Address Resolution Protocol (ARP) is a protocol which transforms an Internet layer address into a link layer address. Typically, this might be the mapping of an IPv4 address to an Ethernet address. ARP Poising, or ARP spoofing, is a technique by which the attacker sends fake ARP packets to the victim claiming his Ethernet address is associated with an IP address different than truly his.
+
+We launched this attack against the phone and the router, meaning the phone sent all communication to the computer instead of directly sending it to the gateway and vice versa. Since all communication is now flowing through the computer we may thoroughly analyze it.
+
+This setup is as well convenient if we are not able to use WiFi as a hotspot, for example due to the need of it for the internet connection itself. Beware that this setup should be used in test networks only.
+
+\section{Codebase}
 
 The application is publicly available on Github \cite{github-telegram} with the first commit dating back to late October 2013. This thesis is concerned with the latest Telegram version 3.13.1 as up to date in October 2016, the \texttt{64e8ec3} commit in particular.
 
@@ -687,29 +741,19 @@ The application's main programming language is Java but it uses the Java Native 
 
 It should be noted that since this was introduced in the 3.2.2 version (September 2015) where the \cite{telegram-aarhus} analysis is based on 2.7.0 (April 2015) and therefore wasn't concerned with the \emph{tgnet} library whatsoever.
 
-\section{Analysis setup}\label{code-setup}
-
-In this section we briefly describe how we proceeded during the code analysis. First, obviously, we cloned the official Telegram repository. Since we realized a simple code exploration is not satisfactory due to the poor code quality we installed the following software.
-
-To run and potentially debug the application Android SDK is needed. Further, the Android NDK is required as well, since Telegram uses the JNI as mentioned earlier. For a complete developer-like experience the Android Studio was installed. Android Studio is the official IDE for Android platform and is based on the popular IntelliJ IDEA platform \cite{android-studio}.
-
-A mobile phone running rooted Android operating system was connected to a computer with such software. The Android Studio itself deals with the phone-computer connection (using the \emph{adb} software) and performs building, compiling and transferring the final .apk file to the phone. It as well enables the developer to debug the software which was crucial here for better understanding of the Telegram's code.
-
-In addition to that the phone was connected via wireless network to the computer which set up a hotstop exclusively for this use. Wireshark was then used to sniff the data sent from the mobile phone.
-
-% bordel prisel ve verzi 3.7.0. a7513b3ba1923113840e78799c4c4132cc7f3116
-
 \section{Code quality}
 
 We decided to analyze the code quality using static code analysis tools to avoid opinion-based reviews. Android Studio itself comes with a code scanning tool \emph{lint} \cite{android-studio-lint}. The tool seeks for potential bugs, optimization improvements, security, performance and other.
 
-Lint was run using the default settings and yielded 20 errors and 286 warnings. The full output is attached in appendix. % TODO
+Lint was run using the default settings and yielded 20 errors and 286 warnings. The full output is attached in the appendix. % TODO
 
-Android Studio can as well perform code inspections. It runs lint and adds number of checks such as error handling, security, code style, javadoc, spelling etc. It found over 650 000 issues. The results are as well available in the appendix. % TODO
+Android Studio can as well perform code inspections. It runs lint and adds number of checks such as error handling, security, code style, javadoc, spelling etc. It found over 650 000 issues in the Telegram project. The results are as well available in the appendix. % TODO
 
 It is important to note that the code analysis concerns the project as whole meaning it includes all the dependencies. Some issues may therefore relate to the libraries Telegram uses not to Telegram itself.
 
 \section{Undocumented obfuscation}\label{code-obf}
+
+% bordel prisel ve verzi 3.7.0. a7513b3ba1923113840e78799c4c4132cc7f3116
 
 One of the main findings is the obfuscation method Telegram uses before sending the data to its severs. This functioning is not documented at all in any way on the Telegram web page or in other sources.
 
