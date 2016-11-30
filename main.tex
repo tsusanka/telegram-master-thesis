@@ -23,6 +23,7 @@
 \usepackage{pifont}% http://ctan.org/pkg/pifont
 \usepackage{enumitem}
 
+\usepackage{minted} % code style
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \newcommand{\cmark}{\ding{51}}%
@@ -733,35 +734,80 @@ We launched this attack against the phone and the router, meaning the phone sent
 
 This setup is as well convenient if we are not able to use WiFi as a hotspot, for example due to the need of it for the internet connection itself. Beware that this setup should be used in test networks only.
 
-\section{Codebase}
+\section{Code}
 
 The application is publicly available on Github \cite{github-telegram} with the first commit dating back to late October 2013. This thesis is concerned with the latest Telegram version 3.13.1 as up to date in October 2016, the \texttt{64e8ec3} commit in particular.
 
 The application's main programming language is Java but it uses the Java Native Interface (JNI) to incorporate C libraries such as borringssl, ffmpeg, sqlite and others. Since the 3.2.2 version Telegram moved a significant portion of logic into a separate C library called \emph{tgnet}. The library is responsible for many connection-related actions including communication with the server and sending messages. The code base closely resembles the previous Java code. The secret messages are still dealt within the Java part of the application.
 
-It should be noted that since this was introduced in the 3.2.2 version (September 2015) where the \cite{telegram-aarhus} analysis is based on 2.7.0 (April 2015) and therefore wasn't concerned with the \emph{tgnet} library whatsoever.
+It should be noted that since this was introduced in the 3.2.2 version (September 2015) whereas the \cite{telegram-aarhus} analysis is based on 2.7.0 (April 2015) and therefore wasn't concerned with the \emph{tgnet} library whatsoever.
 
-\section{Code quality}
+\subsection{Code quality}
 
 We decided to analyze the code quality using static code analysis tools to avoid opinion-based reviews. Android Studio itself comes with a code scanning tool \emph{lint} \cite{android-studio-lint}. The tool seeks for potential bugs, optimization improvements, security, performance and other.
 
-Lint was run using the default settings and yielded 20 errors and 286 warnings. The full output is attached in the appendix. % TODO
-
-Android Studio can as well perform code inspections. It runs lint and adds number of checks such as error handling, security, code style, javadoc, spelling etc. It found over 650 000 issues in the Telegram project. The results are as well available in the appendix. % TODO
+Lint was run using the default settings and yielded 20 errors and 286 warnings. The full output is attached in the appendix. Android Studio can as well perform code inspections. It runs lint and adds number of checks such as error handling, security, code style, javadoc, spelling etc. It found over 650 000 issues in the Telegram project. The results are as well available in the appendix. % TODO
 
 It is important to note that the code analysis concerns the project as whole meaning it includes all the dependencies. Some issues may therefore relate to the libraries Telegram uses not to Telegram itself.
 
-\section{Undocumented obfuscation}\label{code-obf}
+Further, some files contain upto thousands of lines and multiple classes in one file. For example the \emph{TLRPC.java} has 23,010 lines containing 873 static classes. For a brief comparison we are including Table \ref{tab:analysis-storage-metrics} comparing some of the Telegram metrics with Signal. The comparison excludes all libraries, binaries, assets etc. and discusses the source code related files only. We leave it to the reader to draw her own conclusions.
 
-% bordel prisel ve verzi 3.7.0. a7513b3ba1923113840e78799c4c4132cc7f3116
+\begin{table}[htb]\centering
+	\caption{Telegram vs Signal code metrics}
+	\label{tab:analysis-storage-metrics}
+	\begin{tabular}{|l|l|l|}
+		\hline
+					& \textbf{Telegram} & \textbf{Signal} \\ \hline
+		Largest file by size & 714.6 kB\tablefootnote{\path{TMessagesProj/src/main/java/org/telegram/tgnet/TLRPC.java}} & 87.4 kB\tablefootnote{\path{src/org/thoughtcrime/securesms/util/Base64.java}} \\ \hline
+		Largest file by lines count & 23,009 &  2,096 \\ \hline
+TODO         &  & \\ \hline
+	\end{tabular}
+\end{table}
 
-One of the main findings is the obfuscation method Telegram uses before sending the data to its severs. This functioning is not documented at all in any way on the Telegram web page or in other sources.
+It should be noted Signal's files are well documented which impacts on its size. That is not the case of Telegram at all.
 
-The final data to be sent should follow Figure \ref{img:crypto-regular-enc} as official documentation states. However, before sending the data are encrypted one more time with a random key attached in front of the data. Interestingly using AES Counter mode encryption instead of the IGE endorsed by Telegram. This is done in the \texttt{Connection::sendData} function in \path{TMessagesProj/jni/tgnet/Connection.cpp} file. The detailed description follows.
+\section{Storage}
+
+In this section we briefly look how Telegram stores its data. All data are stored in \path{org.telegram.messenger/files} folder. Two types of files are present, SQLite database file and \path{.dat} files which are in Telegram's own configuration format:
+
+\begin{itemize}
+	\item \path{cache4.db} SQLite database file.
+	\item \path{tgnet.dat} Main configuration data.
+	\item \path{dc1conf.db} Datacenter specific configuration.
+\end{itemize}
+
+The \path{cache4.db} file is a SQLite database file. It contains 38 tables in total containing contacts, messages, chat information and all other user data. Messages are stored in bytes and therefore de facto in plaintext. Since the database is available only by physical access to the phone, we do not see this as a malpractice.
+
+The \path{tgnet.dat} file is a place where Telegram stores which datacenter is currently in use, session information and other headers. For each datacenter it further stores IP addresses and ports, \texttt{auth\_key}, \texttt{auth\_key\_id} fingerprint and salts.
+
+\subsection{tgnet.dat extractor}
+
+
+
+TODO dopsat
+TODO přidat popis Python skriptu
+
+
+\section{Undocumented obfuscation}\label{analysis-obf}
+
+During the data collection as described earlier in Section \ref{analysis-setup} the received data did not correspond with the documentation. We expected the data to be in a form of \texttt{auth\_key\_id}, \texttt{msg\_key} and encrypted data; see Figure \ref{img:analysis-obf-expected}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{sniffed-expected.pdf}
+	\caption{Expected form of sniffed data. 64-bits of key fingerprint followed by \texttt{msg\_key} and encrypted data.}
+	\label{img:analysis-obf-expected}
+\end{figure}
+
+Since we extracted our testing \texttt{auth\_key} and \texttt{auth\_key\_id} from our device (TODO jak?) we were able to compare it with the sniffed data. \texttt{auth\_key\_id} was not present. The whole packet seemed random and therefore possibly encrypted.
+
+We examined the code and discovered the responsible function for this behavior \texttt{Connection::sendData} located in \path{TMessagesProj/jni/tgnet/Connection.cpp} file. Before sending the data in the expected manner, they are encrypted one more time with a random key attached in front of the data. Interestingly the Counter block mode is used instead of the IGE endorsed by Telegram.
+
+To properly explain the obfuscation method we are introducing our own terminology first to add a little more clarity because Telegram doesn't practise a great job naming variables.
 
 \subsection{Terminology}
 
-Telegram doesn't practise a great job naming variables. We believe a better terminology is needed, hence we are introducing following titles to add a little more clarity. Since the variables are explained into more details in the following sections, reader may skip this list and use it as a reference later on.
+Since the variables are explained into more details in the following sections, reader may skip this list and use it as a reference later on. The titles we are introducing are:
 
 \begin{itemize}
 	\item \textbf{obf\_enc\_key\_bytes} 64 random bytes storing \textbf{obf\_enc\_key} and \textbf{obf\_enc\_iv} used for obfuscation. Telegram calls this plainly \emph{bytes}.
@@ -770,7 +816,7 @@ Telegram doesn't practise a great job naming variables. We believe a better term
 	\item \textbf{obf\_dec\_key\_bytes} 64 bytes derived from \textbf{obf\_enc\_key\_bytes} storing the server's encryption key and IV. Labeled in Telegram as \emph{temp}.
 \end{itemize}
 
-\subsection{Temporary encryption key}\label{code-obf-enc-key}
+\subsubsection{Temporary encryption key}\label{code-obf-enc-key}
 
 The process starts by generating 64 random bytes \texttt{obf\_enc\_key\_bytes}. The first 8 bytes are unused. The bytes 8 -- 40 are used as an encryption key and bytes 41 -- 56 as an IV. Bytes 57 -- 64 are composed of the last 8 bytes of \texttt{obf\_enc\_key\_bytes} encryption of itself. It is unclear what are those bytes used for.
 
@@ -783,23 +829,65 @@ The array is further appended with the length of the packet, yet again encrypted
 	\label{img:code-obfuscation-bytes-sent}
 \end{figure}
 
-This array of bytes is sent to the server. The real data to be transmitted as expected from the official documentation are then AES-CTR encrypted using the \texttt{obf\_enc\_key} and \texttt{obf\_enc\_iv} and sent.
+This array of bytes is sent to the server. The real data to be transmitted as expected from the official documentation are then AES-CTR encrypted using the \texttt{obf\_enc\_key} and \texttt{obf\_enc\_iv} and sent. All other data in this TCP stream are encrypted using the same obfuscation key. When another connection aa a new \texttt{obf\_enc\_key\_bytes} is generated and the process repeats.
 
-\subsection{Temporary decryption key}
+\subsubsection{Temporary decryption key}
 
-Besides the \texttt{obf\_enc\_key\_bytes} setup the very same function deals with setting up the \texttt{obf\_dec\_key\_bytes}, noted in Telegram as \emph{temp}. This temporary key is used for decrypting incoming traffic.
+Besides the \texttt{obf\_enc\_key\_bytes} setup the very same function deals with setting up the \texttt{obf\_dec\_key\_bytes}. This temporary key is used for decrypting incoming traffic.
 
 The \texttt{obf\_dec\_key\_bytes} is derived from the \texttt{obf\_enc\_key\_bytes}. Totally 48 bytes are reversed from \texttt{obf\_enc\_key\_bytes} starting at position 8. This may be seen in Figure \ref{lst:code-obf-dec}. The first 32 bytes are then set as a decryption key for incoming traffic and next 16 bytes for IV.
 
-\begin{lstlisting}[language=C,label=lst:code-obf-dec,caption=Temporary decryption key deduction.]
-   for (int a = 0; a < 48; a++) {
-      temp[a] = bytes[55 - a];
-   }     
-\end{lstlisting}
-
+\begin{listing}[htb]
+\caption{Temporary decryption key deduction.}
+\label{lst:code-obf-dec}
+\begin{minted}{C++}
+for (int a = 0; a < 48; a++) {
+    obf_dec_key_bytes[a] = obf_enc_key_bytes[55 - a];
+}
+\end{minted}
+\end{listing}
 
 We believe Telegram server receives the \texttt{obf\_enc\_key\_bytes}, tampers them in a way described in this section and finally encrypts its response with \texttt{obf\_dec\_key\_bytes}. As mentioned earlier, this is officially not documented whatsoever.
 
+To summarize the whole function in its simplified version is depicted in Listing \ref{lst:analysis-obfuscation}. It as well uses our own terminology to concur with this document.
+
+\begin{listing}[htb]
+\caption{The function starts by generating random bytes and checking them if they are not equal to Telegram's somehow important integers. Then the decryption key is derived. Both encrypt/decrypt keys are set. Finally, the length of the payload (as well obfuscated), the \texttt{obf\_enc\_key\_bytes} and the actual IGE encrypted payload are sent. The function's argument -- the payload -- is in the expected form, as depicted in Figure \ref{img:analysis-obf-expected}.}
+\label{lst:analysis-obfuscation}
+\begin{minted}{C++}
+
+void sendData(payload)
+{
+    obf_enc_key_bytes = byte[64];
+
+    if (!firstPacketSent) {
+        obf_dec_key_bytes = byte[64];
+        fillWithRandom(obf_enc_key_bytes);
+        checkValues();
+
+        for (int a = 0; a < 48; a++) {
+            obf_dec_key_bytes[a] = obf_enc_key_bytes[55 - a];
+        }
+
+        setAESEncryptKey(obf_enc_key_bytes + 8);
+        setEncryptIv(obf_enc_key_bytes + 40);
+
+        setAESDecryptKey(obf_dec_key_bytes);
+        setDecryptIv(obf_dec_key_bytes + 32);
+
+        encryptAndCopyCheck();
+        
+        send(obf_enc_key_bytes);
+        firstPacketSent = true;
+    }
+
+    send(AESCTREncrypt(packetLength));
+    send(AESCTREncrypt(payload))
+}
+\end{minted}
+\end{listing}
+
+TODO přidat C program
 
 \chapter{TODO}
 
