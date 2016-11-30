@@ -801,7 +801,7 @@ During the data collection as described earlier in Section \ref{analysis-setup} 
 
 Since we extracted our testing \texttt{auth\_key} and \texttt{auth\_key\_id} from our device (TODO jak?) we were able to compare it with the sniffed data. \texttt{auth\_key\_id} was not present. The whole packet seemed random and therefore possibly encrypted.
 
-We examined the code and discovered the responsible function for this behavior \texttt{Connection::sendData} located in \path{TMessagesProj/jni/tgnet/Connection.cpp} file. Before sending the data in the expected manner, they are encrypted one more time with a random key attached in front of the data. Interestingly the Counter block mode is used instead of the IGE endorsed by Telegram.
+We examined the code and discovered the responsible function for this behavior is the \texttt{Connection::sendData} function located in \path{TMessagesProj/jni/tgnet/Connection.cpp} file. Before sending the data in the expected manner, they are encrypted one more time with a random key attached in front of the data. Interestingly the Counter block mode is used instead of the IGE endorsed by Telegram.
 
 To properly explain the obfuscation method we are introducing our own terminology first to add a little more clarity because Telegram doesn't practise a great job naming variables.
 
@@ -818,9 +818,7 @@ Since the variables are explained into more details in the following sections, r
 
 \subsubsection{Temporary encryption key}\label{code-obf-enc-key}
 
-The process starts by generating 64 random bytes \texttt{obf\_enc\_key\_bytes}. The first 8 bytes are unused. The bytes 8 -- 40 are used as an encryption key and bytes 41 -- 56 as an IV. Bytes 57 -- 64 are composed of the last 8 bytes of \texttt{obf\_enc\_key\_bytes} encryption of itself. It is unclear what are those bytes used for.
-
-The array is further appended with the length of the packet, yet again encrypted. The final \texttt{obf\_enc\_key\_bytes} to be sent is visualized in Figure \ref{img:code-obfuscation-bytes-sent}.
+The process starts by generating 64 random bytes \texttt{obf\_enc\_key\_bytes}. The first 8 bytes are unused. The bytes 8 -- 40 are used as an encryption key and bytes 41 -- 56 as an IV. Bytes 57 -- 64 are composed of the last 8 bytes of \texttt{obf\_enc\_key\_bytes} encryption of itself. It is unclear what are those bytes used for. The final \texttt{obf\_enc\_key\_bytes} to be sent is visualized in Figure \ref{img:code-obfuscation-bytes-sent}.
 
 \begin{figure}[htb]
 	\centering
@@ -829,7 +827,7 @@ The array is further appended with the length of the packet, yet again encrypted
 	\label{img:code-obfuscation-bytes-sent}
 \end{figure}
 
-This array of bytes is sent to the server. The real data to be transmitted as expected from the official documentation are then AES-CTR encrypted using the \texttt{obf\_enc\_key} and \texttt{obf\_enc\_iv} and sent. All other data in this TCP stream are encrypted using the same obfuscation key. When another connection aa a new \texttt{obf\_enc\_key\_bytes} is generated and the process repeats.
+Further, the length of the packet, yet again encrypted and the real data to be transmitted as expected from the official documentation are then AES-CTR encrypted using the \texttt{obf\_enc\_key} and \texttt{obf\_enc\_iv} and sent. All other data in this TCP stream are encrypted using the same obfuscation key. When another connection is established a new \texttt{obf\_enc\_key\_bytes} is generated and the process repeats.
 
 \subsubsection{Temporary decryption key}
 
@@ -849,10 +847,10 @@ for (int a = 0; a < 48; a++) {
 
 We believe Telegram server receives the \texttt{obf\_enc\_key\_bytes}, tampers them in a way described in this section and finally encrypts its response with \texttt{obf\_dec\_key\_bytes}. As mentioned earlier, this is officially not documented whatsoever.
 
-To summarize the whole function in its simplified version is depicted in Listing \ref{lst:analysis-obfuscation}. It as well uses our own terminology to concur with this document.
+To sum up, the whole function is depicted in Listing \ref{lst:analysis-obfuscation} in its simplified version. It as well uses our own terminology to concur with this section.
 
 \begin{listing}[htb]
-\caption{The function starts by generating random bytes and checking them if they are not equal to Telegram's somehow important integers. Then the decryption key is derived. Both encrypt/decrypt keys are set. Finally, the length of the payload (as well obfuscated), the \texttt{obf\_enc\_key\_bytes} and the actual IGE encrypted payload are sent. The function's argument -- the payload -- is in the expected form, as depicted in Figure \ref{img:analysis-obf-expected}.}
+\caption{The function starts by generating random bytes. The decryption key is then derived and both encrypt/decrypt keys are set. Finally, the length of the payload (as well obfuscated), the \texttt{obf\_enc\_key\_bytes} and the actual IGE encrypted payload are sent. The function's argument -- the payload -- is in the expected form, as depicted in Figure \ref{img:analysis-obf-expected}. Non-critical actions were redacted.}
 \label{lst:analysis-obfuscation}
 \begin{minted}{C++}
 
@@ -863,7 +861,6 @@ void sendData(payload)
     if (!firstPacketSent) {
         obf_dec_key_bytes = byte[64];
         fillWithRandom(obf_enc_key_bytes);
-        checkValues();
 
         for (int a = 0; a < 48; a++) {
             obf_dec_key_bytes[a] = obf_enc_key_bytes[55 - a];
@@ -874,8 +871,6 @@ void sendData(payload)
 
         setAESDecryptKey(obf_dec_key_bytes);
         setDecryptIv(obf_dec_key_bytes + 32);
-
-        encryptAndCopyCheck();
         
         send(obf_enc_key_bytes);
         firstPacketSent = true;
@@ -887,7 +882,13 @@ void sendData(payload)
 \end{minted}
 \end{listing}
 
+\subsection{Unobfuscation program}
+
 TODO přidat C program
+
+
+
+
 
 \chapter{TODO}
 
