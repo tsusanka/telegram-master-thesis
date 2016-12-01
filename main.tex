@@ -29,6 +29,9 @@
 \newcommand{\cmark}{\ding{51}}%
 \newcommand{\xmark}{\ding{55}}%
 
+%C++
+\newcommand{\cpp}{C\nolinebreak\hspace{-.05em}\raisebox{.4ex}{\tiny +}\nolinebreak\hspace{-.10em}\raisebox{.4ex}{\tiny +}}
+
 % list of acronyms
 % \usepackage[acronym,nonumberlist,toc,numberedsection=autolabel,nomain]{glossaries}
 %\iflanguage{czech}{\renewcommand*{\acronymname}{Seznam pou{\v z}it{\' y}ch zkratek}}{}
@@ -850,7 +853,7 @@ We believe Telegram server receives the \texttt{obf\_enc\_key\_bytes}, tampers t
 To sum up, the whole function is depicted in Listing \ref{lst:analysis-obfuscation} in its simplified version. It as well uses our own terminology to concur with this section.
 
 \begin{listing}[htb]
-\caption{The function starts by generating random bytes. The decryption key is then derived and both encrypt/decrypt keys are set. Finally, the length of the payload (as well obfuscated), the \texttt{obf\_enc\_key\_bytes} and the actual IGE encrypted payload are sent. The function's argument -- the payload -- is in the expected form, as depicted in Figure \ref{img:analysis-obf-expected}. Non-critical actions were redacted.}
+\caption{The function starts by generating random bytes. The decryption key is then derived and both encrypt and decrypt keys are set. Finally, the length of the payload (as well obfuscated), the \texttt{obf\_enc\_key\_bytes} and the actual IGE encrypted payload are sent. The function's argument -- the payload -- is in the expected form, as depicted in Figure \ref{img:analysis-obf-expected}. Non-critical actions were redacted.}
 \label{lst:analysis-obfuscation}
 \begin{minted}{C++}
 
@@ -882,10 +885,25 @@ void sendData(payload)
 \end{minted}
 \end{listing}
 
-\subsection{Unobfuscation program}
+\subsection{Deobfuscation program}
 
-TODO přidat C program
+To verify these findings and to continue the analysis we created software to deobfuscate the traffic. Even though the first language of choice was Python to contain all the scripts in one package, we finally opted for \cpp. This has two major advantages, one we can be directly inspired by the Telegram code, and second we can access OpenSSL functions directly the same way Telegram does.
 
+The program is capable of fetching the obfuscation key and transforming the data into its deobfuscated form and further analyze. It takes two or three arguments as an input:
+
+\begin{itemize}
+
+	\item \textbf{incoming stream} sniffed incoming data
+	\item \textbf{outgoing stream} sniffed outgoing data
+	\item \textbf{key} file containing the user's \texttt{auth\_key} (optional)
+
+\end{itemize}
+
+The first and second arguments are binary files of the sniffed traffic. Since the \texttt{obf\ enc\ key\ bytes} are sent by the client it is stored in the outgoing stream. It is not possible to deobfuscate any traffic without this data. We used Wireshark repeatedly to follow the TCP stream and then saving both incoming and outgoing data into a binary file. This proved as a viable technique.
+
+The third argument is optional. It is the user's secret \texttt{auth\_key}. This is obviously not available for an attacker, but it is helpful for studying purposes. When extracted user may see the real traffic Telegram generates and what actions are taken.
+
+Readme file is present describing how to build and run the program.
 
 
 
