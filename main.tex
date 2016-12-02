@@ -771,25 +771,35 @@ It should be noted Signal's files are well documented which impacts on its size.
 
 \section{Storage}
 
-In this section we briefly look how Telegram stores its data. All data are stored in \path{org.telegram.messenger/files} folder. Two types of files are present, SQLite database file and \path{.dat} files which are in Telegram's own configuration format:
+In this section we briefly look how Telegram stores its data. All data are stored in the \path{org.telegram.messenger/files} folder. Two types of files are present, SQLite database file and \path{.dat} files which are in Telegram's own configuration format:
 
 \begin{itemize}
 	\item \path{cache4.db} SQLite database file.
 	\item \path{tgnet.dat} Main configuration data.
-	\item \path{dc1conf.db} Datacenter specific configuration.
+	\item \path{dcXconf.db} Number of Datacenter specific configuration files.
 \end{itemize}
 
 The \path{cache4.db} file is a SQLite database file. It contains 38 tables in total containing contacts, messages, chat information and all other user data. Messages are stored in bytes and therefore de facto in plaintext. Since the database is available only by physical access to the phone, we do not see this as a malpractice.
 
-The \path{tgnet.dat} file is a place where Telegram stores which datacenter is currently in use, session information and other headers. For each datacenter it further stores IP addresses and ports, \texttt{auth\_key}, \texttt{auth\_key\_id} fingerprint and salts.
+The \path{tgnet.dat} file is a place where Telegram stores its configuration directives. It contains configuration version, currently used datacenter ID, session IDs, time synchronization values, timestamps and other. For each datacenter -- Telegram stored 5 during our analysis -- it stores its ID, IPv4 and IPv6 addresses, salts and most importantly the secret \texttt{auth\_key} and \texttt{auth\_key\_id} fingerprint.
 
-\subsection{tgnet.dat extractor}
+\subsection{Extraction scripts}
 
+To proper analyze the data Telegram stores we wrote three scripts, all in Python 3. The scripts address the \path{tgnet.dat} file, regular messages and encrypted chat information both stored in the SQLite database. Examples of those files are included in the \path{examples} folder of the project and a brief readme file describing how to run the scripts is present as well. Some values' meaning is unclear, therefore the scripts print a simple question mark in such cases to indicate this.
 
+\subsubsection{Extracting tgnet.dat}
 
-TODO dopsat
-TODO přidat popis Python skriptu
+The \path{tgnet-extractor.py} parses the \path{tgnet.dat} file and prints all the values to standard output. This file has Telegram's own binary format and in a nutshell is a collection of values simply written one by one, with no keys, formatting or structure. The most useful values are the datacenter's IP addresses and the \texttt{auth\_key} secrets, mainly \texttt{auth\_key\_id} we expected to see in the sniffed traffic.
 
+\subsubsection{Extracting messages}
+
+Next script \path{message-extractor.py} works with bytes stored in the SQLite database, the column \emph{data} in table \emph{messages} in particular. Those bytes store information on one single message sent in a regular chat.
+
+The script extracts values such as message ID, values to identify both the sender and the receiver, timestamps, flags and most importantly the UTF-8 encoded string of the message itself.
+
+\subsubsection{Extracting secret chat information}
+
+Last but not least the \path{encrypted-chat-extractor.py} script is responsible for the bytes in the column \emph{data} of \emph{enc\_chats} table. Among others it describes a secret chat instance and contains ID, dates, identification values and yet again the \texttt{auth\_key} secret. Note that this \texttt{auth\_key} is used for this particular secret chat which is then encrypted with the regular chat \texttt{auth\_key} as described more into details in Section \ref{crypto-secret}.
 
 \section{Undocumented obfuscation}\label{analysis-obf}
 
