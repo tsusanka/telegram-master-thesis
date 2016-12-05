@@ -769,7 +769,7 @@ TODO         &  & \\ \hline
 
 It should be noted Signal's files are well documented which impacts on its size. That is not the case of Telegram at all.
 
-\section{Storage}
+\section{Storage}\label{analysis-storage}
 
 In this section we briefly look how Telegram stores its data. All data are stored in the \path{org.telegram.messenger/files} folder. Two types of files are present, SQLite database file and \path{.dat} files which are in Telegram's own configuration format:
 
@@ -783,7 +783,7 @@ The \path{cache4.db} file is a SQLite database file. It contains 38 tables in to
 
 The \path{tgnet.dat} file is a place where Telegram stores its configuration directives. It contains configuration version, currently used datacenter ID, session IDs, time synchronization values, timestamps and other. For each datacenter -- Telegram stored 5 during our analysis -- it stores its ID, IPv4 and IPv6 addresses, salts and most importantly the secret \texttt{auth\_key} and \texttt{auth\_key\_id} fingerprint.
 
-\subsection{Extraction scripts}
+\subsection{Extraction scripts}\label{analysis-storage-scripts}
 
 To proper analyze the data Telegram stores we wrote three scripts, all in Python 3. The scripts address the \path{tgnet.dat} file, regular messages and encrypted chat information both stored in the SQLite database. Examples of those files are included in the \path{examples} folder of the project and a brief readme file describing how to run the scripts is present as well. Some values' meaning is unclear, therefore the scripts print a simple question mark in such cases to indicate this.
 
@@ -793,17 +793,17 @@ The \path{tgnet-extractor.py} parses the \path{tgnet.dat} file and prints all th
 
 \subsubsection{Extracting messages}
 
-Next script \path{message-extractor.py} works with the bytes stored in the SQLite database, the column \emph{data} and table \emph{messages} in particular. Those bytes store information on one single message sent in a regular chat.
+Next script \path{message-extractor.py} works with the bytes stored in the SQLite database, the column \emph{data} in table \emph{messages} in particular. Those bytes store information on one single message sent in a regular chat.
 
 The script extracts values such as message ID, values to identify both the sender and the receiver, timestamps, flags and most importantly the UTF-8 encoded string of the message itself.
 
 \subsubsection{Extracting secret chat information}
 
-Last but not least the \path{encrypted-chat-extractor.py} script is responsible for the bytes in the column \emph{data} of \emph{enc\_chats} table. Among others it describes a secret chat instance and contains ID, dates, identification values and yet again an \texttt{auth\_key} secret. Note that this \texttt{auth\_key} is used for this particular secret chat which is then encrypted with the regular chat \texttt{auth\_key} as described more into details in Section \ref{crypto-secret}.
+Last but not least the \path{encrypted-chat-extractor.py} script is responsible for the bytes in the column \emph{data} of \emph{enc\_chats} table. Among others it describes a secret chat instance and contains ID, dates, identification values and yet again an \texttt{auth\_key} secret. Note that this \texttt{auth\_key} is used for this particular secret chat which is then encrypted with the regular chat \texttt{auth\_key} as described in Section \ref{crypto-secret}.
 
 \section{Undocumented obfuscation}\label{analysis-obf}
 
-During the data collection as described earlier in Section \ref{analysis-setup} the received data did not correspond with the documentation. We expected the data to be in a form of \texttt{auth\_key\_id}, \texttt{msg\_key} and encrypted data; see Figure \ref{img:analysis-obf-expected}.
+During the data collection the received data did not correspond with the documentation. We expected the data to be in a form of \texttt{auth\_key\_id}, \texttt{msg\_key} and encrypted data; see Figure \ref{img:analysis-obf-expected}.
 
 \begin{figure}[htb]
 	\centering
@@ -812,7 +812,7 @@ During the data collection as described earlier in Section \ref{analysis-setup} 
 	\label{img:analysis-obf-expected}
 \end{figure}
 
-Since we extracted our testing \texttt{auth\_key} and \texttt{auth\_key\_id} from our device (TODO jak?) we were able to compare it with the sniffed data. \texttt{auth\_key\_id} was not present. The whole packet seemed random and therefore possibly encrypted.
+Using the scripts described in \ref{analysis-storage-scripts} we extracted our testing \texttt{auth\_key} and \texttt{auth\_key\_id} from our device in order to compare it with the sniffed data. \texttt{auth\_key\_id} was not present. The whole packet seemed random and therefore likely encrypted.
 
 We examined the code and discovered the responsible function for this behavior is the \texttt{Connection::sendData} function located in \path{TMessagesProj/jni/tgnet/Connection.cpp} file. Before sending the data in the expected manner, they are encrypted one more time with a random key attached in front of the data. Interestingly the Counter block mode is used instead of the IGE endorsed by Telegram.
 
@@ -909,16 +909,88 @@ The program is capable of fetching the obfuscation key and transforming the data
 
 \end{itemize}
 
-The first and second arguments are binary files of the sniffed traffic. Since the \texttt{obf\ enc\ key\ bytes} are sent by the client it is stored in the outgoing stream. It is not possible to deobfuscate any traffic without this data. We used Wireshark repeatedly to follow the TCP stream and then saving both incoming and outgoing data into a binary file. This proved as a viable technique.
+The first and second arguments are binary files of the sniffed traffic. Since the \texttt{obf\_enc\_key\_bytes} are sent by the client it is stored in the outgoing stream and it is therefore not possible to deobfuscate any traffic without this data. We used Wireshark repeatedly to follow the TCP stream and then saving both incoming and outgoing data into a binary file. This proved as a viable technique.
 
 The third argument is optional. It is the user's secret \texttt{auth\_key}. This is obviously not available for an attacker, but it is helpful for studying purposes. When extracted user may see the real traffic Telegram generates and what actions are taken.
 
 Readme file is present describing how to build and run the program.
 
 
+\section{Attack scenario}\label{analysis-attacks}
+
+During the analysis we as well scrutinized some parts of the code attempting to discover some potential vulnerabilities to exploit. To provide a little bit of a context let's now briefly describe how Telegram processes any incoming data.
+
+\subsection{Incoming data processing}
+
+First, the \texttt{Connection::onReceivedData()} function is called and the incoming data are deobfuscated in the way described in Section \ref{analysis-obf}.
+
+Next, the \texttt{ConnectionsManager::onConnectionDataReceived()} function is called. If the \texttt{auth\_key\_id} is not set to 0 (which is only the case of the handshake process; see Section \ref{crypto-keyexchange}) the \texttt{Datacenter::decryptServerResponse()} is invoked. This function checks the \texttt{auth\_key\_id} and decrypts the actual payload using the master secret \texttt{auth\_key} and derived \texttt{msg\_key}.
+
+If the decryption succeeds the \texttt{onConnectionDataReceived()} function proceeds and processes the IGE decrypted payload and number of checks are carried out. Finally, if those checks succeed the \texttt{ConnectionsManager::processServerResponse} is called to further process the message.
+
+\subsection{Replay attack scenario}
+
+A replay attack is an attack where the attacker sniffs sent data by the application and then maliciously resends them another time. Doing so the attacker can repeat any message without the users noticing, of course without actually knowing the message. Protection might be realized by implementing a message counter keeping track of the order messages appear in.
+
+We analyzed how Telegram deals with this issue, see Listing \ref{lst:analysis-replay-check}. Upon the decryption it checks if the message was already processed. The \texttt{ConnectionSession} holds an internal array of already processed messages. If the message is accepted and processed the message ID is added into the array.
+
+\begin{listing}[htb]
+\caption{}
+\label{lst:analysis-replay-check}
+\begin{minted}{C++}
+if (connection->isMessageIdProcessed(messageId)) {
+    doNotProcess = true;
+}
+
+if (!doNotProcess) {
+    // process
+    addProcessedMessageId(messageId);
+}
+\end{minted}
+\end{listing}
+
+The behavior we believed might be exploited was the \texttt{addProcessedMessageId} function. The function checks the size of the array and if exceeds 300 it erases first 100 messages as seen in Listing \ref{lst:analysis-replay-add-processed}.
+
+
+\begin{listing}[htb]
+\caption{}
+\label{lst:analysis-replay-add-processed}
+\begin{minted}{C++}
+void addProcessedMessageId(messageId)
+{
+    if (processedMessageIds.size() > 300) {
+        processedMessageIds.erase(processedMessageIds.begin(),
+            processedMessageIds.begin() + 100);
+    }
+    processedMessageIds.push_back(messageId);
+}
+\end{minted}
+\end{listing}
+
+The attack scenario is drafted as follows:
+
+\begin{enumerate}
+	\item Sniff a message
+	\item Wait for 300 other messages
+	\item Replace the next message with the first one
+	\item Telegram processes the first message again
+\end{enumerate}
+
+If Telegram does not provide any additional checks and actually deletes the first ID the message would be accepted twice. With the attack scenario drafted it is obviously desired to perform the attack.
+
+\subsection{Replay attack attempt}
+
+
+
+
+
 
 
 \chapter{TODO}
+
+\subsection{Mirroring attack}
+
+A mirroring attack is similar attack when the attacker captures sent data from the user and directly copies the data to him. If a simple counter is used the client is unaware if the message didn't arrive in the exact same time as the counter in time.
 
 \subsection{SHA-1}
 
