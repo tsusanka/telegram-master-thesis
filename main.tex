@@ -24,6 +24,7 @@
 \usepackage{enumitem}
 
 \usepackage{minted} % code style
+\usepackage{wrapfig} % wrapped images
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \newcommand{\cmark}{\ding{51}}%
@@ -407,6 +408,8 @@ The contest remained unsolved until his closure. Number of authors considered it
 
 As mentioned Telegram has two types of messages. Telegram is therefore evaluated twice by the EFF.
 
+\clearpage
+
 \subsubsection{Telegram regular chats}
 
 \begin{table}[htb]
@@ -457,7 +460,7 @@ Telegram authors decided to craft a brand new encryption scheme supposedly to ac
 
 \section{Initialization}\label{crypto-initialization}
 
-During the first lunch of Telegram application user needs to enter and verify its telephone number. The verification is done by sending a five digit code to the phone via SMS. The user then enters the code into the app and therefore verifies its phone number. When this process is done the registration process begins as follows.
+During the first launch of Telegram application user needs to enter and verify its telephone number. The verification is done by sending a five digit code to the phone via SMS. The user then enters the code into the app and therefore verifies its phone number. When this process is done the registration process begins as follows.
 
 Suppose a client $C$ is registering to server $S$:
 
@@ -729,7 +732,7 @@ To demonstrate we may omit the hotspot setup and perform the analysis without fo
 \end{figure}
 
 
-By using Ettercap, a \emph{``comprehensive suite for man in the middle attacks''} \cite{ettercap-homepage} available in Kali Linux, we lunched an ARP Poisoning attack against the phone.
+By using Ettercap, a \emph{``comprehensive suite for man in the middle attacks''} \cite{ettercap-homepage} available in Kali Linux, we launched an ARP Poisoning attack against the phone.
 
 Address Resolution Protocol (ARP) is a protocol which transforms an Internet layer address into a link layer address. Typically, this might be the mapping of an IPv4 address to an Ethernet address. ARP Poising, or ARP spoofing, is a technique by which the attacker sends fake ARP packets to the victim claiming his Ethernet address is associated with an IP address different than truly his.
 
@@ -761,8 +764,10 @@ Further, some files contain upto thousands of lines and multiple classes in one 
 	\begin{tabular}{|l|l|l|}
 		\hline
 					& \textbf{Telegram} & \textbf{Signal} \\ \hline
-		Largest file by size & 714.6 kB\tablefootnote{\path{TMessagesProj/src/main/java/org/telegram/tgnet/TLRPC.java}} & 87.4 kB\tablefootnote{\path{src/org/thoughtcrime/securesms/util/Base64.java}} \\ \hline
+		Project size\tablefootnote{The project as a whole, including all libraries, assets etc.} & 188,6 MB & 138,6 MB \\ \hline
+		Largest file by size & 714.6 KB\tablefootnote{\path{TMessagesProj/src/main/java/org/telegram/tgnet/TLRPC.java}} & 87.4 KB\tablefootnote{\path{src/org/thoughtcrime/securesms/util/Base64.java}} \\ \hline
 		Largest file by lines count & 23,009 &  2,096 \\ \hline
+		Number of test files\tablefootnote{Number of files each including at least one unit test.} & 0 & 13 \\ \hline
 TODO         &  & \\ \hline
 	\end{tabular}
 \end{table}
@@ -916,7 +921,8 @@ The third argument is optional. It is the user's secret \texttt{auth\_key}. This
 Readme file is present describing how to build and run the program.
 
 
-\section{Attack scenario}\label{analysis-attacks}
+
+\section{Replay attack}\label{analysis-attacks}
 
 During the analysis we as well scrutinized some parts of the code attempting to discover some potential vulnerabilities to exploit. To provide a little bit of a context let's now briefly describe how Telegram processes any incoming data.
 
@@ -928,9 +934,9 @@ Next, the \texttt{ConnectionsManager::onConnectionDataReceived()} function is ca
 
 If the decryption succeeds the \texttt{onConnectionDataReceived()} function proceeds and processes the IGE decrypted payload and number of checks are carried out. Finally, if those checks succeed the \texttt{ConnectionsManager::processServerResponse} is called to further process the message.
 
-\subsection{Replay attack scenario}
+\subsection{Vulnerability}
 
-A replay attack is an attack where the attacker sniffs sent data by the application and then maliciously resends them another time. Doing so the attacker can repeat any message without the users noticing, of course without actually knowing the message. Protection might be realized by implementing a message counter keeping track of the order messages appear in.
+A replay attack is an attack where an attacker sniffs sent data by the application and then maliciously resends them another time. Doing so the attacker can repeat any message without the users noticing, of course without actually knowing the message. Protection might be realized by implementing a message counter keeping track of the order messages appear in.
 
 We analyzed how Telegram deals with this issue, see Listing \ref{lst:analysis-replay-check}. Upon the decryption it checks if the message was already processed. The \texttt{ConnectionSession} holds an internal array of already processed messages. If the message is accepted and processed the message ID is added into the array.
 
@@ -976,13 +982,65 @@ The attack scenario is drafted as follows:
 	\item Telegram processes the first message again
 \end{enumerate}
 
-If Telegram does not provide any additional checks and actually deletes the first ID the message would be accepted twice. With the attack scenario drafted it is obviously desired to perform the attack.
+If Telegram does not provide any additional checks and actually deletes the first ID the message would be accepted twice. With the attack scenario drafted it is desired to perform the attack.
 
-\subsection{Replay attack attempt}
+\subsection{Exploit attempt}
+
+To perform the attack it was first decided to inject a new TCP packet containing the payload copied from the very first packet. That proved to be rather difficult since it's not possible to inject a TCP packet without interfering with the TCP connection. We finally opted for replacing the payload of the next message (i.e. 301st) meaning we would drop its payload and replace it with the first one. That should result in the victim receiving the first message again instead of the new one.
+
+\subsubsection{Required tools}
+
+As found out nor Scapy nor Wireshark are the right tools. Both are useful for passive sniffing and Scapy is capable of sending additional packets but does not allow modification of the packets in real time as it does not reside in the middle of the traffic as described in the Setup, Section \ref{analysis-setup}.
+
+Further, since Telegram uses its own Application layer protocol we were unable to use popular tools such as Fiddler, Burp Suite or OWASP ZAP which are built for HTTP \cite{fiddler-homepage}\cite{burp-homepage}.
+
+Next, the already mentioned Ettercap used to perform the MiM provides simple filtering interface allowing to modify the data routed through. We tried this approach but Ettercap requires the filters to be written in its own language which is very limiting and unfortunately insufficient for our needs.
+
+The scenario was finally tested with Trudy software which can modify any TCP traffic. As its documentation states Trudy is \emph{``a transparent proxy that can modify and drop traffic for arbitrary TCP connections''} \cite{github-trudy}. All traffic is routed through Trudy which then applies so called \emph{modules}. Trudy provides an example of such module and users are encouraged to further implement it. Since Trudy is written in Go all modules are to be written in Go as well. To route the traffic and setup the environment properly a provided virtual machine may be used \cite{github-trudy-vm}.
+
+Upon setting up the MiM as described in \ref{analysis-setup} a virtual machine is run on the computer using Vagrant\footnote{Vagrant is simple wrapper around a virtualization provider for building complete virtual environment.}. The VM installs all required software and Trudy as well. Then it routes all the traffic into and out of Trudy using \texttt{iptables}. Trudy receives all the traffic, modifies it if desired and shifts it back to internet as seen in Figure \ref{img:analysis-trudy-setup}.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=1\textwidth]{setup-trudy.pdf}
+	\caption{The computer runs Trudy inside a virtual machine. All traffic is routed bidirectionally through Trudy.}
+	\label{img:analysis-trudy-setup}
+\end{figure}
 
 
+The implementation of a module for Trudy is straightforward. Trudy calls specific methods in fixed order each designed for one particular action. The methods of a single module are depicted in \ref{img:analysis-trudy-flow} and a description of the methods follows.
+
+\begin{wrapfigure}{r}{0.45\textwidth}
+	\centering
+	\includegraphics[width=0.34\textwidth]{trudy-flow.pdf}
+	\caption{Trudy's data flow}
+	\label{img:analysis-trudy-flow}
+\end{wrapfigure}
+
+\begin{itemize}
+	\item \textbf{Deserialize()} converts the raw payload into a known structure of data (e.g. HTTP)
+	\item \textbf{Drop()} if returns \emph{true} the whole packet is discarded
+	\item \textbf{DoMangle()} if returns \emph{true} \texttt{Mangle()} is called
+	\item \textbf{Mangle()} alters the payload
+	\item \textbf{DoIntercept()} if returns \emph{true} data are sent to the Trudy interceptor\footnote{Trudy interceptor is a simple local website the user may use to interfere with the data. Was not investigated further.}
+	\item \textbf{DoPrint()} if returns \emph{true} \texttt{PrettyPrint()} is called
+	\item \textbf{PrettyPrint()} prints data in human friendly format
+	\item \textbf{Serialize()} converts back to the raw payload if previously deserialized
+	\item \textbf{BeforeWriteTo()} actions taken before the data are written to one side or the other
+	\item \textbf{AfterWriteTo()} actions taken after the data are written to one side or the other
+
+\end{itemize}
 
 
+\subsubsection{Execution}
+
+First, to test our settings we set up a breakpoint on the very line where Telegram checks if the ID was already processed or not, that is the line 729 and 859 in the \texttt{ConnectionsManager} file. If the packet was actually send again these breakpoints would be fired and the message further rejected by Telegram. This would prove our surmise and later improved to comply fully with the scenario.
+
+Unfortunately we were unable to perform this. We confirmed Telegram successfully  receives the repeated traffic but neither of the desired breakpoints were fired. Further analysis showed Telegram incorrectly deobfuscated the traffic. This is due to the fact that during the 300 messages the \texttt{obf\_enc\_key\_bytes} change periodically. The deobfuscated data are therefore completely different and are rejected on different places as nonsense.
+
+The attack still might be possible if we would save the first message in its deobfuscated form, captured the current obfuscation key and obfuscate the data in that way. We were unable to continue this way unfortunately due to time limitations and scope of this work.
+
+TODO jak to dodelat sem nebo jinam?
 
 
 
