@@ -180,15 +180,14 @@ Serious drawbacks were found in this method in 2011 \cite{whatsapp-hijack1}. To 
 
 Following these findings another method to bypass the registration process was published. During the registration phase WhatsApp sent a request for the verification SMS to be sent to the client in HTTP request similiar to this \cite{whatsapp-shootingthemsg}:
 
-
-\begin{lstlisting}[
-	caption={HTTP request to dispatch SMS},
-	basicstyle=\footnotesize,
-	breaklines=true
-]
+\begin{listing}[htb]
+\caption{HTTP request to dispatch a text message to the client for verification.}
+\begin{minted}{http}
 GET [..]?to=4915143[..]&auth=659&[..] HTTP/1.1
 User-Agent: WhatsApp/2.6.4 iPhone_OS/4.3.3 Device/iPhone_4
-\end{lstlisting}
+\end{minted}
+\label{lst:status-whatsapp-http}
+\end{listing}
 
 The request contained the final verification code in the GET parameter. That leads to a conclusion the client created the verification code, not the server, and expected user's confirmation. An attacker could simply intercept the request, retrieved the verification code and made sure the request didn't arrive to WhatsApp's servers to let the victim unaware of malicious intentions.
 
@@ -201,11 +200,16 @@ The author of the research notified WhatsApp developers beforehand and WhatsApp 
 
 WhatsApp uses lightly modified version of XMPP \cite{whatsapp-xmpp}. During the registration process it creates a username based on the user's phone number. In newer versions than 2.10 the password is generated on server's side \cite{whatsapp-imei}. However, older versions used the phone's IMEI  number as password \cite{whatsapp-imei, whatsapp-imei2}.
 
-\begin{lstlisting}[caption={Pseudo-code of password generation on Android}]
-md5(revert('IMEI')) 
-\end{lstlisting}
+\begin{listing}[htb]
+\caption{Pseudo-code of the password generation on Android in older versions of WhatsApp.}
+\begin{minted}{c}
+md5(revert(<IMEI>))
+\end{minted}
+\label{lst:status-whatsapp-password}
+\end{listing}
 
-Any phone number -- IMEI pair was therefore all an attacker needed to send messages on victim's behalf. Numerous applications are collecting plenty of user data and the IMEI and phone number might be among them. Any database leak with such information would lead directly to large accounts abuse.
+
+Any phone number and IMEI was therefore all an attacker needed to send messages on victim's behalf. Numerous applications are collecting plenty of user data and the IMEI and phone number might be among them. Any database leak with such information would lead directly to large accounts abuse.
 
 \subsubsection{Messages encryption}
 
@@ -851,10 +855,11 @@ Further, the length of the packet, yet again encrypted and the real data to be t
 
 Besides the \texttt{obf\_enc\_key\_bytes} setup the very same function deals with setting up the \texttt{obf\_dec\_key\_bytes}. This temporary key is used for decrypting incoming traffic.
 
-The \texttt{obf\_dec\_key\_bytes} is derived from the \texttt{obf\_enc\_key\_bytes}. Totally 48 bytes are reversed from \texttt{obf\_enc\_key\_bytes} starting at position 8. This may be seen in Figure \ref{lst:code-obf-dec}. The first 32 bytes are then set as a decryption key for incoming traffic and next 16 bytes for IV.
+The \texttt{obf\_dec\_key\_bytes} is derived from the \texttt{obf\_enc\_key\_bytes}. Totally 48 bytes are reversed from \texttt{obf\_enc\_key\_bytes} starting at position 8. This may be seen in Listing \ref{lst:code-obf-dec}. The first 32 bytes are then set as a decryption key for incoming traffic and next 16 bytes for IV.
 
 \begin{listing}[htb]
-\caption{Temporary decryption key deduction.}
+\caption{Temporary decryption key deduction from the \texttt{obf\_enc\_key\_bytes} array. First 32 bytes are used as a decryption key, next 16 bytes for the IV.
+\protect \\ Telegram for Android source code, file \texttt{Connections.cpp}, line 331.}
 \label{lst:code-obf-dec}
 \begin{minted}{C++}
 for (int a = 0; a < 48; a++) {
@@ -863,12 +868,14 @@ for (int a = 0; a < 48; a++) {
 \end{minted}
 \end{listing}
 
+
 We believe Telegram server receives the \texttt{obf\_enc\_key\_bytes}, tampers them in a way described in this section and finally encrypts its response with \texttt{obf\_dec\_key\_bytes}. As mentioned earlier, this is officially not documented whatsoever.
 
 To sum up, the whole function is depicted in Listing \ref{lst:analysis-obfuscation} in its simplified version. It as well uses our own terminology to concur with this section.
 
 \begin{listing}[htb]
-\caption{The function starts by generating random bytes. The decryption key is then derived and both encrypt and decrypt keys are set. Finally, the length of the payload (as well obfuscated), the \texttt{obf\_enc\_key\_bytes} and the actual IGE encrypted payload are sent. The function's argument -- the payload -- is in the expected form, as depicted in Figure \ref{img:analysis-obf-expected}. Non-critical actions were redacted.}
+\caption{The function starts by generating random bytes. The decryption key is then derived and both encrypt and decrypt keys are set. Finally, the length of the payload (as well obfuscated), the \texttt{obf\_enc\_key\_bytes} and the actual IGE encrypted payload are sent. The function's argument -- the payload -- is in the expected form as depicted in Figure \ref{img:analysis-obf-expected}.
+\protect\linebreak Telegram for Android source code, file \texttt{Connection.cpp}, line 289, redacted.}
 \label{lst:analysis-obfuscation}
 \begin{minted}{C++}
 
@@ -941,7 +948,8 @@ A replay attack is an attack where an attacker sniffs sent data by the applicati
 We analyzed how Telegram deals with this issue, see Listing \ref{lst:analysis-replay-check}. Upon the decryption it checks if the message was already processed. The \texttt{ConnectionSession} holds an internal array of already processed messages. If the message is accepted and processed the message ID is added into the array.
 
 \begin{listing}[htb]
-\caption{}
+\caption{Each incoming message is checked whether it was already processed. If not the message is further processed and finally marked as such.
+\protect\\ Telegram for Android source code, file \texttt{ConnectionsManager.cpp}, line 728.}
 \label{lst:analysis-replay-check}
 \begin{minted}{C++}
 if (connection->isMessageIdProcessed(messageId)) {
@@ -955,11 +963,13 @@ if (!doNotProcess) {
 \end{minted}
 \end{listing}
 
-The behavior we believed might be exploited was the \texttt{addProcessedMessageId} function. The function checks the size of the array and if exceeds 300 it erases first 100 messages as seen in Listing \ref{lst:analysis-replay-add-processed}.
+
+The behavior we believe might be exploitable is the \texttt{addProcessedMessageId()} function. The function checks the size of the array and if it exceeds 300 it erases the first 100 messages as seen in Listing \ref{lst:analysis-replay-add-processed}.
 
 
 \begin{listing}[htb]
-\caption{Telegram source code commit \texttt{abdef}, file Connection.cpp, line 39}
+\caption{After message is successfully processed its ID is added to an internal array of processed messages.
+\protect\\ Telegram for Android source code, file \texttt{ConnectionSession.cpp}, line 55.}
 \label{lst:analysis-replay-add-processed}
 \begin{minted}{C++}
 void addProcessedMessageId(messageId)
