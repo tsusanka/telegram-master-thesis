@@ -869,7 +869,7 @@ for (int a = 0; a < 48; a++) {
 \end{listing}
 
 
-We believe Telegram server receives the \texttt{obf\_enc\_key\_bytes}, tampers them in a way described in this section and finally encrypts its response with \texttt{obf\_dec\_key\_bytes}. As mentioned earlier, this is officially not documented whatsoever.
+We believe Telegram server receives the \texttt{obf\_enc\_key\_bytes}, tampers them in a way described in this section and finally encrypts its response with \texttt{obf\_dec\_key\_bytes}. As mentioned earlier, this is officially not documented whatsoever. Yet again, a more conventional approach would be much appreciated such as the usage of SSL/TLS, a cryptographic protocol scrutinized thoroughly by researchers all over the world.
 
 To sum up, the whole function is depicted in Listing \ref{lst:analysis-obfuscation} in its simplified version. It as well uses our own terminology to concur with this section.
 
