@@ -170,7 +170,7 @@ WhatsApp's user identity is bound to user's phone number. In order to verify the
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.4\textwidth]{whatsapp-registration.png}
-	\caption{WhatsApp's registration process}
+	\caption[WhatsApp's registration process]{WhatsApp's registration process}
 	\label{img:whatsapp_reg}
 \end{figure}
 
@@ -217,7 +217,7 @@ On May 2012 an application called ``WhatsAppSniffer'' had been released  \cite{w
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.4\textwidth]{whatsapp-sniffer.png}
-	\caption{WhatsAppSniffer \cite{whatsapp-sniffer2}}
+	\caption[WhatsAppSniffer]{WhatsAppSniffer \cite{whatsapp-sniffer2}}
 	\label{img:whatsapp_sniffer}
 \end{figure}
 
@@ -505,7 +505,7 @@ First, let's describe the content of a single message, further referred to as a 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.7\textwidth]{regular-payload.pdf}
-	\caption{Payload of a single message to be encrypted in regular chat.}
+	\caption[Message payload in regular chats]{Payload of a single message to be encrypted in regular chat.}
 	\label{img:regular-payload}
 \end{figure}
 
@@ -530,7 +530,7 @@ This \texttt{msg\_key} along with the \texttt{auth\_key} described in Section \r
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{mtproto-encflow.pdf}
-	\caption{The AES key a IV is derived from the \texttt{auth\_key} and SHA-1 hash of the payload \texttt{msg\_key}. Using these values the padded payload is encrypted. The encrypted data along with \texttt{auth\_key\_id} and \texttt{msg\_key} are ready to be transported \cite{telegram-aarhus}.}
+	\caption[MTProto encryption flow]{The AES key and IV is derived from the \texttt{auth\_key} and SHA-1 hash of the payload \texttt{msg\_key}. Using these values the padded payload is encrypted. The encrypted data along with \texttt{auth\_key\_id} and \texttt{msg\_key} are ready to be transported \cite{telegram-aarhus}.}
 	\label{img:crypto-regular-enc}
 \end{figure}
 
@@ -557,7 +557,7 @@ Careful reader notices that for the first output block we need two initialisatio
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{ige-enc.pdf}
-	\caption{IGE mode of operation with two Initialization Vectors \cite{telegram-aarhus} used with AES.}
+	\caption[IGE block cipher mode]{IGE mode of operation with two Initialization Vectors \cite{telegram-aarhus} used with AES.}
 	\label{img:crypto-regular-ige-enc}
 \end{figure}
 
@@ -574,7 +574,7 @@ Before the decryption process starts the \texttt{auth\_key\_id} is validated. Th
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.9\textwidth]{mtproto-auth-key.pdf}
-	\caption{Before the decryption process starts the \texttt{auth\_key\_id} values are checked.}
+	\caption[Message acceptance check]{Before the decryption process starts the \texttt{auth\_key\_id} values are checked.}
 	\label{img:crypto-regular-dec}
 \end{figure}
 
@@ -583,7 +583,7 @@ The decryption process is plainly the encryption process in reverse. The KDF yie
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{mtproto-decflow.pdf}
-	\caption{The KDF produces the AES key and IV from the \texttt{auth\_key} and received \texttt{msg\_key'}. The SHA-1 of the decrypted payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'} and only then accepted \cite{telegram-aarhus}.}
+	\caption[MTProto decryption flow]{The KDF produces the AES key and IV from the \texttt{auth\_key} and received \texttt{msg\_key'}. The SHA-1 of the decrypted payload generates \texttt{msg\_key} which is compared to \texttt{msg\_key'} and only then accepted \cite{telegram-aarhus}.}
 	\label{img:telegram-decflow}
 \end{figure}
 
@@ -617,7 +617,7 @@ Where $r_{client}$ is a 2048-bit random integer generated on the client side and
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.4\textwidth]{telegram-keybox.png}
-	\caption{Encryption key visualization}
+	\caption[Encryption key visualization]{Encryption key visualization}
 	\label{img:telegram-keybox}
 \end{figure}
 
@@ -639,7 +639,7 @@ With the key negotiated we may now focus on the message encryption itself. Let's
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.95\textwidth]{secret-payload.pdf}
-	\caption{Payload of a single message in secret chat \cite{telegram-aarhus}.}
+	\caption[Message payload in secret chats]{Payload of a single message in secret chat \cite{telegram-aarhus}.}
 	\label{img:crypto-secret-payload}
 \end{figure}
 
@@ -659,7 +659,7 @@ Both payload and message type are not described into much details in the documen
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{decrypted-message.pdf}
-	\caption{The message object containing the message itself, random integer, time to live settings and media header.}
+	\caption[Message object]{The message object contains the message itself, random integer, time to live settings and media header.}
 	\label{img:crypto-secret-messageobject}
 \end{figure}
 
@@ -713,7 +713,7 @@ In the first scenario we set up a wireless network on the computer and instruct 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{setup-hotspot.pdf}
-	\caption{Computer running analysis software is connected to the internet on one interface and creating WiFi hotspot using the other one. Mobile phone running Telegram connects to the computer's WiFi and all data are therefore routed through the computer.}
+	\caption[Analysis setup 1]{Computer running analysis software is connected to the internet on one interface and creating WiFi hotspot using the other one. Mobile phone running Telegram connects to the computer's WiFi and all data are therefore routed through the computer.}
 	\label{img:analysis-setup-hotspot}
 \end{figure}
 
@@ -727,7 +727,7 @@ To demonstrate we may omit the hotspot setup and perform the analysis without fo
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{setup-arp.pdf}
-	\caption{Both computer and mobile are connected to the same network. Computer runs ARP Poisoning software inducing the mobile to send traffic through the computer.}
+	\caption[Analysis setup 2]{Both computer and mobile are connected to the same network. Computer runs ARP Poisoning software inducing the mobile to send traffic through the computer.}
 	\label{img:analysis-setup-arp}
 \end{figure}
 
@@ -813,7 +813,7 @@ During the data collection the received data did not correspond with the documen
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{sniffed-expected.pdf}
-	\caption{Expected form of sniffed data. 64-bits of key fingerprint followed by \texttt{msg\_key} and encrypted data.}
+	\caption[Expected form of sniffed data]{Expected form of sniffed data where 64-bits of key fingerprint are followed by \texttt{msg\_key} and encrypted data.}
 	\label{img:analysis-obf-expected}
 \end{figure}
 
@@ -841,7 +841,7 @@ The process starts by generating 64 random bytes \texttt{obf\_enc\_key\_bytes}. 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{bytes-sent.pdf}
-	\caption{The \texttt{obf\_enc\_key\_bytes} containing random bytes and its usage for the obfuscation encryption.}
+	\caption[Random bytes used for obfuscation]{The \texttt{obf\_enc\_key\_bytes} containing random bytes and its usage for the obfuscation encryption.}
 	\label{img:code-obfuscation-bytes-sent}
 \end{figure}
 
@@ -959,7 +959,7 @@ The behavior we believed might be exploited was the \texttt{addProcessedMessageI
 
 
 \begin{listing}[htb]
-\caption{}
+\caption{Telegram source code commit \texttt{abdef}, file Connection.cpp, line 39}
 \label{lst:analysis-replay-add-processed}
 \begin{minted}{C++}
 void addProcessedMessageId(messageId)
@@ -1003,7 +1003,7 @@ Upon setting up the MiM as described in \ref{analysis-setup} a virtual machine i
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{setup-trudy.pdf}
-	\caption{The computer runs Trudy inside a virtual machine. All traffic is routed bidirectionally through Trudy.}
+	\caption[Trudy setup]{The computer runs Trudy inside a virtual machine. All traffic is routed bidirectionally through Trudy.}
 	\label{img:analysis-trudy-setup}
 \end{figure}
 
@@ -1013,7 +1013,7 @@ The implementation of a module for Trudy is straightforward. Trudy calls specifi
 \begin{wrapfigure}{r}{0.45\textwidth}
 	\centering
 	\includegraphics[width=0.34\textwidth]{trudy-flow.pdf}
-	\caption{Trudy's data flow}
+	\caption[Trudy's data flow]{Trudy's data flow}
 	\label{img:analysis-trudy-flow}
 \end{wrapfigure}
 
@@ -1041,6 +1041,8 @@ Unfortunately we were unable to perform this. We confirmed Telegram successfully
 The attack still might be possible if we would save the first message in its deobfuscated form, captured the current obfuscation key and obfuscate the data in that way. We were unable to continue this way unfortunately due to time limitations and scope of this work.
 
 TODO jak to dodelat sem nebo jinam?
+
+
 
 
 
