@@ -749,7 +749,7 @@ This setup is as well convenient if we are not able to use WiFi as a hotspot, fo
 
 The application is publicly available on Github \cite{github-telegram} with the first commit dating back to late October 2013. This thesis is concerned with the latest Telegram version 3.13.1 as up to date in October 2016, the \texttt{64e8ec3} commit in particular.
 
-The application's main programming language is Java but it uses the Java Native Interface (JNI) to incorporate C libraries such as borringssl, ffmpeg, sqlite and others. Since the 3.2.2 version Telegram moved a significant portion of logic into a separate C library called \emph{tgnet}. The library is responsible for many connection-related actions including communication with the server and sending messages. The code base closely resembles the previous Java code. The secret messages are still dealt within the Java part of the application.
+The application's main programming language is Java but it uses the Java Native Interface (JNI) to incorporate C libraries such as borringssl, ffmpeg, sqlite and others. Since the 3.2.2 version Telegram moved a significant portion of logic into a separate C library called \emph{tgnet}. The library is responsible for many connection-related actions including communication with the server and sending messages. The codebase closely resembles the previous Java code. The secret messages are still dealt within the Java part of the application.
 
 It should be noted that since this was introduced in the 3.2.2 version (September 2015) whereas the \cite{telegram-aarhus} analysis is based on 2.7.0 (April 2015) and therefore wasn't concerned with the \emph{tgnet} library whatsoever.
 
@@ -908,7 +908,7 @@ void sendData(payload)
 \end{minted}
 \end{listing}
 
-\subsection{Deobfuscation program}
+\subsection{Deobfuscation program}\label{analysis-obf-program}
 
 To verify these findings and to continue the analysis we created software to deobfuscate the traffic. Even though the first language of choice was Python to contain all the scripts in one package, we finally opted for \cpp. This has two major advantages, one we can be directly inspired by the Telegram code, and second we can access OpenSSL functions directly the same way Telegram does.
 
@@ -1101,9 +1101,17 @@ func (input *Data) Mangle() {
 
 Unfortunately it was not the case. We confirmed Telegram successfully  receives the repeated traffic but neither of the desired breakpoints were fired. Further analysis showed Telegram incorrectly deobfuscated the traffic. This is due to the fact that during the communication the \texttt{obf\_enc\_key\_bytes} change periodically. The deobfuscated data are therefore completely different and are rejected on different places as nonsense.
 
-The attack still might be possible if we would save the first message in its deobfuscated form, captured the current obfuscation key and obfuscate the data in that way. We were unable to continue this way unfortunately due to time limitations and scope of this work.
+We were unable to continue the attack due to time limitations and the scope of this work. However, we still believe this attack might be feasible. In order to continue the obfuscation keys would have to be saved as well. The modified scenario goes as follow:
 
-TODO jak to dodelat sem nebo jinam?
+\begin{enumerate}
+	\item Sniff a message, deobfuscate it and save
+	\item Wait for 300 other messages
+	\item Save the current obfuscation key
+	\item Replace the next message with the first one obfuscated by the current key
+	\item Telegram processes the first message again
+\end{enumerate}
+
+This requires to have the obfuscation capabilities introduced in the C program in Section \ref{analysis-obf-program}. Since Go has a native support of C the codebase could be incorporated into the Trudy module.
 
 
 
