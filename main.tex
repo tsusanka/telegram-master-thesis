@@ -25,6 +25,7 @@
 
 \usepackage{minted} % code style
 \usepackage{wrapfig} % wrapped images
+\usepackage{csquotes} % middle quotes
 
 \newcommand{\HRule}{\rule{\linewidth}{0.5mm}}
 \newcommand{\cmark}{\ding{51}}%
@@ -953,7 +954,7 @@ If the decryption succeeds the \texttt{onConnectionDataReceived()} function proc
 
 A replay attack is an attack where an attacker sniffs sent data by the application and then maliciously resends them another time. Doing so the attacker can repeat any message without the users noticing, of course without actually knowing the message. Protection might be realized by implementing a message counter keeping track of the order messages appear in.
 
-We analyzed how Telegram deals with this issue, see Listing \ref{lst:analysis-replay-check}. Upon the decryption it checks if the message was already processed. The \texttt{ConnectionSession} holds an internal array of already processed messages. If the message is accepted and processed the message ID is added into the array.
+We analyzed how Telegram deals with this issue, see Listing \ref{lst:analysis-replay-check}. Upon the decryption it checks if the message was already processed. The function \texttt{ConnectionSession} holds an internal array of already processed messages. If the message is accepted and processed the message ID is then added into the array.
 
 \begin{listing}[htb]
 \caption{Each incoming message is checked whether it was already processed. If not the message is further processed and finally marked as such.
@@ -1000,7 +1001,7 @@ The attack scenario is drafted as follows:
 	\item Telegram processes the first message again
 \end{enumerate}
 
-If Telegram does not provide any additional checks and actually deletes the first ID the message would be accepted twice. With the attack scenario drafted it is desired to perform the attack.
+If Telegram does not provide any additional checks and actually deletes the first 100 IDs the message would be accepted twice. With the attack scenario drafted it is desired to perform the attack.
 
 \subsection{Exploit attempt}
 
@@ -1014,9 +1015,9 @@ Further, since Telegram uses its own Application layer protocol we were unable t
 
 Next, the already mentioned Ettercap used to perform the MiM provides simple filtering interface allowing to modify the data routed through. We tried this approach but Ettercap requires the filters to be written in its own language which is very limiting and unfortunately insufficient for our needs.
 
-The scenario was finally tested with Trudy software which can modify any TCP traffic. As its documentation states Trudy is \emph{``a transparent proxy that can modify and drop traffic for arbitrary TCP connections''} \cite{github-trudy}. All traffic is routed through Trudy which then applies so called \emph{modules}. Trudy provides an example of such module and users are encouraged to further implement it. Since Trudy is written in Go all modules are to be written in Go as well. To route the traffic and setup the environment properly a provided virtual machine may be used \cite{github-trudy-vm}.
+The scenario was finally tested with Trudy software which can modify any TCP traffic. As its documentation states Trudy is \emph{``a transparent proxy that can modify and drop traffic for arbitrary TCP connections''} \cite{github-trudy}. All traffic is routed through Trudy which then applies so called \emph{modules}. Trudy modules are bulks of preprogrammed code to perform modifications desired by the user. Trudy provides an example stub of such module and users are encouraged to implement it. Since Trudy is written in Go all modules are to be written in Go as well. To route the traffic and setup the environment properly a prepared virtual machine is available \cite{github-trudy-vm}.
 
-Upon setting up the MiM as described in \ref{analysis-setup} a virtual machine is run on the computer using Vagrant\footnote{Vagrant is simple wrapper around a virtualization provider for building complete virtual environment.}. The VM installs all required software and Trudy as well. Then it routes all the traffic into and out of Trudy using \texttt{iptables}. Trudy receives all the traffic, modifies it if desired and shifts it back to internet as seen in Figure \ref{img:analysis-trudy-setup}.
+Upon setting up the MiM as described in \ref{analysis-setup} a virtual machine is run on the computer using Vagrant\footnote{Vagrant is a simple wrapper around a virtualization provider for building complete independent virtual environments.}. The VM installs all required software and Trudy as well. Then it routes all the traffic into and out of Trudy using \texttt{iptables}. Trudy receives all the traffic, modifies it based on the used module and shifts it back to internet as seen in Figure \ref{img:analysis-trudy-setup}.
 
 \begin{figure}[htb]
 	\centering
@@ -1050,11 +1051,55 @@ The implementation of a module for Trudy is straightforward. Trudy calls specifi
 \end{itemize}
 
 
+\subsubsection{Preliminaries}
+
+To test our settings we set up a breakpoint on the very line where Telegram checks if the ID was already processed or not, that is the line 729 and 859 in the \texttt{ConnectionsManager} file. If the packet was actually send again these breakpoints would be fired and the message further rejected by Telegram. This would confirm our surmise and later improved to comply fully with the scenario.
+
+To further simplify the process we limited all our testing messages to the length of 201 bytes to easily identify a message from other traffic. The length of the message stayed the same throughout the testing, we only changed some of the characters each time to see which messages arrived. The testing message we used reads:
+
+\begin{displayquote}
+To simplify the process we are using a message longer than 200 bytes to easily identify it in the stream of data
+\end{displayquote}
+
+When sending such message through Telegram its length is always equal to 201 bytes under normal conditions.
+
 \subsubsection{Execution}
 
-First, to test our settings we set up a breakpoint on the very line where Telegram checks if the ID was already processed or not, that is the line 729 and 859 in the \texttt{ConnectionsManager} file. If the packet was actually send again these breakpoints would be fired and the message further rejected by Telegram. This would prove our surmise and later improved to comply fully with the scenario.
+We've implemented the Trudy module as shown in Listing \ref{lst:analysis-replay-module}. The \texttt{DoMangle()} function checks if the source IP address is equal to one of the Telegram datacenters (\texttt{149.154.167.91:80}). We confirmed our testing application is communicating with this server using Wireshark and as well the configuration details extracted from the \texttt{tgnet.dat} file (see Section \ref{analysis-storage-scripts}) contained a datacenter with such IP address. Further the size of the packet is checked to limit to testing messages.
 
-Unfortunately we were unable to perform this. We confirmed Telegram successfully  receives the repeated traffic but neither of the desired breakpoints were fired. Further analysis showed Telegram incorrectly deobfuscated the traffic. This is due to the fact that during the 300 messages the \texttt{obf\_enc\_key\_bytes} change periodically. The deobfuscated data are therefore completely different and are rejected on different places as nonsense.
+If those conditions are met the \texttt{Mangle()} function checks whether some bytes were already saved. If not it signifies this is the first message and it copies the TCP payload into the \texttt{oldBytes} array and sets the \texttt{saved} flag to \emph{true}. It does not modify the payload in any way. If \texttt{saved} is already set to \emph{true} it copies the saved bytes into the currently intercepted TCP packet replacing its content. Keep in mind we are attempting the simplified scenario and therefore not waiting for 300 messages, we are trying to resend the message as soon as another comes which should fire the breakpoints.
+
+\begin{listing}[htb]
+\caption{Programmed Trudy module code used to perform a Replay attack on Telegram. The \texttt{DoMangle()} function limits the packet modifications only to our messages. \texttt{Mangle()} actually performs the attack.}
+\label{lst:analysis-replay-module}
+\begin{minted}{Go}
+var saved bool
+var oldBytes []byte
+
+func (input Data) DoMangle() bool {
+	if input.ServerAddr.String() == "149.154.167.91:80"
+		&& len(input.Bytes) == 201 {
+		return true
+	}
+	return false
+}
+
+func (input *Data) Mangle() {
+	if saved {
+		copy(input.Bytes, oldBytes)
+	} else {
+		oldBytes = make([]byte, len(input.Bytes))
+		copy(oldBytes, input.Bytes)
+		saved = true
+	}
+}
+\end{minted}
+\end{listing}
+
+
+\subsubsection{Results and Future Work}
+
+Unfortunately it was not the case. We confirmed Telegram successfully  receives the repeated traffic but neither of the desired breakpoints were fired. Further analysis showed Telegram incorrectly deobfuscated the traffic. This is due to the fact that during the communication the \texttt{obf\_enc\_key\_bytes} change periodically. The deobfuscated data are therefore completely different and are rejected on different places as nonsense.
 
 The attack still might be possible if we would save the first message in its deobfuscated form, captured the current obfuscation key and obfuscate the data in that way. We were unable to continue this way unfortunately due to time limitations and scope of this work.
 
