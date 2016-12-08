@@ -935,11 +935,19 @@ During the analysis we as well scrutinized some parts of the code attempting to 
 
 \subsection{Incoming data processing}
 
-First, the \texttt{Connection::onReceivedData()} function is called and the incoming data are deobfuscated in the way described in Section \ref{analysis-obf}.
+The Figure \ref{img:analysis-replay-incoming} shows how Telegram processes all incoming data. First, the \texttt{Connection::onReceivedData()} function is called and incoming data are deobfuscated in the way described in Section \ref{analysis-obf}.
 
-Next, the \texttt{ConnectionsManager::onConnectionDataReceived()} function is called. If the \texttt{auth\_key\_id} is not set to 0 (which is only the case of the handshake process; see Section \ref{crypto-keyexchange}) the \texttt{Datacenter::decryptServerResponse()} is invoked. This function checks the \texttt{auth\_key\_id} and decrypts the actual payload using the master secret \texttt{auth\_key} and derived \texttt{msg\_key}.
+Next, the \texttt{ConnectionsManager::onConnectionDataReceived()} function is called. If the \texttt{auth\_key\_id} is not set to 0 (which is only the case of the key exchange process; see Section \ref{crypto-keyexchange}) the \texttt{Datacenter::decryptServerResponse()} is invoked. This function checks the \texttt{auth\_key\_id} and if valid decrypts the actual payload using the master secret \texttt{auth\_key} and derived \texttt{msg\_key}. Upon doing so the message ID and other checks are performed.
 
-If the decryption succeeds the \texttt{onConnectionDataReceived()} function proceeds and processes the IGE decrypted payload and number of checks are carried out. Finally, if those checks succeed the \texttt{ConnectionsManager::processServerResponse} is called to further process the message.
+If the decryption succeeds the \texttt{onConnectionDataReceived()} function proceeds and processes further the IGE decrypted payload. It checks all the headers and other fields. Finally, if all checks succeed the whole process is finalized by the \texttt{ConnectionsManager::processServerResponse} function.
+
+\begin{figure}[htb]
+	\centering
+	\includegraphics[width=0.99\textwidth]{incoming-flow.pdf}
+	\caption[Incoming data processing]{The incoming data are first deobfuscated. If the non-zero \texttt{auth\_key\_id} is valid the message is decrypted and checked if valid. The process is completed by the \texttt{processServerResponse()} function.}
+	\label{img:analysis-replay-incoming}
+\end{figure}
+
 
 \subsection{Vulnerability}
 
