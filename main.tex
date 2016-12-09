@@ -80,9 +80,6 @@ In the scope of this thesis we aim\footnote{"we", "I" nebo radši neurčitě?} t
 
 Further, I'll dive into the code of Telegram itself, the official application for Android in particular. I'll verify its consistency with the official documentation, focus on its code base, evaluate how it proceeds with user's data storage and finally in case some inconsistencies are found I'll draft an attack scenario and attempt to execute it.
 
-
-% Instant messengers are especially by young generation considered as a crucial tool of theirs everyday life. Today's users share many of their intimate moments using one of many messengers available. That said, we should devote our time to investigate messenger's security.
-
 \end{introduction}
 
 
@@ -169,7 +166,7 @@ WhatsApp's user identity is bound to user's phone number. In order to verify the
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.4\textwidth]{whatsapp-registration.png}
-	\caption[WhatsApp's registration process]{WhatsApp's registration process}
+	\caption[WhatsApp's registration process]{WhatsApp's registration process prompts the user to enter its phone number and verifies it by sending a text message.}
 	\label{img:whatsapp_reg}
 \end{figure}
 
@@ -216,11 +213,10 @@ Up to version approximately 2.8 WhatsApp did not use any message encryption. The
 
 On May 2012 an application called ``WhatsAppSniffer'' had been released  \cite{whatsapp-sniffer}\cite{whatsapp-sniffer2}. It abused described flaw and enabled attacker to see victim's messages in easy and lucid user interface.
 
-
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.4\textwidth]{whatsapp-sniffer.png}
-	\caption[WhatsAppSniffer]{WhatsAppSniffer \cite{whatsapp-sniffer2}}
+	\caption[WhatsAppSniffer]{WhatsAppSniffer application was able to sniff all user's data and read them \cite{whatsapp-sniffer2}.}
 	\label{img:whatsapp_sniffer}
 \end{figure}
 
@@ -353,11 +349,11 @@ Regrettably WeChat was not included in the EFF secure messaging survey.
 
 \section{Telegram}
 
-Telegram is instant messaging service enabling users to send messages, photos, videos, stickers and files. Telegram describes itself as fast and secure solution for instant messaging and claims to be safer than WhatsApp. Compared to WhatsApp, Telegram is more cloud-based, it stores all messages on its servers and sync them with all user's devices.\cite{telegramfaq}
+Telegram is instant messaging service enabling users to send messages, photos, videos, stickers and files. Telegram describes itself as fast and secure solution for instant messaging and claims to be safer than WhatsApp. Compared to WhatsApp, Telegram is more cloud-based, it stores all messages on its servers and sync them with all user's devices~\cite{telegramfaq}.
 
 Nikolaj and Pavel Durov are the authors of Telegram. After leaving the  social network VK Pavel Durov founded, they focused on creating safe forms of communication leading to Telegram.
 
-Telegram provides two modes of messaging. Besides the regular chat Telegram provides ``secret chats''. Secret chat messages are encrypted using end-to-end encryption and are not stored on Telegram's servers\cite{telegramfaq}.
+Telegram provides two modes of messaging. Besides the regular chat Telegram provides so-called \emph{secret chats}. Secret chat messages are encrypted using end-to-end encryption and are not stored on Telegram's servers~\cite{telegramfaq}.
 
 \begin{figure}[htb]
 	\centering
@@ -375,7 +371,7 @@ Telegram provides two modes of messaging. Besides the regular chat Telegram prov
 		\caption{Secret chat}
 		\label{img:telegram:secret}
 	\end{subfigure}
-	\caption{Telegram chat modes}
+	\caption[Telegram chat modes]{Telegram has two chat modes. Regular chat is meant to be used for traditional communication and its messages are stored on Telegram's servers. Secret chats are supposed to provide another layer of protection and are end-to-end encrypted.}
 \end{figure}
 
 Similar to WhatsApp user can contact someone using his phone number but Telegram provides classical username approach as well. User needs to know the recipient's phone number or Telegram username in order to communicate with him.
@@ -514,7 +510,7 @@ First, let's describe the content of a single message, further referred to as a 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.7\textwidth]{regular-payload.pdf}
-	\caption[Message payload in regular chats]{Payload of a single message to be encrypted in regular chat.}
+	\caption[Message payload in regular chats]{Payload of a single message to be encrypted in regular chat contains salt, session and message identifier, sequence number, length and the text itself.}
 	\label{img:regular-payload}
 \end{figure}
 
@@ -566,7 +562,7 @@ Careful reader notices that for the first output block we need two initialisatio
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{ige-enc.pdf}
-	\caption[IGE block cipher mode]{IGE mode of operation with two Initialization Vectors \cite{telegram-aarhus} used with AES.}
+	\caption[IGE block cipher mode]{IGE mode of operation with two Initialization Vectors used with AES~\cite{telegram-aarhus}.}
 	\label{img:crypto-regular-ige-enc}
 \end{figure}
 
@@ -624,7 +620,7 @@ Where $r_{client}$ is a 2048-bit random integer generated on the client side and
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.4\textwidth]{telegram-keybox.png}
-	\caption[Encryption key visualization]{Encryption key visualization}
+	\caption[Encryption key visualization]{Encryption key visualization provides a technique to verify no malicious intermediary is present.}
 	\label{img:telegram-keybox}
 \end{figure}
 
@@ -646,7 +642,7 @@ With the key negotiated we may now focus on the message encryption itself. Let's
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.95\textwidth]{secret-payload.pdf}
-	\caption[Message payload in secret chats]{Payload of a single message in secret chat \cite{telegram-aarhus}.}
+	\caption[Message payload in secret chats]{Payload of a single message in secret chat contains a number of additional fields~\cite{telegram-aarhus}.}
 	\label{img:crypto-secret-payload}
 \end{figure}
 
@@ -1034,7 +1030,7 @@ The implementation of a module for Trudy is straightforward. Trudy calls specifi
 \begin{wrapfigure}{r}{0.45\textwidth}
 	\centering
 	\includegraphics[width=0.34\textwidth]{trudy-flow.pdf}
-	\caption[Trudy's data flow]{Trudy's data flow}
+	\caption[Trudy's data flow]{Trudy module's functions are called in a predefined fixed order.}
 	\label{img:analysis-trudy-flow}
 \end{wrapfigure}
 
