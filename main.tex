@@ -74,15 +74,16 @@
 
 \begin{introduction}
 
-The human interaction and communication takes place more and more often in the digital world. This trend will most likely continue and the line between real and digital may one day disappear entirely. The surveillance disclosures emanating from the ex-NSA employee Edward Snowden showed the demand for a secure communication and number of solutions emerged\footnote{Málo "akademické"? Na druhou stranu se po Snowdenovi výrazně více začala řešit bezpečnost komunikace.}. The more users share the more we realize the pitfalls of insecure communications.
+The human interaction and communication takes place more and more often in the digital world. This trend will most likely continue and the line between real and digital may one day disappear entirely. The surveillance disclosures emanating from the ex-NSA employee Edward Snowden showed the demand for a secure communication and number of solutions emerged\footnote{Málo "akademické"? Na druhou stranu se po Snowdenovi výrazně více začala řešit bezpečnost komunikace.}. The more users share the more we realize the pitfalls of insecure communication.
 
-In the scope of this thesis I aim\footnote{První osoba je v pořádku v úvodu?} to provide a brief overview of the current Instant Messenger solutions with the focus on their security. Following this summary I'll focus into more depth on Telegram. Telegram introduces its own cryptographic protocol MTProto instead of using known solutions. Many of the cryptographic community raised its concerns on this decision\footnote{Moc silné tvrzení na úvod?}. I'll be devoted to its further investigation, studying the cryptography behind the protocol, how the protocol deals with key negotiation, message authentication, integrity and other.
+In the scope of this thesis we aim\footnote{"we", "I" nebo radši neurčitě?} to provide a brief overview of the current Instant Messenger solutions with a focus on their security. Following this summary we'll focus into more depth on Telegram. Telegram introduces its own cryptographic protocol MTProto instead of using known solutions which many of the cryptographic community criticised\footnote{Moc silné tvrzení na úvod? Citace v úvodu?}. I'll be devoted to its further investigation, studying the cryptography behind the protocol, how the protocol deals with key negotiation, message authentication, integrity and other.
 
 Further, I'll dive into the code of Telegram itself, the official application for Android in particular. I'll verify its consistency with the official documentation, focus on its code base, evaluate how it proceeds with user's data storage and finally in case some inconsistencies are found I'll draft an attack scenario and attempt to execute it.
 
-\end{introduction}
 
-% This work will focus on five current Instant Messenger solutions. We will cover the messenger's history, origin, its security-related aspects and other information in order to provide the reader an insight into the security of today's modern Instant Messaging.
+% Instant messengers are especially by young generation considered as a crucial tool of theirs everyday life. Today's users share many of their intimate moments using one of many messengers available. That said, we should devote our time to investigate messenger's security.
+
+\end{introduction}
 
 
 
@@ -933,7 +934,7 @@ Readme file is present describing how to build and run the program.
 
 \section{Replay attack}\label{analysis-attacks}
 
-During the analysis we as well scrutinized some parts of the code attempting to discover some potential vulnerabilities to exploit. To provide a little bit of a context let's now briefly describe how Telegram processes any incoming data.
+During the analysis we as well examined some parts of the code attempting to discover some potential vulnerabilities to exploit. To provide a little bit of a context let's now briefly describe how Telegram processes any incoming data.
 
 \subsection{Incoming data processing}
 
@@ -1120,17 +1121,27 @@ The findings have been reported to Telegram on 12 December 2016 with a request f
 
 \begin{conclusion}
 
-TODO TODO TODO
+The goal of this thesis was to describe a selection of currently used Instant Messenger solutions and to investigate Telegram into more details, mainly its homebrew protocol MTProto and its code. This has been successfully accomplished.
 
-% This work will focus on five current Instant Messenger solutions. We will cover the messenger's history, origin, its security-related aspects and other information in order to provide the reader an insight into the security of today's modern Instant Messaging.
+First, we've described five Instant Messengers and covered its history, origin, its security-related aspects and other information in order to provide the reader an insight into the security of today's modern Instant Messaging.
 
-Instant messengers are especially by young generation considered as a crucial tool of theirs everyday life. Today's users share many of their intimate moments using one of many messengers available. That said, we should devote our time to investigate messenger's security.
+We've analyzed many security incidents and presented their impact on the end user. We noted how the messengers respond to such incidents and if they try to improve their security. There are still number of security related problems remaining. Many messengers are closed-source thus not providing an opportunity for an independent code review. Insufficient or completely missing documentation raises severe questions as well.
 
-We've analyzed many security incidents and presented their impact on the end user. We noted how the messengers respond to such incidents and if they try to improve their security. We presented the collaboration between WhatsApp and Open Whisper Systems delivering the Signal's protocol to WhatsApp. From such cooperation users may only benefit.
+In the next chapters we've studied the Telegram IM and its MTProto protocol. We've thoroughly documented the protocol's internal working, its initialization and encryption process. Since Telegram has two types of chat environment (regular and secret chats) we've covered both and stressed out how they relate to each other. We've noted the cryptographic primitives it uses as well.
 
-There are still number of security related problems remaining. Many messengers are closed-source thus not providing an opportunity for an independent code review. Insufficient or completely missing documentation raises questions as well.
+In Chapter \ref{analysis} we setup a testing laboratory using various tools and analyzed the network traffic Telegram produces. We've scrutinized the code base of the official application for Android and concluded the state of the application is at serious variance with the official documentation. This concerns mainly the undocumented obfuscation method described in Section \ref{analysis-obf}. We've implemented deobfuscation program converting the obfuscated traffic into its raw form and other auxiliary tools.
 
-Finally, the reader should have received an insight into Telegram's inner operations. We described Telegram's encryption and decryption process and described some of the cryptographical primitives.
+Finally, we've identified what we believe might be an exploitable vulnerability and drafted an attack scenario. Although our primary scenario of the attack turned out not be applicable, we've drafted a new altered scenario which we believe could be.
+
+For future research we recommend\footnote{Úplně nevím, jestli to sem dávat. Nebo přesunout?}:
+
+\begin{itemize}
+	\item Performing the new modified attack scenario outlined in Section \ref{analysis-attacks}.
+	\item Analyze the usage of sequence numbers. During the analysis we didn't observe validation of the sequence numbers as promoted in the documentation.
+	\item Analyzing other official Telegram clients, such as the desktop or iOS version.
+\end{itemize}
+
+
 
 \end{conclusion}
 
