@@ -409,11 +409,17 @@ On November 4, 2014, Telegram published contest with a winning price \$300,000 f
 
 The contest remained unsolved until his closure. Number of authors considered it rigged and stated that the contest does not provide any prove of Telegram's overall security whatsoever.\cite{telegramcontestfail}\cite{telegramcontestfail2}
 
+\subsubsection{IND-CCA insecurity}
+
+In Spring 2015 researchers from Aarhus University performed an independent audit of the protocol \cite{telegram-aarhus}. They concluded the encryption scheme is not IND-CCA\footnote{Indistinguishability under Chosen Ciphertext} secure, meaning any ciphertext can be altered into another ciphertext decrypting to the very same plaintext.
+
+The researchers stressed the theoretical nature of the attack and that they ``\emph{do not see any way of turning the attack into a full plaintext-recovery attack}''\cite{telegram-aarhus}. Telegram's FAQ describes it as a minor issue unaffecting overall security \cite{telegram-techfaq}.
+
+
 \subsection{EFF's secure messaging score}
 
 As mentioned Telegram has two types of messages. Telegram is therefore evaluated twice by the EFF.
 
-\clearpage
 
 \subsubsection{Telegram regular chats}
 
@@ -568,9 +574,7 @@ Careful reader notices that for the first output block we need two initialisatio
 
 \subsubsection{SHA-1}
 
-SHA-1 is a cryptographic hash function and most widely used one \cite{understanding-crypto}. It produces 160-bit digest of a message. The authors opted for SHA-1 because of its low resource consumption.
-
-Some experts consider SHA-1 as outdated and recommended to be replaced by SHA-2 or SHA-3. % TODO consequences for Telegram tady nebo jinde?
+SHA-1 is a cryptographic hash function and most widely used one \cite{understanding-crypto}. It produces 160-bit digest of a message. The authors opted for SHA-1 because of its low resource consumption \cite{telegram-sha1}. Some experts consider SHA-1 as outdated and recommended to be replaced by SHA-2 or SHA-3 \cite{telegram-sha1}. % TODO consequences for Telegram tady nebo jinde?
 
 \subsection{Decryption}\label{crypto-regular-dec}
 
@@ -1114,33 +1118,6 @@ We were unable to continue the attack due to time limitations and the scope of t
 This requires to have the obfuscation capabilities introduced in the C program in Section \ref{analysis-obf-program}. Since Go has a native support of C the codebase could be incorporated into the Trudy module.
 
 The findings have been reported to Telegram on 12 December 2016 with a request for comments. As of today we did not receive a reply.
-
-
-
-
-
-\chapter{TODO}
-
-\subsection{Mirroring attack}
-
-A mirroring attack is similar attack when the attacker captures sent data from the user and directly copies the data to him. If a simple counter is used the client is unaware if the message didn't arrive in the exact same time as the counter in time.
-
-\subsection{SHA-1}
-
-Telegram architects chosed to use SHA-1 because of its low resource consumption. SHA-1 is however, cryptographically broken in some scenarios \cite{telegram-sha1}. The Bruce Schneier's blog claims \cite{telegram-sha1}: \emph{``A collision attack is therefore well within the range of what an organized crime syndicate can practically budget by 2018, and a university research project by 2021.''}
-
-Let's investigate what the consequences would be if any collisions are found.
-
-As mentioned in Section \ref{telegram-enc} \emph{auth\_key\_id} is made of the last 64-bit SHA-1 hash of the master secret \emph{auth\_key}. Becuase of the truncation finding another input which hashes to the \emph{auth\_key\_id} is significantly easier. On the other hand we need to perform a preimage attack which is harder than a collision attack, hence the quoted findings are not applicable.
-
-The SHA-1 is applied in MTProto as well to calculate the integrity check \emph{msg\_key}. If an attacker would find a message $m'$ that yields the same \emph{msg\_key} as for message $m$ she could theoretically forge the message. However, the \emph{msg\_key} is hash of the plaintext, which as per Telegram's FAQ \cite{telegram-techfaq} mitigates the risks.
-
-\subsection{IND-CCA insecurity}
-
-In Spring 2015 researchers from Aarhus University performed an independent audit of the protocol \cite{telegram-aarhus}. They concluded the encryption scheme is not IND-CCA\footnote{Indistinguishability under Chosen Ciphertext} secure, meaning any ciphertext can be altered into another ciphertext decrypting to the very same plaintext.
-
-The researchers stressed the theoretical nature of the attack and that they ``\emph{do not see any way of turning the attack into a full plaintext-recovery attack}''\cite{telegram-aarhus}. Telegram's FAQ describes it as a minor issue unaffecting overall security. \cite{telegram-techfaq}
-
 
 
 
