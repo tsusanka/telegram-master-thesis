@@ -1053,21 +1053,21 @@ The implementation of a module for Trudy is straightforward. Trudy calls specifi
 
 \subsubsection{Preliminaries}
 
-To test our settings we set up a breakpoint on the very line where Telegram checks if the ID was already processed or not, that is the line 729 and 859 in the \texttt{ConnectionsManager} file. If the packet was actually send again these breakpoints would be fired and the message further rejected by Telegram. This would confirm our surmise and later improved to comply fully with the scenario.
+To test our settings we didn't wait for the next 300 messages, rather set up breakpoints on the very lines where Telegram checks if the ID was already processed or not, the line 729 and 859 in the \texttt{ConnectionsManager} file in particular. If the packet was actually send again these breakpoints would be fired and the message further rejected by Telegram. This would confirm our surmise and later improved to comply fully with the scenario.
 
-To further simplify the process we limited all our testing messages to the length of 201 bytes to easily identify a message from other traffic. The length of the message stayed the same throughout the testing, we only changed some of the characters each time to see which messages arrived. The testing message we used reads:
+To further simplify the process we limited all the test messages to the length of 201 bytes to easily identify a message from the other traffic. The length of the message remained the same throughout the testing, we only changed some of the characters each time to see which messages arrived. The testing message we used reads:
 
 \begin{displayquote}
 To simplify the process we are using a message longer than 200 bytes to easily identify it in the stream of data
 \end{displayquote}
 
-When sending such message through Telegram its length is always equal to 201 bytes under normal conditions.
+When sending such message through Telegram its length is always equal to 201 bytes under regular conditions.
 
 \subsubsection{Execution}
 
-We've implemented the Trudy module as shown in Listing \ref{lst:analysis-replay-module}. The \texttt{DoMangle()} function checks if the source IP address is equal to one of the Telegram datacenters (\texttt{149.154.167.91:80}). We confirmed our testing application is communicating with this server using Wireshark and as well the configuration details extracted from the \texttt{tgnet.dat} file (see Section \ref{analysis-storage-scripts}) contained a datacenter with such IP address. Further the size of the packet is checked to limit to testing messages.
+We've implemented the Trudy module as shown in Listing \ref{lst:analysis-replay-module}. The \texttt{DoMangle()} function checks if the source IP address is equal to one of the Telegram datacenters (\texttt{149.154.167.91:80}). We confirmed our testing application is communicating with this server using Wireshark and as well the configuration details extracted from the \texttt{tgnet.dat} file (see Section \ref{analysis-storage-scripts}) contained a datacenter with such IP address. Further the size of the packet is checked to select the testing messages only.
 
-If those conditions are met the \texttt{Mangle()} function checks whether some bytes were already saved. If not it signifies this is the first message and it copies the TCP payload into the \texttt{oldBytes} array and sets the \texttt{saved} flag to \emph{true}. It does not modify the payload in any way. If \texttt{saved} is already set to \emph{true} it copies the saved bytes into the currently intercepted TCP packet replacing its content. Keep in mind we are attempting the simplified scenario and therefore not waiting for 300 messages, we are trying to resend the message as soon as another comes which should fire the breakpoints.
+If those conditions are met the \texttt{Mangle()} function checks whether some bytes were already saved. If not it signifies this is the first message and it copies the TCP payload into the \texttt{oldBytes} array and sets the \texttt{saved} flag to \emph{true}. It does not modify the payload in any way. If \texttt{saved} is already set to \emph{true} it copies the saved bytes into the currently intercepted TCP packet replacing its content. Keep in mind we are attempting the simplified scenario and therefore not waiting for 300 other messages, we are trying to resend the message as soon as another comes which should fire the breakpoints.
 
 \begin{listing}[htb]
 \caption{Programmed Trudy module code used to perform a Replay attack on Telegram. The \texttt{DoMangle()} function limits the packet modifications only to our messages. \texttt{Mangle()} actually performs the attack.}
@@ -1112,6 +1112,8 @@ We were unable to continue the attack due to time limitations and the scope of t
 \end{enumerate}
 
 This requires to have the obfuscation capabilities introduced in the C program in Section \ref{analysis-obf-program}. Since Go has a native support of C the codebase could be incorporated into the Trudy module.
+
+The findings have been reported to Telegram on 12 December 2016 with a request for comments. As of today we did not receive a reply.
 
 
 
