@@ -74,18 +74,15 @@
 
 \begin{introduction}
 
-TODO TODO zduraznit motivaci
+The human interaction and communication takes place more and more often in the digital world. This trend will most likely continue and the line between real and digital may one day disappear entirely. The surveillance disclosures emanating from the ex-NSA employee Edward Snowden showed the demand for a secure communication and number of solutions emerged\footnote{Málo "akademické"? Na druhou stranu se po Snowdenovi výrazně více začala řešit bezpečnost komunikace.}. The more users share the more we realize the pitfalls of insecure communications.
 
-The human interaction and communication takes place more and more often in the digital world. This trend will most likely continue and the line between real and digital may one day disappear entirely. There is a plenty of communication solutions. Some claim themselves as very secure, some try to avoid such questions.
+In the scope of this thesis I aim\footnote{První osoba je v pořádku v úvodu?} to provide a brief overview of the current Instant Messenger solutions with the focus on their security. Following this summary I'll focus into more depth on Telegram. Telegram introduces its own cryptographic protocol MTProto instead of using known solutions. Many of the cryptographic community raised its concerns on this decision\footnote{Moc silné tvrzení na úvod?}. I'll be devoted to its further investigation, studying the cryptography behind the protocol, how the protocol deals with key negotiation, message authentication, integrity and other.
 
-Today's users are picky. Instant messengers are de facto required to have both mobile and web access and more advance capabilities, such as media, voice or location sharing and the list might continue.
+Further, I'll dive into the code of Telegram itself, the official application for Android in particular. I'll verify its consistency with the official documentation, focus on its code base, evaluate how it proceeds with user's data storage and finally in case some inconsistencies are found I'll draft an attack scenario and attempt to execute it.
 
-The surveillance disclosures emanating from the ex-NSA employee Edward Snowden showed the demand for a secure communication and number of solutions emerged. The more users share the more we realize the pitfalls of insecure communication. We shall not however forget that there is a distinction between security advertised and security actually achieved.
-
-TODO Telegram
+\end{introduction}
 
 % This work will focus on five current Instant Messenger solutions. We will cover the messenger's history, origin, its security-related aspects and other information in order to provide the reader an insight into the security of today's modern Instant Messaging.
-\end{introduction}
 
 
 
@@ -1124,6 +1121,8 @@ The findings have been reported to Telegram on 12 December 2016 with a request f
 \begin{conclusion}
 
 TODO TODO TODO
+
+% This work will focus on five current Instant Messenger solutions. We will cover the messenger's history, origin, its security-related aspects and other information in order to provide the reader an insight into the security of today's modern Instant Messaging.
 
 Instant messengers are especially by young generation considered as a crucial tool of theirs everyday life. Today's users share many of their intimate moments using one of many messengers available. That said, we should devote our time to investigate messenger's security.
 
