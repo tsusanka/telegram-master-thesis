@@ -1099,7 +1099,7 @@ func (input *Data) Mangle() {
 
 Unfortunately it was not the case. We confirmed Telegram successfully  receives the repeated traffic but neither of the desired breakpoints were fired. Further analysis showed Telegram incorrectly deobfuscated the traffic. This is due to the fact that during the communication the \texttt{obf\_enc\_key\_bytes} change periodically. The deobfuscated data are therefore completely different and are rejected on different places as nonsense.
 
-We were unable to continue the attack due to time limitations and the scope of this work. However, we still believe this attack might be feasible. In order to continue the obfuscation keys would have to be saved as well. The modified scenario goes as follow:
+We were unable to continue the attack due to time limitations and the scope of this work. However, we still believe this attack is feasible. In order to continue the obfuscation keys would have to be saved as well. The modified scenario goes as follow:
 
 \begin{enumerate}
 	\item Sniff a message, deobfuscate it and save
@@ -1111,7 +1111,20 @@ We were unable to continue the attack due to time limitations and the scope of t
 
 This requires to have the obfuscation capabilities introduced in the C program in Section \ref{analysis-obf-program}. Since Go has a native support of C the codebase could be incorporated into the Trudy module.
 
-The findings have been reported to Telegram on 12 December 2016 with a request for comments. As of today we did not receive a reply.
+
+\subsubsection{Responsible Disclosure}
+
+The findings were reported to Telegram security team on 7 December 2016 with a request for comments. In particular, two points were discussed, the obfuscation method and the Replay attack scenario. A response from Telegram was received on 12 December 2016.
+
+The obfuscation method was commented only briefly as \emph{``unrelated to data security and is used to counter some of the less sophisticated attempts at banning our service in certain countries''}. In October 2015 Pavel Durov stated on its Twitter account that Telegram was blocked temporarily in Iran as a result of denied collaboration with the Iranian government~\cite{telegram-durov-iran}. This of course concerns other countries applying some form of internet censorship but illustrates that Telegram indeed faces censorship issues.
+
+MTProto has a fixed structure where the \texttt{auth\_key\_id} value is always present at the beginning of the packet and therefore easily recognizable. This may be considered as a design flaw of the protocol itself.
+
+Under these circumstances it is understandable why the obfuscation method is not documented.
+
+Secondly, Telegram responded to our attack scenario form Section \ref{analysis-attacks}.
+
+
 
 
 
