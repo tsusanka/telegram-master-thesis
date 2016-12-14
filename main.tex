@@ -211,7 +211,7 @@ Any phone number and IMEI was therefore all an attacker needed to send messages 
 
 Up to version approximately 2.8 WhatsApp did not use any message encryption. The messenger used port 443 (commonly used for HTTPS) to send content, however it did not encrypt anything~\cite{whatsapp-plaintext}. Using a simple network sniffer like Wireshark attacker was able to read all user's messages.
 
-On May 2012 an application called ``WhatsAppSniffer'' had been released ~\cite{whatsapp-sniffer, whatsapp-sniffer2}. It abused described flaw and enabled attacker to see victim's messages in easy and lucid user interface.
+On May 2012 an application called WhatsAppSniffer had been released ~\cite{whatsapp-sniffer, whatsapp-sniffer2}. It abused described flaw and enabled attacker to see victim's messages in easy and lucid user interface.
 
 \begin{figure}[htb]
 	\centering
@@ -227,7 +227,7 @@ On November 18, 2014, Open Whisper Systems, the creators behind Signal messenger
 
 WhatsApp confirmed this partnership, however did not comment it any further nor offered any further information. No additional information from Open Whisper Systems' side had been released as well. WhatsApp's FAQ currently only briefly states \emph{``WhatsApp communication between your phone and our server is encrypted.''}~\cite{whatsapp-faq}.
 
-On April 2015, \emph{heise.de} investigated the current state of WhatsApp's encryption. The journalists were sniffing messages using the Man-in-the-Middle technique. They showed that Android versions used end-to-end encryption and that the messages ``\emph{were encrypted according to the TextSecure protocol}''~\cite{whatsapp-encstate}. However, during testing the iOS client they concluded the messages weren't protected in such manner. Finally, they concluded they are unsure whether end-to-end encryption was actually used in all cases.
+On April 2015, \emph{heise.de} investigated the current state of WhatsApp's encryption. The journalists were sniffing messages using the Man-in-the-Middle technique. They showed that Android versions used end-to-end encryption and that the messages \emph{``were encrypted according to the TextSecure protocol''}~\cite{whatsapp-encstate}. However, during testing the iOS client they concluded the messages weren't protected in such manner. Finally, they concluded they are unsure whether end-to-end encryption was actually used in all cases.
 
 TODO WhatsApp released white paper
 
@@ -407,7 +407,7 @@ The contest remained unsolved until his closure. Number of authors considered it
 
 In Spring 2015 researchers from Aarhus University performed an independent audit of the protocol~\cite{telegram-aarhus}. They concluded the encryption scheme is not IND-CCA\footnote{Indistinguishability under Chosen Ciphertext} secure, meaning any ciphertext can be altered into another ciphertext decrypting to the very same plaintext.
 
-The researchers stressed the theoretical nature of the attack and that they ``\emph{do not see any way of turning the attack into a full plaintext-recovery attack}''~\cite{telegram-aarhus}. Telegram's FAQ describes it as a minor issue unaffecting overall security~\cite{telegram-techfaq}.
+The researchers stressed the theoretical nature of the attack and that they \emph{``do not see any way of turning the attack into a full plaintext-recovery attack''}~\cite{telegram-aarhus}. Telegram's FAQ describes it as a minor issue unaffecting overall security~\cite{telegram-techfaq}.
 
 
 \subsection{EFF's secure messaging score}
