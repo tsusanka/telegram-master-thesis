@@ -1114,15 +1114,25 @@ This requires to have the obfuscation capabilities introduced in the C program i
 
 \subsubsection{Responsible Disclosure}
 
-The findings were reported to Telegram security team on 7 December 2016 with a request for comments. In particular, two points were discussed, the obfuscation method and the Replay attack scenario. A response from Telegram was received on 12 December 2016.
+The findings were reported to Telegram security team on 7 December 2016 with a kind request for comments. In particular, two points were discussed, the obfuscation method and the Replay attack scenario. The first response from Telegram was received on 12 December 2016.
 
-The obfuscation method was commented only briefly as \emph{``unrelated to data security and is used to counter some of the less sophisticated attempts at banning our service in certain countries''}. In October 2015 Pavel Durov stated on its Twitter account that Telegram was blocked temporarily in Iran as a result of denied collaboration with the Iranian government~\cite{telegram-durov-iran}. This of course concerns other countries applying some form of internet censorship but illustrates that Telegram indeed faces censorship issues.
+The obfuscation method was commented only briefly as \emph{``unrelated to data security and is used to counter some of the less sophisticated attempts at banning our service in certain countries''}. In October 2015 Pavel Durov (the founder of Telegram) stated on its Twitter account that Telegram was blocked temporarily in Iran as a result of denied collaboration with the Iranian government~\cite{telegram-durov-iran}. This most likely concerns other countries applying some form of internet censorship but illustrates well that Telegram indeed faces censorship issues.
 
 MTProto has a fixed structure where the \texttt{auth\_key\_id} value is always present at the beginning of the packet and therefore easily recognizable. This may be considered as a design flaw of the protocol itself.
 
-Under these circumstances it is understandable why the obfuscation method is not documented.
+Under these circumstances it is understandable why the obfuscation method is not officially documented in any form.
 
-Secondly, Telegram responded to our attack scenario from Section \ref{analysis-attacks}.
+Secondly, Telegram responded to our attack scenario from Section \ref{analysis-attacks} and actually accepted some of our claims. According to the Telegram team the Android application (as opposed to the other clients such as Telegram for iOS, Telegram Desktop etc.) does not perform one of the the security checks as is required by the protocol, defined in the Security Guidelines for Client Developers
+in particular \cite{telegram-security-guideline}.
+
+Among other checks, the Security Guideline requires \cite{telegram-security-guideline} the message ID to be checked against the stored ones and Telegram performs that. However, it requires one more additional check -- if the incoming message has lower or equal ID than all the stored IDs such message is to be discarded. This action does indeed mitigate the risk, but Telegram for Android did not carry out this check.
+ 
+The Telegram team further elaborate that this vulnerability does not allow the attacker to cause severe damage because of additional protection on the side of the Telegram API. Messages (sending, editing, deleting, and changing read status), group membership, secret chats, and other important areas are not be affected\footnote{According to Telegram these checks are done in the \texttt{MessagesController.java} class on lines 5731, 5561, 5765, 5817 and other.}.
+
+Nevertheless, Telegram team confirmed the attack would work for nonessential service updates like online or typing statuses. Telegram promised this will be fixed in the next Android release and offered a financial reward for our findings.
+
+We briefly reviewed theses claims. The Java part of Telegram application indeed does deal with additional identifiers, such as \texttt{qts}, \texttt{pts} and other. These values do seem to provide additional protection. It is important to note that we did not perform a deeper kind of research.
+
 
 
 
