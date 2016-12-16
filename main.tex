@@ -256,15 +256,15 @@ At the time of writing, WhatsApp has six points out of seven in the EFF's secure
 
 \section{Signal}
 
-Signal is an open-source voice calling and messaging application. It is available for Android and iOS. Its messages are end-to-end encrypted. During a voice calls simple identity check is available when a given word is included by both sides in the call.
+Signal is an open-source voice calling and messaging application. It is available for Android and iOS. Its messages are end-to-end encrypted. During a voice call a simple identity check is available when a given word is supposed to be pronounced by both sides of the call.
 
-Signal uses its own Signal Protocol (previously called \emph{Axolotl}) based on cryptographic primitives such as Elliptic Curves (Curve25519), AES and HMAC-SHA256~\cite{signal-bochum}. As mentioned in Section~\ref{whatsapp} WhatsApp currently uses the very same protocol.
+Signal uses its own Signal Protocol (previously called Axolotl) based on cryptographic primitives such as Elliptic Curves (Curve25519), AES and HMAC-SHA256~\cite{signal-bochum}. As mentioned in Section~\ref{whatsapp} WhatsApp currently uses the very same protocol.
 
 \subsection{Security-related incidents}
 
 In late 2014 \emph{Der Spiegel} published articles claiming NSA considered Signal's encrypted voice calling used with other tools as a catastrophic to theirs surveilance missions~\cite{signal-spiegel}. Edward Snowden recommended Signal on various occasions~\cite{signal-snowden,signal-snowden2}.
 
-A research team from Ruhr University Bochum provided a security analysis \emph{``How Secure is TextSecure?''} of the former Signal version \cite{signal-bochum}. They came to a conclusion that the protocol is susceptible for an Unknown key-share attack and proposed a mitigation. If such patch applied they concluded Signal as secure.
+A research team from the Ruhr-University Bochum provided a security analysis \emph{``How Secure is TextSecure?''} of the former Signal version \cite{signal-bochum}. They came to a conclusion that the protocol is susceptible to an Unknown key-share attack and proposed a mitigation. The researchers concluded Signal as secure in case the suggested patch was applied which eventually was.
 
 Up to this date no other security-related incidents or analysis of Signal messenger are known.
 
