@@ -62,7 +62,7 @@
 \author{Tom{\' a}{\v s} Su{\v s}{\' a}nka} %author's name without academic degrees
 \authorWithDegrees{Bc. Tom{\' a}{\v s} Su{\v s}{\' a}nka} %author's name with academic degrees
 \supervisor{Ing. Josef Kokeš}
-\acknowledgements{Most importantly, I would like to thank my thesis supervisor Ing. Josef Kokeš for his essential help, guidance and an incredible response time. Many thanks to Jakob Bjerre Jakobsen from the Aarhus University for sharing his source codes of the MTProto illustrations which I partially modified. Thanks to Prof.~Dr.-Ing.~Christof Paar and Dr.-Ing.~Juraj Somorovsky from Ruhr-Universität Bochum for encouraging me to pursue this topic. Special thanks to Miriam for proofreading\footnote{In case, she actually does, kind of a test. (TODO)} and last but not least, thanks to my family for supporting me during my studies.}
+\acknowledgements{Most importantly, I would like to thank my thesis supervisor Ing. Josef Kokeš for his essential help, guidance and an incredible response time. Many thanks to Jakob Bjerre Jakobsen from the Aarhus University for sharing his source codes of the MTProto illustrations which I partially modified. Thanks to Prof.~Dr.-Ing.~Christof Paar and Dr.-Ing.~Juraj Somorovsky from the Ruhr-University Bochum for encouraging me to pursue this topic. Special thanks to Miriam for proofreading\footnote{In case, she actually does, kind of a test. (TODO)} and last but not least, thanks to my family for supporting me during my studies.}
 \abstractCS{TODO}
 \abstractEN{TODO}
 \placeForDeclarationOfAuthenticity{Žižkov, Prague} %where you have signed the declaration
@@ -72,19 +72,25 @@
 
 \begin{document}
 
-% \newacronym{IM}{IM}{Instant Messanger}
-% \newacronym{RLE}{RLE}{Run-Length Encoding}
-
 \begin{introduction}
 
-The human interaction and communication take place more and more often in the digital world. This trend will most likely continue and the line between real and digital may one day disappear entirely. The surveillance disclosures emanating from the ex-NSA employee Edward Snowden showed the demand for a secure communication and a number of solutions has emerged\footnote{Málo "akademické"? Na druhou stranu se po Snowdenovi výrazně více začala řešit bezpečnost komunikace.}. The~more users share the more we realize the pitfalls of insecure communication.
+Instant messaging is a form of an online real-time communication. The history of Instant Messengers (IM) dates back as far as to 1960s, but the modern IMs, as we currently know them, were published in the mid-1990s, such as the very popular ICQ or AOL Instant Messenger. Nowadays, the human interaction and communication take place more and more often in the digital realm and instant messaging is the digital version of a spoken dialogue.
 
-In the scope of this thesis we aim\footnote{"we", "I" nebo radši neurčitě?} to provide a brief overview of the current Instant Messenger solutions with a focus on their security. Following this summary we'll focus in more depth on Telegram. Telegram introduces its own cryptographic protocol MTProto instead of using known solutions which many of the cryptographic community criticised\footnote{Moc silné tvrzení na úvod? Citace v úvodu?}. I'll devote myself to its further investigation, studying the cryptography behind the protocol, how the protocol deals with key negotiation, message authentication, integrity and other topics.
+A common feature of the IM software is the ability to see if a specific contact is connected and available or not. Further, IMs are primarily designed for a repetitive exchange of a number of shorter messages, as opposed to the well-established typically longer emails.
 
-Furthermore, I'll dive into the code of Telegram itself, the official application for Android in particular. I'll verify its consistency with the official documentation, focus on its code base, evaluate how it proceeds with user's data storage and finally in case some inconsistencies are found I'll draft an attack scenario and I'll attempt to execute it.
+Today, many social networks as well provide some form of messaging solution and the users are picky. Instant messengers are de facto required to have both mobile and web access and more advance capabilities, such as media, voice, or location sharing and the list goes on.
+
+The surveillance disclosures emanating from the ex-NSA employee Edward Snowden showed the demand for a secure communication and a number of solutions has emerged. The~more users share the more we realize the pitfalls of insecure communication.
+
+In the scope of this thesis we aim to provide a brief overview of the current Instant Messenger solutions with a focus on their security. We will cover the messengers' history, origin, their security-related aspects and other
+information in order to provide the reader an insight into the security of
+today's modern instant messaging applications.
+
+Following this summary we will focus in more depth on Telegram. Telegram stresses out the need for users' privacy, and has 100 million active users, especially popular in Iran, but as well in the US, Germany, India, Uzbekistan, Russia, Italy or Brazil~\cite{telegram-countries}. Telegram introduces its own cryptographic protocol MTProto instead of using known solutions which many of the cryptographic community criticised~\cite{telegram-community-vice,telegram-community-register}. We will devote ourselves to its further investigation, studying the cryptography behind the protocol, how the protocol deals with a key negotiation, message authentication, integrity and other topics.
+
+Furthermore, we will dive into the code of Telegram itself, the official application for Android in particular. We'll verify its consistency with the official documentation, focus on its code base, evaluate how it proceeds with user's data storage and finally in case some inconsistencies are found we will draft an attack scenario and attempt to execute it.
 
 \end{introduction}
-
 
 
 \chapter{Current security status of major IMs}\label{compar}
