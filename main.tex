@@ -1134,33 +1134,24 @@ The Telegram team further elaborated that this vulnerability does not allow the 
 
 We briefly reviewed theses claims and concluded that the Java part of Telegram application indeed does deal with additional identifiers, such as \texttt{qts}, \texttt{pts} and other. These values do seem to provide additional protection. It is important to note that we did not perform a deeper kind of research.
 
-Telegram promised this will be fixed in the next Android release and offered a financial reward for our findings.
+Telegram promised this will be fixed in the next Android update and offered a financial reward for our findings.
 
 
 
 
 \begin{conclusion}
 
-The goal of this thesis was to describe a selection of currently used Instant Messenger solutions and to investigate Telegram in more detail, mainly its homebrew protocol MTProto and its code. This has been successfully accomplished.
+In the scope of this thesis our objective was to describe a selection of currently used Instant Messenger solutions and discuss its security aspects. Furthermore, to investigate the Telegram Instant Messenger in more detail, mainly its homebrew protocol MTProto and its code.
 
-First, we've described five Instant Messengers and covered their history, origin, their security-related aspects and other information in order to provide the reader with an insight into the security of today's modern Instant Messaging.
+We have analyzed many security-related incidents and presented their impact on the end user. We have noted how the messengers respond to such incidents, and if they try to improve their security. A number of security related problems still remain. Many messengers are closed-source thus not providing an opportunity for an independent code review, and insufficient or completely missing documentation raises severe questions as well.
 
-We've analyzed many security incidents and presented their impact on the end user. We noted how the messengers respond to such incidents and if they try to improve their security. A number of security related problems still remain. Many messengers are closed-source thus not providing an opportunity for an independent code review. Insufficient or completely missing documentation raises severe questions as well.
+Moreover, we have studied the Telegram IM and its MTProto protocol. We have thoroughly documented the protocol's internal working, its initialization and the encryption process. Since Telegram has two types of chat environment (regular and secret chats) we have covered both, and stressed out how they relate to each other. We have noted the cryptographic primitives it uses as well.
 
-In the following chapters we've studied the Telegram IM and its MTProto protocol. We've thoroughly documented the protocol's internal working, its initialization and encryption process. Since Telegram has two types of chat environment (regular and secret chats) we've covered both and stressed out how they relate to each other. We've noted the cryptographic primitives it uses as well.
+We have setup a testing laboratory using various tools, and analyzed the network traffic Telegram produces. We have scrutinized the code base of the official application for Android, and concluded the state of the application is at serious odds with the documentation. This concerns mainly the undocumented obfuscation method Telegram uses. The MTProto traffic is encrypted one more time with the key and IV appended in front of the data. This has no effect on the data security, and is easily debunked by the deobfuscation program we have implemented. When the Telegram team was confronted with these claims, they noted the method is used to defy some of the less sophisticated methods of censorship in certain countries.
 
-In Chapter \ref{analysis} we setup a testing laboratory using various tools and analyzed the network traffic Telegram produces. We've scrutinized the code base of the official application for Android and concluded the state of the application is at serious odds with the official documentation. This concerns mainly the undocumented obfuscation method described in Section \ref{analysis-obf}. We've implemented deobfuscation program converting the obfuscated traffic into its raw form and other auxiliary tools.
+Finally, we have localized an exploitable vulnerability and drafted an attack scenario. We concluded the Android application does not check message identification numbers properly and that a Replay attack might be feasible. Although our primary scenario of the attack turned out not to be applicable, we have drafted a new altered scenario which we believe could be. We have reported our findings to the Telegram security team which accepted our remarks and agreed, to a certain degree, this might be exploitable. Telegram promised to fix this issue in the next software release.
 
-Finally, we've identified what we believe might be an exploitable vulnerability and drafted an attack scenario. Although our primary scenario of the attack turned out not to be applicable, we've drafted a new altered scenario which we believe could be.
-
-For future research we recommend\footnote{Úplně nevím, jestli to sem dávat. Nebo přesunout?}:
-
-\begin{itemize}
-	\item Performing the new modified attack scenario outlined in Section \ref{analysis-attacks}.
-	\item Analyze the usage of sequence numbers. During the analysis we didn't observe validation of the sequence numbers as promoted in the documentation.
-	\item Analyzing other official Telegram clients, such as the desktop or iOS version.
-\end{itemize}
-
+Our work mainly focused on the protocol and the Android client, but there are still many areas where further research might be required. Other research might focus on the other Telegram clients, such as the desktop or iOS version, studying the protocol as a whole or applying other forms of attacks.
 
 
 \end{conclusion}
