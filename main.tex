@@ -353,11 +353,11 @@ Regrettably, WeChat was not included in the EFF secure messaging survey.
 
 \section{Telegram}
 
-Telegram is instant messaging service enabling users to send messages, photos, videos, stickers and files. Telegram describes itself as fast and secure solution for instant messaging and claims to be safer than WhatsApp. Compared to WhatsApp, Telegram is more cloud-based, it stores all messages on its servers and sync them with all user's devices~\cite{telegramfaq}.
+Telegram is an instant messaging service enabling users to send messages, photos, videos, stickers and files. Telegram describes itself as fast and secure solution for instant messaging, and claims to be safer than WhatsApp. Compared to WhatsApp, Telegram is more cloud-based because it stores all messages on its servers, and sync them with all the user's devices~\cite{telegramfaq}.
 
-Nikolaj and Pavel Durov are the authors of Telegram. After leaving the  social network VK Pavel Durov founded, they focused on creating safe forms of communication leading to Telegram.
+Nikolaj and Pavel Durov are the authors of Telegram. After leaving the social network VK Pavel Durov founded they focused on creating safe forms of communication leading to Telegram.
 
-Telegram provides two modes of messaging. Besides the regular chat Telegram provides so-called \emph{secret chats}. Secret chat messages are encrypted using end-to-end encryption and are not stored on Telegram's servers~\cite{telegramfaq}.
+Telegram provides two modes of messaging. Apart from the regular chat, Telegram provides so-called \emph{secret chats}. Secret chat messages are end-to-end encrypted and are not stored on the Telegram's servers for longer period of time than necessary~\cite{telegramfaq}.
 
 \begin{figure}[htb]
 	\centering
@@ -375,14 +375,14 @@ Telegram provides two modes of messaging. Besides the regular chat Telegram prov
 		\caption{Secret chat}
 		\label{img:telegram:secret}
 	\end{subfigure}
-	\caption[Telegram chat modes]{Telegram has two chat modes. Regular chat is meant to be used for traditional communication and its messages are stored on Telegram's servers. Secret chats are supposed to provide another layer of protection and are end-to-end encrypted.}
+	\caption[Telegram chat modes]{Telegram has two chat modes. Regular chat is meant to be used for traditional communication, and its messages are stored on Telegram's servers. Secret chats are supposed to provide another layer of protection, and are end-to-end encrypted.}
 \end{figure}
 
-Similar to WhatsApp user can contact someone using his phone number but Telegram provides classical username approach as well. User needs to know the recipient's phone number or Telegram username in order to communicate with him.
+Similar to WhatsApp user can contact someone using his phone number, but Telegram provides classical username focused approach as well. User needs to know the recipient's phone number or Telegram username in order to communicate with him.
 
 All clients are licensed under GPLv2 or GPLv3 license, the server-side part of Telegram is closed-sourced and proprietery~\cite{telegram-server}.
 
-In 2015 Brazilian judiciary ordered WhatsApp to shut down for 48 hours. During this event, which was finally lowered to only 12 hours, Telegram welcomed 5 million new users \cite{whatsappbrazil}. It may be therefore considered as a direct competitor to WhatsApp.
+In 2015, Brazilian judiciary ordered WhatsApp to shut down its service for 48 hours. During this event, which was finally lowered to only 12 hours, Telegram welcomed 5 million new users \cite{whatsappbrazil}. It may be therefore considered as a direct competitor to WhatsApp.
 
 In May 2015 Telegram had 62 million active users~\cite{telegram-users}.
 
@@ -391,25 +391,25 @@ In May 2015 Telegram had 62 million active users~\cite{telegram-users}.
 
 \subsubsection{SMS authentication}
 
-In Section~\ref{whatsapp-registration} we described how the WhatsApp's registration process using SMS works. Telegram works on a similar basis and allows as well logging in using just a simple SMS.
+In Section~\ref{whatsapp-registration} we described how the WhatsApp's registration process using SMS works. Telegram works on a similar basis, and allows as well logging in using just a simple SMS.
 
-Those are fully readable for mobile network operators which may and usually do cooperate with the corresponding government. Furthermore SMS can be intercepted using inexpensive IMSI catchers. If an attacker is able to steal the authenticating SMS he is able to login on his behalf. Worse, Telegram stores the whole user's message history, hence it allows the attacker to read old messages as well.
+The text messages are fully readable for mobile network operators which may and usually do cooperate with the corresponding government. Furthermore, SMS can be intercepted using inexpensive IMSI catchers. If an attacker is able to steal the authenticating SMS, he is able to login on his behalf. Worse, Telegram stores the whole user's message history, thus it allows the attacker to read older messages as well.
 
-Early 2016 was shown this was a legitimate concern~\cite{telegram-smsiran}. Some Telegram users experienced their accounts being erased and blamed Telegram to enforce political censorship. Telegram denied. Russian activist Oleg Kozlovsky described in its Facebook post~\cite{telegram-russia} how his account was allegedly hacked.
+In early 2016, it was shown this is a legitimate concern~\cite{telegram-smsiran}. Some Telegram users experienced their accounts being erased, and blamed Telegram to enforce political censorship which Telegram denied. Russian activist Oleg Kozlovsky described in its Facebook post~\cite{telegram-russia} how his account was allegedly hacked.
 
-First the Russia's mobile operator disabled SMS service on Oleg's phone number. Upon the disconnection, the attacker tried to log into victim's Telegram account. Since intercepting the SMS is all the attacker needs he simply entered the authorization code he sniffed and got full access to Oleg's account. Telegram recommended to turn on two-factor authentication for additional security.
+First the Russia's mobile operator disabled SMS service on Oleg's phone number. Upon the disconnection, the attacker tried to log into the victim's Telegram account. Because intercepting the SMS is all the attacker needs, he simply entered the authorization code he sniffed, and got full access to Oleg's account. Telegram recommended to turn on two-factor authentication for additional security.
 
 These concerns raise serious questions if SMS authentication is a security-wise valid instrument.
 
 \subsubsection{Cracking Contest}
 
-On November 4, 2014, Telegram published contest with a winning price \$300,000 for cracking its encryption. The contest became quite known in the community and probably provided a bit of advertisement for Telegram.
+On November 4, 2014, Telegram published contest with a winning price \$300,000 for cracking its encryption. The contest became quite known in the community, and probably provided a bit of advertisement for Telegram.
 
-The contest remained unsolved until his closure. Number of authors considered it rigged and stated that the contest does not provide any prove of Telegram's overall security whatsoever~\cite{telegramcontestfail,telegramcontestfail2}.
+The contest remained unsolved until its closure. Number of authors considered it rigged, and stated that the contest does not provide any prove of Telegram's overall security whatsoever~\cite{telegramcontestfail,telegramcontestfail2}.
 
 \subsubsection{IND-CCA insecurity}
 
-In Spring 2015 researchers from Aarhus University performed an independent audit of the protocol~\cite{telegram-aarhus}. They concluded the encryption scheme is not IND-CCA\footnote{Indistinguishability under Chosen Ciphertext} secure, meaning any ciphertext can be altered into another ciphertext decrypting to the very same plaintext.
+In Spring 2015, researchers from Aarhus University performed an independent audit of the protocol~\cite{telegram-aarhus}. They concluded the encryption scheme is not IND-CCA\footnote{Indistinguishability under Chosen Ciphertext} secure, meaning any ciphertext can be altered into another ciphertext decrypting to the very same plaintext.
 
 The researchers stressed the theoretical nature of the attack and that they \emph{``do not see any way of turning the attack into a full plaintext-recovery attack''}~\cite{telegram-aarhus}. Telegram's FAQ describes it as a minor issue unaffecting overall security~\cite{telegram-techfaq}.
 
