@@ -464,23 +464,23 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 
 \chapter{Cryptography behind Telegram}\label{telegramcrypto}
 
-Telegram authors decided to craft a brand new encryption scheme supposedly to achieve better delivery times and stability, MTProto. In this section we describe into details how the protocol should work based on~\cite{telegram-aarhus} and the official Telegram documentation.
+Telegram authors decided to craft a brand new encryption scheme supposedly to achieve better delivery times and stability, MTProto. In this section we describe into detail how the protocol should work based on~\cite{telegram-aarhus} and the official Telegram documentation.
 
 
 \section{Initialization}\label{crypto-initialization}
 
-During the first launch of Telegram application user needs to enter and verify its telephone number. The verification is done by sending a five digit code to the phone via SMS. The user then enters the code into the app and therefore verifies its phone number. When this process is done the registration process begins as follows.
+During the first launch of Telegram application user needs to enter and verify its telephone number. The verification is done by sending a five digit code to the phone via SMS. The user then enters the code into the app and verifies its phone number. When this process is done, the registration process begins as follows.
 
-Suppose a client $C$ is registering to server $S$:
+Suppose a client $C$ is registering to a server $S$:
 
 \begin{enumerate}
 	\item $C$ sends a 128-bit random integer \emph{nonce} to $S$.
 	\item $S$ responds with another 128-bit random integer \emph{server\_nonce}, composite number \emph{pq} and a fingerprint of a RSA public key.
 	\item $C$ provides a proof of work by decomposing \emph{pq} into prime factors \emph{p} and \emph{q} such that $\emph{p} < \emph{q}$.
-	\item $C$ has several RSA public keys stored locally and chooses the appropriate one based on the received fingerprint.
-	\item $C$ crafts a payload of \emph{p}, \emph{q}, \emph{pq}, \emph{nonce}, \emph{server\_nonce} and another new 256-bit random integer \emph{new\_nonce}. The payload including its hash is then encrypted by the RSA key and sent to $S$.
+	\item $C$ has several RSA public keys stored locally, and chooses the appropriate one based on the received fingerprint.
+	\item $C$ crafts a payload of \emph{p}, \emph{q}, \emph{pq}, \emph{nonce}, \emph{server\_nonce} and another new 256-bit random integer \emph{new\_nonce}. The payload including its hash is then encrypted by the RSA key, and sent to $S$.
 	\item $S$ responds with $g$, $g_a$ and $p$ encrypted AES-IGE using a key derived from \emph{new\_nonce} and \emph{server\_nonce}.\label{crypto-initialization-6}
-	\item $C$ generates random 2048-bit $b$ and computes $g_b = g^b \bmod p$ and $K = g_a^b \bmod p$. The $g_b$ value is sent to $S$ encrypted in the way as previously.
+	\item $C$ generates random 2048-bit $b$, and computes $g_b = g^b \bmod p$ and $K = g_a^b \bmod p$. The $g_b$ value is sent to $S$ encrypted as previously.
 	\item $S$ calculates $K = g_b^a \bmod p$. Both $C$ and $S$ now share a common key $K$ noted as \texttt{auth\_key}.
 \end{enumerate}
 
@@ -491,35 +491,35 @@ Some details may be omitted for simplification. During the exchange the client s
 	\item $2^{2047} < p < 2^{2048}$
 	\item $g$ is equal to 2, 3, 4, 5, 6 or 7 and it generates a cyclic subgroup of prime order $q$
 	\item $1 < g_a, g_b < p-1$
-	\item and is recommended to check $2^{2048-64} < g_a, g_b < p - 2^{2048-64}$
+	\item and finally, it is recommended to check $2^{2048-64} < g_a, g_b < p - 2^{2048-64}$
 \end{itemize}
 
-The requirements check might be cached and the client is as well allowed to hard-code the already checked $p$ and $q$ values into the application.
+The requirements check might be cached, and the client is as well allowed to hard-code the already checked $p$ and $q$ values into the application.
 
-We compared these requirements with the FIPS 186-4 publication concerning Digital Signature Algorithm and concluded it requires similar conditions as Telegram with only minor distinctions.
+We compared these requirements with the FIPS 186-4 publication concerning Digital Signature Algorithm, and concluded it requires similar conditions as Telegram with only minor distinctions.
 
-The resulting \texttt{auth\_key} is now used for all client-server communication and regular chats. Finally, a fingerprint of the exchanged \texttt{auth\_key} is created labeled as \texttt{auth\_key\_id}. It is crafted from the last 64 bits of SHA-1(\texttt{auth\_key}).
+The resulting \texttt{auth\_key} is now used for all client-server communication and regular chats. Finally, a fingerprint of the exchanged \texttt{auth\_key} is created labeled as \texttt{auth\_key\_id}. It is crafted from the last 64 bits of \texttt{SHA1(auth\_key)}.
 
 
 
 \section{Regular chats}\label{crypto-regular}
 
-With the connection to server established in the previous section, we may now look into the delivery process. The~\cite{telegram-aarhus} was concerned with secret chats only, therefore in this section we relay on the official documentation only.
+With the connection to the server established in the previous section we may now look into the delivery process. The~\cite{telegram-aarhus} was concerned with secret chats only therefore in this section we rely on the official documentation only.
 
 
 \subsection{Payload}\label{crypto-regular-payload}
 
-First, let's describe the content of a single message, further referred to as a payload. The payload prior to encryption is depicted in Figure \ref{img:regular-payload} and contains:
+First, let us describe the content of a single message, further referred to as a payload. The payload prior to encryption is depicted in Figure \ref{img:regular-payload} and contains:
 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.7\textwidth]{regular-payload.pdf}
-	\caption[Message payload in regular chats]{Payload of a single message to be encrypted in regular chat contains salt, session and message identifier, sequence number, length and the text itself.}
+	\caption[Message payload in regular chats]{Payload of a single message to be encrypted in the regular chat contains salt, session and message identifier, sequence number, length and the text itself.}
 	\label{img:regular-payload}
 \end{figure}
 
 \begin{itemize}
-	\item \textbf{salt} Periodically changed number used for replay attacks protection and other.
+	\item \textbf{salt} Periodically changed number used for various protection purposes.
 	\item \textbf{session\_id} Unique number to identify the user and its device.
 	\item \textbf{msg\_id} Unique ID of the message within a session.
 	\item \textbf{seq\_no} Message sequence counter.
@@ -543,13 +543,13 @@ This \texttt{msg\_key} along with the \texttt{auth\_key} described in Section \r
 	\label{img:crypto-regular-enc}
 \end{figure}
 
-Finally, two other values are added at the top of the encrypted data array: the already mentioned \texttt{msg\_key} and the \texttt{auth\_key\_id} described in Section \ref{crypto-initialization}. This data array is then ready to be transported to the server.
+Finally, two other values are added on the top of the encrypted data array: the already mentioned \texttt{msg\_key} and the \texttt{auth\_key\_id} described in Section \ref{crypto-initialization}. The data array is then ready to be transported to the server.
 
 \subsubsection{Advanced Encryption Standard}
 
-The Advanced Encryption Standard (AES) is a symmetric block cipher with key lengths of 128, 192 and 256 bits respectively and block size of 128 bits. Telegram uses 256 bit key. AES is currently the most widely used symmetric cipher and is used in many internet standards such as IPsec, TLS, SSH and many others~\cite{understanding-crypto}.
+The Advanced Encryption Standard (AES) is a symmetric block cipher with a key lengths of 128, 192 and 256 bits respectively, and a block size of 128 bits. Telegram uses 256 bit key. AES is currently the most widely used symmetric cipher, and is used in many internet standards such as IPsec, TLS, SSH and many others~\cite{understanding-crypto}.
 
-AES was selected through a worldwide open competition and finally defined in the FIPS-197 publication by the US National Institute of Standards and Technology (NIST) in 2001. As of today, AES is secure against brute-force attacks and no reasonable analytic attacks are currently known~\cite{understanding-crypto}.
+AES was selected through a worldwide open competition, and finally defined in the FIPS-197 publication by the US National Institute of Standards and Technology (NIST) in 2001. As of today, AES is secure against brute-force attacks, and no reasonable analytic attacks are currently known~\cite{understanding-crypto}.
 
 \subsubsection{Infinite Garble Extension}
 
@@ -559,24 +559,24 @@ Infinite Garble Extension (IGE) is a lesser-known block cipher mode. It is shown
 c_i = f_K(m_i \oplus c_{i-1}) \oplus m_{i-1}
 \end{gather*}
 
-where $f_K$ stands for the encrypting function with key $K$ (AES in our case) and $i$ goes from 1 to $n$ -- the number of plaintext blocks.
+where $f_K$ stands for the encrypting function with key $K$ (AES in our case), and $i$ goes from 1 to $n$ -- the number of plaintext blocks.
 
 Careful reader notices that for the first output block we need two initialisation values $m_0$ and $c_0$. Both are taken from the IV values described earlier. The original paper described $m_0$ as a random block and $c_0$ its encrypted counterpart. The OpenSSL implementation however, uses a more general implementation where both $m_0$ and $c_0$ are provided by the user~\cite{telegram-openssl-ige}.
 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{ige-enc.pdf}
-	\caption[IGE block cipher mode]{IGE mode of operation with two Initialization Vectors used with AES~\cite{telegram-aarhus}.}
+	\caption[IGE block cipher mode]{Infinite Garble Extension block mode with two Initialization Vectors~\cite{telegram-aarhus}.}
 	\label{img:crypto-regular-ige-enc}
 \end{figure}
 
 \subsubsection{SHA-1}
 
-SHA-1 is a cryptographic hash function and most widely used one~\cite{understanding-crypto}. It produces 160-bit digest of a message. The authors opted for SHA-1 because of its low resource consumption~\cite{telegram-sha1}. Some experts consider SHA-1 as outdated and recommended to be replaced by SHA-2 or SHA-3~\cite{telegram-sha1}. % TODO consequences for Telegram tady nebo jinde?
+SHA-1 is a cryptographic hash function and most widely used one~\cite{understanding-crypto}. It produces 160-bit digest of a message. The authors opted for SHA-1 because of its low resource consumption~\cite{telegram-sha1}. Some experts consider SHA-1 as outdated and recommend to be replaced by SHA-2 or SHA-3~\cite{telegram-sha1}.
 
 \subsection{Decryption}\label{crypto-regular-dec}
 
-Before the decryption process starts the \texttt{auth\_key\_id} is validated. The receiver's \texttt{auth\_key\_id} needs to match the value the sender appended to the byte array. If the values differ the whole message is discarded.
+Before the decryption process starts the \texttt{auth\_key\_id} is validated. The receiver's \texttt{auth\_key\_id} needs be to matched against the value the sender appended to the byte array. If the values differ, the whole message is discarded.
 
 \begin{figure}[htb]
 	\centering
@@ -601,11 +601,11 @@ The decryption process is plainly the encryption process in reverse. The KDF yie
 
 Secret chats are designed to bring an extra level of security compared to regular chats. Secret chat may be initiated between two particular devices only and therefore the messages may be read only on those devices.
 
-It is crucial to note that all secret chat communication is done using the connection described previously in \ref{crypto-initialization}. All data described as follows are considered as input into the MTProto protocol for regular chats. Hence the data are actually encrypted twice.% More on that in TODO
+It is crucial to note that all the secret chat communication is done using the established connection described previously in Section \ref{crypto-initialization}. All data described as follows are considered as an input into the MTProto protocol for regular chats, and therefore encrypted twice.
 
 \subsection{Key exchange}\label{crypto-keyexchange}
 
-The exchange performs traditional Diffie-Hellman key exchange (DH). The DH parameters are received from the Telegram server and the client verifies them in the very same manner as in Section \ref{crypto-prime-req}. The exchange proceeds similarly as earlier, however with the connection already established is a little more straightforward. Suppose user $A$ initiates secret chat with $B$:
+The exchange performs traditional Diffie-Hellman key exchange (DH). The DH parameters are received from the Telegram server, and the client verifies them in the very same manner as in Section \ref{crypto-prime-req}. The exchange proceeds similarly as earlier, however with the connection already established, is a little more straightforward. Suppose user $A$ initiates secret chat with $B$:
 
 \begin{enumerate}
 	\item $A$ computes a random 2048-bit number $a$ and sets $g_a = g^a \bmod p$.\label{enum:DH-a}
@@ -632,16 +632,16 @@ The DH by itself does not provide any authentication of the communicating partie
 
 The visualisation used to be based on a 128-bit fingerprint\footnote{Not to be confused with the 64-bit \texttt{auth\_key\_id} fingerprint.} of the secret key. An~article presented in January 2015 showed~\cite{telegram-264} that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat, a MiM attack is possible only with $2^{64}$ operations, rather than $2^{128}$, based on the Birthday paradox. The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions USD. Telegram's FAQ addresses this issue and states its cost is around a trillion dollars to achieve a result in one month. Nevertheless, Telegram later decided to use additional 160 bits from the key summing up to 288 bits~\cite{telegram-techfaq}. This improvement should make this attack impossible.
 
-The article as well reasons that in real-world scenario the users don't actually meet to verify the key. Most of them probably ignore the verification whatsoever, some send the image via regular chat or using another -- possibly insecure -- channel.
+The article as well reasons that in a real-world scenario the users do not actually meet to verify the key. Most of them probably ignore the verification whatsoever, some send the image via regular chat or using another -- possibly insecure -- channel.
 
-To accomplish the Perfect Forward Secrecy model the key is renegotiated each time it has been used for more than 100 messages or has been used for more than one week. For the renegotiation the already established chat is used in order to send the $g_a$ and $g_b$ values. The server does not help with the randomness here and the same DH parameters are used. The \emph{auth\_key} visualization does not change and is therefore based on the first negotiated key.
+To accomplish the Perfect Forward Secrecy model the key is renegotiated each time it has been used for more than 100 messages or has been used for more than one week. For the renegotiation the already established chat is used in order to send the $g_a$ and $g_b$ values. The server does not help with the randomness here, and the same DH parameters are used. The \emph{auth\_key} visualization does not change and is therefore based on the first negotiated key.
 
-It is unclear whether Telegram applies the Trust on first mechanism.
+It is unclear whether Telegram applies the Trust on First Use mechanism.
 
 
 \subsection{Payload}
 
-With the key negotiated we may now focus on the message encryption itself. Let's describe the payload which slightly differs from its regular chat counterpart. It is composed of:
+With the key negotiated we may now focus on the message encryption itself. The payload slightly differs from its regular chat counterpart. It is composed of:
 
 \begin{figure}[htb]
 	\centering
@@ -661,7 +661,7 @@ With the key negotiated we may now focus on the message encryption itself. Let's
 	\item  \textbf{serialized message object} Containing other values and the message itself as depicted in Figure \ref{img:crypto-secret-messageobject}.
 \end{itemize}
 
-Both payload and message type are not described into much details in the documentation. \cite{telegram-aarhus} states they're both \emph{''headers related to the version of the protocol``}. The serialized message object contains four subsequent values:
+Both payload and message types are not described elaborately in the documentation. The \cite{telegram-aarhus} states they are both \emph{''headers related to the version of the protocol``}. The serialized message object contains four subsequent values:
 
 \begin{figure}[htb]
 	\centering
@@ -677,7 +677,7 @@ Both payload and message type are not described into much details in the documen
 	\item \textbf{media} Header specifying media attachment if any.
 \end{itemize}
 
-Throughout this paper we assume that no media attachments are present and therefore the \texttt{media} attribute is always empty. This payload is then serialized as an array of bytes and prepared to be encrypted.
+Throughout this paper we assume that no media attachments are present, and therefore the \texttt{media} attribute is always empty. This payload is then serialized as an array of bytes and prepared to be encrypted.
 
 \subsection{Encryption}\label{crypto-secret-enc}
 
