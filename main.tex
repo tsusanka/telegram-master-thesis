@@ -693,7 +693,7 @@ Decryption is the same as well. First the \texttt{auth\_key\_id}s are validated.
 
 \chapter{The Analysis}\label{analysis}
 
-In this chapter we present our approach and share some of the findings we discovered. These findings are based primarily on these three sources:
+In this chapter we present our analysis approach and share some of the findings we discovered. These findings are based primarily on these three sources:
 
 \begin{itemize}
 	\item The official open-sourced Telegram application for Android
@@ -701,26 +701,26 @@ In this chapter we present our approach and share some of the findings we discov
 	\item The already cited~\cite{telegram-aarhus}
 \end{itemize}
 
-We commenced by installing Telegram for Android and analyzing it with various tools in order to perform comparison with the other sources. The following section describes our actions.
+We commenced by installing Telegram for Android and analyzing it with various tools in order to perform comparison with the other sources mentioned above. The following section describes our actions.
 
 \section{Setup}\label{analysis-setup}
 
-First, we cloned the official Telegram repository. Since we realized a simple code exploration is not satisfactory due to both complexity and poor code quality we installed the following software.
+First, we cloned the official Telegram repository. Because we realized a simple code exploration is not satisfactory due to both complexity and poor code quality, we installed the following software.
 
-To run and potentially debug the application Android SDK is needed. Further, the Android NDK is required as well, since Telegram uses the JNI as mentioned earlier. For a complete developer-like experience the Android Studio was installed. Android Studio is the official IDE for Android platform and is based on the popular IntelliJ IDEA platform~\cite{android-studio}.
+To run and potentially debug the application the Android SDK is needed. Furthermore, the Android NDK is required as well since Telegram uses the Java Native Interface (JNI) which enables the program to incorporate low-level programming languages, such as C. For a complete developer-like experience the Android Studio was installed. Android Studio is the official IDE for Android platform and is based on the popular IntelliJ IDEA platform~\cite{android-studio}.
 
 A mobile phone running rooted Android operating system was connected to a computer with such software. The Android Studio itself deals with the phone-computer connection (using the \emph{adb} software) and performs building, compiling and transferring the final .apk file to the phone. It as well enables the developer to debug the software which was crucial here for better understanding of the Telegram's code.
 
-Further, we wanted to sniff the data sent from the application. To achieve that two approaches were used.
+Next, we wanted to sniff the data sent from the application. To achieve that two approaches were used.
 
 \subsection{Sniffing using wireless hotspot}
 
-In the first scenario we set up a wireless network on the computer and instruct the mobile to connect to it. Even though this does require the victim to connect to the network, there are ways to achieve this by using special dedicated devices~\cite{pineapple}. The Diagram \ref{img:analysis-setup-hotspot} shows this setup.
+In the first scenario we set up a wireless network on the computer, and instruct the mobile to connect to it. Even though this does require the victim to connect to the network, there are ways to achieve this by using special dedicated devices~\cite{pineapple}. The Diagram \ref{img:analysis-setup-hotspot} shows this setup.
 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{setup-hotspot.pdf}
-	\caption[Analysis setup 1]{Computer running analysis software is connected to the internet on one interface and creating WiFi hotspot using the other one. Mobile phone running Telegram connects to the computer's WiFi and all data are therefore routed through the computer.}
+	\caption[Analysis setup 1]{Computer running analysis software is connected to the internet on one interface and creates WiFi hotspot using the other one. Mobile phone running Telegram connects to the computer's WiFi, and all data are therefore routed through the computer.}
 	\label{img:analysis-setup-hotspot}
 \end{figure}
 
@@ -729,7 +729,7 @@ This scenario is easy to setup because most Operating Systems support this funct
 
 \subsection{Sniffing using ARP Poisoning}
 
-To demonstrate we may omit the hotspot setup and perform the analysis without forcing the mobile to change its network we're introducing second scenario shown in Figure \ref{img:analysis-setup-arp}. In this case the computer and the mobile phone are in the same network.
+To demonstrate we may omit the hotspot setup and perform the analysis without forcing the mobile to change its network we are introducing second scenario shown in Figure \ref{img:analysis-setup-arp}. In this case the computer and the mobile phone are in the same network.
 
 \begin{figure}[htb]
 	\centering
@@ -738,12 +738,11 @@ To demonstrate we may omit the hotspot setup and perform the analysis without fo
 	\label{img:analysis-setup-arp}
 \end{figure}
 
-
 By using Ettercap, a \emph{``comprehensive suite for man in the middle attacks''}~\cite{ettercap-homepage} available in Kali Linux, we launched an ARP Poisoning attack against the phone.
 
-Address Resolution Protocol (ARP) is a protocol which transforms an Internet layer address into a link layer address. Typically, this might be the mapping of an IPv4 address to an Ethernet address. ARP Poising, or ARP spoofing, is a technique by which the attacker sends fake ARP packets to the victim claiming his Ethernet address is associated with an IP address different than truly his.
+The Address Resolution Protocol (ARP) is a protocol which transforms an Internet layer address into a link layer address. Typically, this is the mapping of an IPv4 address to an Ethernet address. ARP Poising, or ARP spoofing, is a technique by which the attacker sends fake ARP packets to the victim claiming his Ethernet address is associated with an IP address different than truly his.
 
-We launched this attack against the phone and the router, meaning the phone sent all communication to the computer instead of directly sending it to the gateway and vice versa. Since all communication is now flowing through the computer we may thoroughly analyze it.
+We launched this attack against the phone and the router, meaning the phone sent all the communication to the computer instead of directly sending it to the gateway and vice versa. Since all communication is now flowing through the computer we may thoroughly analyze it.
 
 This setup is as well convenient if we are not able to use WiFi as a hotspot, for example due to the need of it for the internet connection itself. Beware that this setup should be used in test networks only.
 
@@ -751,17 +750,17 @@ This setup is as well convenient if we are not able to use WiFi as a hotspot, fo
 
 The application is publicly available on Github~\cite{github-telegram} with the first commit dating back to late October 2013. This thesis is concerned with the latest Telegram version 3.13.1 as up to date in October 2016, the \texttt{64e8ec3} commit in particular.
 
-The application's main programming language is Java but it uses the Java Native Interface (JNI) to incorporate C libraries such as borringssl, ffmpeg, sqlite and others. Since the 3.2.2 version Telegram moved a significant portion of logic into a separate C library called \emph{tgnet}. The library is responsible for many connection-related actions including communication with the server and sending messages. The codebase closely resembles the previous Java code. The secret messages are still dealt within the Java part of the application.
+The application's main programming language is Java but it uses the already mentioned JNI to incorporate C libraries such as borringssl, ffmpeg, sqlite and others. Since the 3.2.2 version Telegram moved a significant portion of the logic into a separate C library called \emph{tgnet}. The library is responsible for many connection-related actions including communication with the server and sending messages. The codebase closely resembles the previous Java code. The secret messages are still dealt within the Java part of the application.
 
-It should be noted that since this was introduced in the 3.2.2 version (September 2015) whereas the~\cite{telegram-aarhus} analysis is based on 2.7.0 (April 2015) and therefore wasn't concerned with the \emph{tgnet} library whatsoever.
+It should be noted that since this was introduced in the 3.2.2 version (September 2015) whereas the~\cite{telegram-aarhus} analysis is based on 2.7.0 (April 2015) and therefore was not concerned with the \emph{tgnet} library at all.
 
 \subsection{Code quality}
 
 We decided to analyze the code quality using static code analysis tools to avoid opinion-based reviews. Android Studio itself comes with a code scanning tool \emph{lint}~\cite{android-studio-lint}. The tool seeks for potential bugs, optimization improvements, security, performance and other.
 
-Lint was run using the default settings and yielded 20 errors and 286 warnings. The full output is attached in the appendix. Android Studio can as well perform code inspections. It runs lint and adds number of checks such as error handling, security, code style, javadoc, spelling etc. It found over 650 000 issues in the Telegram project. The results are as well available in the appendix. % TODO
+Lint was run using the default settings, and yielded 20 errors and 286 warnings. The full output is attached in the appendix. Android Studio can as well perform code inspections. It runs lint and adds number of checks, such as error handling, security, code style, javadoc coverage, spelling etc. It found over 650 000 issues in the Telegram project. The results are as well available in the appendix. % TODO
 
-It is important to note that the code analysis concerns the project as whole meaning it includes all the dependencies. Some issues may therefore relate to the libraries Telegram uses not to Telegram itself.
+It is important to note that the code analysis concerns the project as whole meaning it includes all the dependencies. Some issues may therefore relate to the libraries Telegram uses, not to Telegram itself.
 
 Further, some files contain upto thousands of lines and multiple classes in one file. For example the \emph{TLRPC.java} has 23,010 lines containing 873 static classes. For a brief comparison we are including Table \ref{tab:analysis-storage-metrics} comparing some of the Telegram metrics with Signal. The comparison excludes all libraries, binaries, assets etc. and discusses the source code related files only. We leave it to the reader to draw her own conclusions.
 
@@ -771,11 +770,10 @@ Further, some files contain upto thousands of lines and multiple classes in one 
 	\begin{tabular}{|l|l|l|}
 		\hline
 					& \textbf{Telegram} & \textbf{Signal} \\ \hline
-		Project size\tablefootnote{The project as a whole, including all libraries, assets etc.} & 188,6 MB & 138,6 MB \\ \hline
+%		Project size\tablefootnote{The project as a whole, including all libraries, assets etc.} & 188,6 MB & 138,6 MB \\ \hline
 		Largest file by size & 714.6 KB\tablefootnote{\path{TMessagesProj/src/main/java/org/telegram/tgnet/TLRPC.java}} & 87.4 KB\tablefootnote{\path{src/org/thoughtcrime/securesms/util/Base64.java}} \\ \hline
 		Largest file by lines count & 23,009 &  2,096 \\ \hline
 		Number of test files\tablefootnote{Number of files each including at least one unit test.} & 0 & 13 \\ \hline
-TODO         &  & \\ \hline
 	\end{tabular}
 \end{table}
 
@@ -783,7 +781,7 @@ It should be noted Signal's files are well documented which impacts on its size.
 
 \section{Storage}\label{analysis-storage}
 
-In this section we briefly look how Telegram stores its data. All data are stored in the \path{org.telegram.messenger/files} folder. Two types of files are present, SQLite database file and \path{.dat} files which are in Telegram's own configuration format:
+In this section we briefly look how Telegram stores its data. All data are stored in the phone's \path{org.telegram.messenger/files} folder. Two types of files are present -- SQLite database file and \path{.dat} files which are in a Telegram's own configuration format:
 
 \begin{itemize}
 	\item \path{cache4.db} SQLite database file.
@@ -797,21 +795,21 @@ The \path{tgnet.dat} file is a place where Telegram stores its configuration dir
 
 \subsection{Extraction scripts}\label{analysis-storage-scripts}
 
-To proper analyze the data Telegram stores we wrote three scripts, all in Python 3. The scripts address the \path{tgnet.dat} file, regular messages and encrypted chat information both stored in the SQLite database. Examples of those files are included in the \path{examples} folder of the project and a brief readme file describing how to run the scripts is present as well. Some values' meaning is unclear, therefore the scripts print a simple question mark in such cases to indicate this.
+To proper analyze the data Telegram stores we wrote three scripts, all in Python 3. The first script addresses the \path{tgnet.dat} file, the second the regular messages and the third the encrypted chat information, last two working with the SQLite database. Examples of those files are included in the \path{examples} folder of the project and a brief readme file describing how to run the scripts is present as well. Some values' meaning is unclear therefore the scripts print a simple question mark in such cases to indicate this.
 
 \subsubsection{Extracting tgnet.dat}
 
-The \path{tgnet-extractor.py} parses the \path{tgnet.dat} file and prints all the values to standard output. This file has Telegram's own binary format and in a nutshell is a collection of values simply written one by one, with no keys, formatting or structure. The most useful values are the datacenter's IP addresses and the \texttt{auth\_key} secrets, mainly \texttt{auth\_key\_id} we expected to see in the sniffed traffic, more on that in the following Section \ref{analysis-obf}.
+The \path{tgnet-extractor.py} parses the \path{tgnet.dat} file and prints all the values to the standard output. This file has Telegram's own binary format and is, in a nutshell, a collection of values simply written one by one with no keys, formatting or structure. The most useful values for this research were the datacenter's IP addresses and the \texttt{auth\_key} secrets, mainly the \texttt{auth\_key\_id} we expected to see in the sniffed traffic, more on that in the following Section~\ref{analysis-obf}.
 
 \subsubsection{Extracting messages}
 
 Next script \path{message-extractor.py} works with the bytes stored in the SQLite database, the column \emph{data} in table \emph{messages} in particular. Those bytes store information on one single message sent in a regular chat.
 
-The script extracts values such as message ID, values to identify both the sender and the receiver, timestamps, flags and most importantly the UTF-8 encoded string of the message itself.
+The script extracts values, such as a message ID, values to identify both the sender and the receiver, timestamps, flags and most importantly the UTF-8 encoded string of the message itself.
 
 \subsubsection{Extracting secret chat information}
 
-Last but not least the \path{encrypted-chat-extractor.py} script is responsible for the bytes in the column \emph{data} of \emph{enc\_chats} table. Among others it describes a secret chat instance and contains ID, dates, identification values and yet again an \texttt{auth\_key} secret. Note that this \texttt{auth\_key} is used for this particular secret chat which is then encrypted with the regular chat \texttt{auth\_key} as described in Section \ref{crypto-secret}.
+Last but not least, the \path{encrypted-chat-extractor.py} script is responsible for the bytes in the column \emph{data} of the \emph{enc\_chats} table. Among other things, it describes a secret chat instance and contains ID, dates, identification values and yet again an \texttt{auth\_key} secret. Note that this \texttt{auth\_key} is used for this particular secret chat which is then encrypted with the regular chat \texttt{auth\_key} as described in Section \ref{crypto-secret}.
 
 \section{Undocumented obfuscation}\label{analysis-obf}
 
@@ -824,11 +822,11 @@ During the data collection the received data did not correspond with the documen
 	\label{img:analysis-obf-expected}
 \end{figure}
 
-Using the scripts described in \ref{analysis-storage-scripts} we extracted our testing \texttt{auth\_key} and \texttt{auth\_key\_id} from our device in order to compare it with the sniffed data. \texttt{auth\_key\_id} was not present. The whole packet seemed random and therefore likely encrypted.
+Using the scripts described in \ref{analysis-storage-scripts} we extracted our testing \texttt{auth\_key} and \texttt{auth\_key\_id} from our device in order to compare it with the sniffed data -- the \texttt{auth\_key\_id} value was not present. The whole packet seemed random and therefore likely encrypted.
 
-We examined the code and discovered the responsible function for this behavior is the \texttt{Connection::sendData} function located in \path{TMessagesProj/jni/tgnet/Connection.cpp} file. Before sending the data in the expected manner, they are encrypted one more time with a random key attached in front of the data. Interestingly the Counter block mode is used instead of the IGE endorsed by Telegram.
+We examined the code and discovered the responsible function for this behavior is the \texttt{Connection::sendData} function located in \path{TMessagesProj/jni/tgnet/Connection.cpp} file. Before sending the data in the expected manner, they are encrypted one more time with a random key attached in front of the data. Interestingly, the Counter block mode is used instead of the IGE endorsed by Telegram.
 
-To properly explain the obfuscation method we are introducing our own terminology first to add a little more clarity because Telegram doesn't practise a great job naming variables.
+To properly explain the obfuscation method we are introducing our own terminology first, to add a little more clarity because Telegram does not practise a great job naming variables. Maybe intentionally, to make the deobfuscation process even harder.
 
 \subsection{Terminology}
 
@@ -852,16 +850,16 @@ The process starts by generating 64 random bytes \texttt{obf\_enc\_key\_bytes}. 
 	\label{img:code-obfuscation-bytes-sent}
 \end{figure}
 
-Further, the length of the packet, yet again encrypted and the real data to be transmitted as expected from the official documentation are then AES-CTR encrypted using the \texttt{obf\_enc\_key} and \texttt{obf\_enc\_iv} and sent. All other data in this TCP stream are encrypted using the same obfuscation key. When another connection is established a new \texttt{obf\_enc\_key\_bytes} is generated and the process repeats.
+The length of the packet, yet again encrypted, and the real data to be transmitted as expected from the official documentation are then AES-CTR encrypted using the \texttt{obf\_enc\_key} and \texttt{obf\_enc\_iv}, and sent. All the other data in this TCP stream are encrypted using the same obfuscation key. When another connection is established, a new \texttt{obf\_enc\_key\_bytes} is generated and the process repeats.
 
 \subsubsection{Temporary decryption key}
 
-Besides the \texttt{obf\_enc\_key\_bytes} setup the very same function deals with setting up the \texttt{obf\_dec\_key\_bytes}. This temporary key is used for decrypting incoming traffic.
+Besides the \texttt{obf\_enc\_key\_bytes} setup the very same function deals with setting up the \texttt{obf\_dec\_key\_bytes}. This temporary key is used for decrypting the incoming traffic.
 
-The \texttt{obf\_dec\_key\_bytes} is derived from the \texttt{obf\_enc\_key\_bytes}. Totally 48 bytes are reversed from \texttt{obf\_enc\_key\_bytes} starting at position 8. This may be seen in Listing \ref{lst:code-obf-dec}. The first 32 bytes are then set as a decryption key for incoming traffic and next 16 bytes for IV.
+The \texttt{obf\_dec\_key\_bytes} is derived from the \texttt{obf\_enc\_key\_bytes}. Totally 48 bytes are reversed from \texttt{obf\_enc\_key\_bytes} starting at position 8. This may be seen in Listing \ref{lst:code-obf-dec}. The first 32 bytes are then used as a key and the next 16 bytes as an IV for the incoming traffic decryption.
 
 \begin{listing}[htb]
-\caption{Temporary decryption key deduction from the \texttt{obf\_enc\_key\_bytes} array. First 32 bytes are used as a decryption key, next 16 bytes for the IV.
+\caption{Temporary decryption key deduction from the \texttt{obf\_enc\_key\_bytes} array. First 32 bytes are used as a decryption key, next 16 bytes for an IV.
 \protect \\ Telegram for Android source code, file \texttt{Connections.cpp}, line 331.}
 \label{lst:code-obf-dec}
 \begin{minted}{C++}
@@ -872,12 +870,12 @@ for (int a = 0; a < 48; a++) {
 \end{listing}
 
 
-We believe Telegram server receives the \texttt{obf\_enc\_key\_bytes}, tampers them in a way described in this section and finally encrypts its response with \texttt{obf\_dec\_key\_bytes}. As mentioned earlier, this is officially not documented whatsoever. Yet again, a more conventional approach would be much appreciated such as the usage of SSL/TLS, a cryptographic protocol scrutinized thoroughly by researchers all over the world.
+We believe Telegram server receives the \texttt{obf\_enc\_key\_bytes}, tampers them in a way described in this section and finally encrypts its response with \texttt{obf\_dec\_key\_bytes}. As mentioned earlier, this is officially not documented whatsoever. A more conventional approach would be much appreciated,  such as the usage of SSL/TLS, a cryptographic protocol scrutinized thoroughly by researchers all over the world.
 
 To sum up, the whole function is depicted in Listing \ref{lst:analysis-obfuscation} in its simplified version. It as well uses our own terminology to concur with this section.
 
 \begin{listing}[htb]
-\caption{The function starts by generating random bytes. The decryption key is then derived and both encrypt and decrypt keys are set. Finally, the length of the payload (as well obfuscated), the \texttt{obf\_enc\_key\_bytes} and the actual IGE encrypted payload are sent. The function's argument -- the payload -- is in the expected form as depicted in Figure \ref{img:analysis-obf-expected}.
+\caption{The function starts by generating random bytes. The decryption key is then derived, and both encrypt and decrypt keys are set. Finally, the length of the payload (as well obfuscated), the \texttt{obf\_enc\_key\_bytes} and the actual IGE encrypted payload are sent. The function's argument -- the payload -- is in the expected form as depicted in Figure \ref{img:analysis-obf-expected}.
 \protect\linebreak Telegram for Android source code, file \texttt{Connection.cpp}, line 289, redacted.}
 \label{lst:analysis-obfuscation}
 \begin{minted}{C++}
@@ -912,9 +910,9 @@ void sendData(payload)
 
 \subsection{Deobfuscation program}\label{analysis-obf-program}
 
-To verify these findings and to continue the analysis we created software to deobfuscate the traffic. Even though the first language of choice was Python to contain all the scripts in one package, we finally opted for \cpp. This has two major advantages, one we can be directly inspired by the Telegram code, and second we can access OpenSSL functions directly the same way Telegram does.
+To verify these findings, and to continue the analysis we created software to deobfuscate the traffic. Even though the first language of choice was Python to contain all the scripts in one package, we finally opted for \cpp. This has two major advantages, one we can be directly inspired by the Telegram code, and second we can access OpenSSL functions directly the same way Telegram does\footnote{Telegram actually uses BoringSSL -- a fork of OpenSSL by Google but for our case the distinction was not relevant.}.
 
-The program is capable of fetching the obfuscation key and transforming the data into its deobfuscated form and further analyze. It takes two or three arguments as an input:
+The program is capable of fetching the obfuscation key and transforming the data into its deobfuscated form and further analyze it. It takes two or three arguments as an input:
 
 \begin{itemize}
 
@@ -924,9 +922,9 @@ The program is capable of fetching the obfuscation key and transforming the data
 
 \end{itemize}
 
-The first and second arguments are binary files of the sniffed traffic. Since the \texttt{obf\_enc\_key\_bytes} are sent by the client it is stored in the outgoing stream and it is therefore not possible to deobfuscate any traffic without this data. We used Wireshark repeatedly to follow the TCP stream and then saving both incoming and outgoing data into a binary file. This proved as a viable technique.
+The first and second argument are binary files of the sniffed traffic. Since the \texttt{obf\_enc\_key\_bytes} value is sent by the client, it is stored in the outgoing stream, and it is therefore not possible to deobfuscate any traffic without these data. We used Wireshark repeatedly to follow the TCP stream and then saving both the incoming and outgoing data into a binary file. We then run the program with those files which proved as a viable technique.
 
-The third argument is optional. It is the user's secret \texttt{auth\_key}. This is obviously not available for an attacker, but it is helpful for studying purposes. When extracted user may see the real traffic Telegram generates and what actions are taken.
+The third argument is optional. It is the user's secret \texttt{auth\_key}. This is obviously not available for an attacker, but it is helpful for studying purposes. When extracted, user may see the real traffic Telegram generates and what actions are taken.
 
 Readme file is present describing how to build and run the program.
 
