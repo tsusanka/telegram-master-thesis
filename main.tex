@@ -932,15 +932,15 @@ Readme file is present describing how to build and run the program.
 
 \section{Replay attack}\label{analysis-attacks}
 
-During the analysis we as well examined some parts of the code attempting to discover some potential vulnerabilities to exploit. To provide a little bit of a context let's now briefly describe how Telegram processes any incoming data.
+During the analysis we examined some parts of the code attempting to discover some potential vulnerabilities to exploit. To provide a little bit of a context let us now briefly describe how Telegram processes all incoming data.
 
 \subsection{Incoming data processing}
 
-The Figure \ref{img:analysis-replay-incoming} shows how Telegram processes all incoming data. First, the \texttt{Connection::onReceivedData()} function is called and incoming data are deobfuscated in the way described in Section \ref{analysis-obf}.
+The Figure \ref{img:analysis-replay-incoming} shows how Telegram handles all incoming data. First, the \texttt{Connection::onReceivedData()} function is called, and incoming data are deobfuscated in the way described in Section \ref{analysis-obf}.
 
-Next, the \texttt{ConnectionsManager::onConnectionDataReceived()} function is called. If the \texttt{auth\_key\_id} is not set to 0 (which is only the case of the key exchange process; see Section \ref{crypto-keyexchange}) the \texttt{Datacenter::decryptServerResponse()} is invoked. This function checks the \texttt{auth\_key\_id} and if valid decrypts the actual payload using the master secret \texttt{auth\_key} and derived \texttt{msg\_key}. Upon doing so the message ID and other checks are performed.
+Next, the \texttt{ConnectionsManager::onConnectionDataReceived()} function is called. If the \texttt{auth\_key\_id} is not set to 0 (which is only the case of the key exchange process; see Section \ref{crypto-keyexchange}), the \texttt{Datacenter::decryptServerResponse()} is invoked. This function checks the \texttt{auth\_key\_id} and if valid, decrypts the actual payload using the master secret \texttt{auth\_key} and derived \texttt{msg\_key}. Afterwards, the message ID and other checks are performed.
 
-If the decryption succeeds the \texttt{onConnectionDataReceived()} function proceeds and processes further the IGE decrypted payload. It checks all the headers and other fields. Finally, if all checks succeed the whole process is finalized by the \texttt{ConnectionsManager::processServerResponse} function.
+If the decryption succeeds, the \texttt{onConnectionDataReceived()} function proceeds and further processes the IGE decrypted payload. It checks all the headers and other fields. Finally, if all checks succeed, the whole process is finalized by the \texttt{ConnectionsManager::processServerResponse} function.
 
 \begin{figure}[htb]
 	\centering
@@ -952,12 +952,12 @@ If the decryption succeeds the \texttt{onConnectionDataReceived()} function proc
 
 \subsection{Vulnerability}
 
-A replay attack is an attack where an attacker sniffs sent data by the application and then maliciously resends them another time. Doing so the attacker can repeat any message without the users noticing, of course without actually knowing the message. Protection might be realized by implementing a message counter keeping track of the order messages appear in.
+A replay attack is an attack where an attacker sniffs sent data by the application and then maliciously resends them another time. Doing so, the attacker can repeat any message without the users noticing, of course without actually knowing the message. Protection might be realized by implementing a message counter keeping track of the order messages appear in.
 
-We analyzed how Telegram deals with this issue, see Listing \ref{lst:analysis-replay-check}. Upon the decryption it checks if the message was already processed. The function \texttt{ConnectionSession} holds an internal array of already processed messages. If the message is accepted and processed the message ID is then added into the array.
+We analyzed how Telegram deals with this issue, see Listing \ref{lst:analysis-replay-check}. After the decryption it checks if the message was already processed. The function \texttt{ConnectionSession} holds an internal array of the already processed messages. If the message is accepted and processed, the message ID is then added into the array.
 
 \begin{listing}[htb]
-\caption{Each incoming message is checked whether it was already processed. If not the message is further processed and finally marked as such.
+\caption{Each incoming message is checked whether it was already processed. If not, the message is further processed and finally marked as such.
 \protect\\ Telegram for Android source code, file \texttt{ConnectionsManager.cpp}, line 728.}
 \label{lst:analysis-replay-check}
 \begin{minted}{C++}
@@ -973,7 +973,7 @@ if (!doNotProcess) {
 \end{listing}
 
 
-The behavior we believe might be exploitable is the \texttt{addProcessedMessageId()} function. The function checks the size of the array and if it exceeds 300 it erases the first 100 messages as seen in Listing \ref{lst:analysis-replay-add-processed}.
+The behavior we believe might be exploitable is the \texttt{addProcessedMessageId()} function. The function checks the size of the array, and if it exceeds 300 it erases the first 100 messages as seen in Listing \ref{lst:analysis-replay-add-processed}.
 
 
 \begin{listing}[htb]
@@ -1001,23 +1001,23 @@ The attack scenario is drafted as follows:
 	\item Telegram processes the first message again
 \end{enumerate}
 
-If Telegram does not provide any additional checks and actually deletes the first 100 IDs the message would be accepted twice. With the attack scenario drafted it is desired to perform the attack.
+If Telegram does not provide any additional checks and actually deletes the first 100 IDs, the message would be accepted twice. With the attack scenario drafted it is desired to perform the attack.
 
 \subsection{Exploit attempt}
 
-To perform the attack it was first decided to inject a new TCP packet containing the payload copied from the very first packet. That proved to be rather difficult since it's not possible to inject a TCP packet without interfering with the TCP connection. We finally opted for replacing the payload of the next message (i.e. 301st) meaning we would drop its payload and replace it with the first one. That should result in the victim receiving the first message again instead of the new one.
+To perform the attack it was first decided to inject a new TCP packet containing the payload copied from the very first packet. That proved to be rather difficult since it is not possible to inject a new TCP packet without interfering with the TCP connection. We finally opted for replacing the payload of the next message (i.e. the 301st) meaning we would drop its payload and replace it with the first one. That should result in the victim receiving the first message again instead of the new one.
 
 \subsubsection{Required tools}
 
-As found out nor Scapy nor Wireshark are the right tools. Both are useful for passive sniffing and Scapy is capable of sending additional packets but does not allow modification of the packets in real time as it does not reside in the middle of the traffic as described in the Setup, Section \ref{analysis-setup}.
+As found out nor Scapy nor Wireshark are the right tools. Both are useful for passive sniffing, and Scapy is capable of sending additional packets but does not allow modification of the packets in real time as it does not reside in the middle of the traffic as described in the Setup, Section \ref{analysis-setup}.
 
-Further, since Telegram uses its own Application layer protocol we were unable to use popular tools such as Fiddler, Burp Suite or OWASP ZAP which are built for HTTP~\cite{fiddler-homepage, burp-homepage}.
+Furthermore, since Telegram uses its own Application layer protocol, we were unable to use popular tools such as Fiddler, Burp Suite or OWASP ZAP which are built for HTTP~\cite{fiddler-homepage, burp-homepage}.
 
-Next, the already mentioned Ettercap used to perform the MiM provides simple filtering interface allowing to modify the data routed through. We tried this approach but Ettercap requires the filters to be written in its own language which is very limiting and unfortunately insufficient for our needs.
+Next, the already mentioned Ettercap, used to perform the MiM, provides a simple filtering interface allowing to modify the data routed through. We tried this approach, but Ettercap requires the filters to be written in its own language which is very limiting and unfortunately insufficient for our needs.
 
-The scenario was finally tested with Trudy software which can modify any TCP traffic. As its documentation states Trudy is \emph{``a transparent proxy that can modify and drop traffic for arbitrary TCP connections''}~\cite{github-trudy}. All traffic is routed through Trudy which then applies so called \emph{modules}. Trudy modules are bulks of preprogrammed code to perform modifications desired by the user. Trudy provides an example stub of such module and users are encouraged to implement it. Since Trudy is written in Go all modules are to be written in Go as well. To route the traffic and setup the environment properly a prepared virtual machine is available~\cite{github-trudy-vm}.
+The scenario was finally tested with the Trudy software which can modify any TCP traffic. As its documentation states Trudy is \emph{``a transparent proxy that can modify and drop traffic for arbitrary TCP connections''}~\cite{github-trudy}. All traffic is routed through Trudy which then applies so called \emph{modules}. Trudy modules are bulks of preprogrammed code to perform modifications desired by the user. Trudy provides an example stub of such module, and users are encouraged to implement it. Because Trudy is written in Go, all modules are to be written in Go as well. To route the traffic and setup the environment properly a prepared virtual machine is available~\cite{github-trudy-vm}.
 
-Upon setting up the MiM as described in \ref{analysis-setup} a virtual machine is run on the computer using Vagrant\footnote{Vagrant is a simple wrapper around a virtualization provider for building complete independent virtual environments.}. The VM installs all required software and Trudy as well. Then it routes all the traffic into and out of Trudy using \texttt{iptables}. Trudy receives all the traffic, modifies it based on the used module and shifts it back to internet as seen in Figure \ref{img:analysis-trudy-setup}.
+After setting up the MiM as described in \ref{analysis-setup} a virtual machine is run on the computer using Vagrant\footnote{Vagrant is a simple wrapper around a virtualization provider for building complete independent virtual environments.}. The VM installs all the required software and the Trudy itself as well. Then it routes all the traffic into and out of Trudy using \texttt{iptables}. Trudy receives all the traffic, modifies it based on the used module and shifts it back to internet as seen in Figure \ref{img:analysis-trudy-setup}.
 
 \begin{figure}[htb]
 	\centering
@@ -1038,11 +1038,11 @@ The implementation of a module for Trudy is straightforward. Trudy calls specifi
 
 \begin{itemize}
 	\item \textbf{Deserialize()} converts the raw payload into a known structure of data (e.g. HTTP)
-	\item \textbf{Drop()} if returns \emph{true} the whole packet is discarded
-	\item \textbf{DoMangle()} if returns \emph{true} \texttt{Mangle()} is called
+	\item \textbf{Drop()} if \emph{true} is returned, the whole packet is discarded
+	\item \textbf{DoMangle()} if \emph{true} is returned, \texttt{Mangle()} is called
 	\item \textbf{Mangle()} alters the payload
-	\item \textbf{DoIntercept()} if returns \emph{true} data are sent to the Trudy interceptor\footnote{Trudy interceptor is a simple local website the user may use to interfere with the data. Was not investigated further.}
-	\item \textbf{DoPrint()} if returns \emph{true} \texttt{PrettyPrint()} is called
+	\item \textbf{DoIntercept()} if \emph{true} is returned, the data are sent to the Trudy interceptor\footnote{Trudy interceptor is a simple local website the user may use to interfere with the data. Was not investigated further.}
+	\item \textbf{DoPrint()} if \emph{true} is returned, \texttt{PrettyPrint()} is called
 	\item \textbf{PrettyPrint()} prints data in human friendly format
 	\item \textbf{Serialize()} converts back to the raw payload if previously deserialized
 	\item \textbf{BeforeWriteTo()} actions taken before the data are written to one side or the other
@@ -1050,27 +1050,26 @@ The implementation of a module for Trudy is straightforward. Trudy calls specifi
 
 \end{itemize}
 
-
 \subsubsection{Preliminaries}
 
-To test our settings we didn't wait for the next 300 messages, rather set up breakpoints on the very lines where Telegram checks if the ID was already processed or not, the line 729 and 859 in the \texttt{ConnectionsManager} file in particular. If the packet was actually send again these breakpoints would be fired and the message further rejected by Telegram. This would confirm our surmise and later improved to comply fully with the scenario.
+To test our settings we didn't wait for the next 300 messages, rather set up breakpoints on the very lines where Telegram checks if the ID was already processed or not, the line 729 and 859 in the \texttt{ConnectionsManager} file in particular. If the packet was actually send again, these breakpoints would be fired, and the message further rejected by Telegram. This would confirm our surmise and later be improved to comply fully with the scenario.
 
-To further simplify the process we limited all the test messages to the length of 201 bytes to easily identify a message from the other traffic. The length of the message remained the same throughout the testing, we only changed some of the characters each time to see which messages arrived. The testing message we used reads:
+To further simplify the process we limited all the test messages to the length of 201 bytes to easily identify a message from the other traffic. The length of the message remained the same throughout the testing, we only changed some of the characters each time, to see which messages arrived. The testing message we used reads:
 
 \begin{displayquote}
-To simplify the process we are using a message longer than 200 bytes to easily identify it in the stream of data
+\emph{``To simplify the process we are using a message longer than 200 bytes to easily identify it in the stream of data''}
 \end{displayquote}
 
-When sending such message through Telegram its length is always equal to 201 bytes under regular conditions.
+When sending such message using Telegram, its length is always equal to 201 bytes under regular conditions.
 
 \subsubsection{Execution}
 
-We've implemented the Trudy module as shown in Listing \ref{lst:analysis-replay-module}. The \texttt{DoMangle()} function checks if the source IP address is equal to one of the Telegram datacenters (\texttt{149.154.167.91:80}). We confirmed our testing application is communicating with this server using Wireshark and as well the configuration details extracted from the \texttt{tgnet.dat} file (see Section \ref{analysis-storage-scripts}) contained a datacenter with such IP address. Further the size of the packet is checked to select the testing messages only.
+We implemented the Trudy module as shown in Listing \ref{lst:analysis-replay-module}. The \texttt{DoMangle()} function checks if the source IP address is equal to one of the Telegram datacenters (\texttt{149.154.167.91:80}). We confirmed our testing application is communicating with this server using Wireshark, and as well the configuration details extracted from the \texttt{tgnet.dat} file (see Section \ref{analysis-storage-scripts}) contained a datacenter with such IP address. Furthermore, the size of the packet is checked to select the testing messages only.
 
-If those conditions are met the \texttt{Mangle()} function checks whether some bytes were already saved. If not it signifies this is the first message and it copies the TCP payload into the \texttt{oldBytes} array and sets the \texttt{saved} flag to \emph{true}. It does not modify the payload in any way. If \texttt{saved} is already set to \emph{true} it copies the saved bytes into the currently intercepted TCP packet replacing its content. Keep in mind we are attempting the simplified scenario and therefore not waiting for 300 other messages, we are trying to resend the message as soon as another comes which should fire the breakpoints.
+If those conditions are met, the \texttt{Mangle()} function checks whether some bytes were already saved. If not, it signifies this is the first message, and it copies the TCP payload into the \texttt{oldBytes} array, and sets the \texttt{saved} flag to \emph{true}. It does not modify the payload in any way. If \texttt{saved} is already set to \emph{true}, it copies the saved bytes into the currently intercepted TCP packet replacing its content. Keep in mind, we are attempting the simplified scenario and therefore not waiting for 300 other messages, we are trying to resend the message as soon as another comes which should fire the breakpoints.
 
 \begin{listing}[htb]
-\caption{Programmed Trudy module code used to perform a Replay attack on Telegram. The \texttt{DoMangle()} function limits the packet modifications only to our messages. \texttt{Mangle()} actually performs the attack.}
+\caption{The programmed Trudy module code used to perform a Replay attack on Telegram. The \texttt{DoMangle()} function limits the packet modifications only to our messages. \texttt{Mangle()} actually performs the attack.}
 \label{lst:analysis-replay-module}
 \begin{minted}{Go}
 var saved bool
@@ -1099,38 +1098,38 @@ func (input *Data) Mangle() {
 
 \subsubsection{Results and Future Work}
 
-Unfortunately it was not the case. We confirmed Telegram successfully  receives the repeated traffic but neither of the desired breakpoints were fired. Further analysis showed Telegram incorrectly deobfuscated the traffic. This is due to the fact that during the communication the \texttt{obf\_enc\_key\_bytes} change periodically. The deobfuscated data are therefore completely different and are rejected on different places as nonsense.
+Unfortunately, it was not the case. We confirmed Telegram successfully  receives the repeated traffic, but neither of the desired breakpoints were fired. Further analysis showed Telegram incorrectly deobfuscated the traffic. This is due to the fact that during the communication the \texttt{obf\_enc\_key\_bytes} changes periodically. The deobfuscated data are therefore completely different and are rejected on different places as nonsense.
 
 We were unable to continue the attack due to time limitations and the scope of this work. However, we still believe this attack is feasible. In order to continue the obfuscation keys would have to be saved as well. The modified scenario goes as follow:
 
 \begin{enumerate}
-	\item Sniff a message, deobfuscate it and save
+	\item Sniff a message, deobfuscate it and save it
 	\item Wait for 300 other messages
 	\item Save the current obfuscation key
 	\item Replace the next message with the first one obfuscated by the current key
 	\item Telegram processes the first message again
 \end{enumerate}
 
-This requires to have the obfuscation capabilities introduced in the C program in Section \ref{analysis-obf-program}. Since Go has a native support of C the codebase could be incorporated into the Trudy module.
+This requires to have the obfuscation capabilities introduced in the C program in Section \ref{analysis-obf-program}. Since Go has a native support of C, the codebase could be incorporated into the Trudy module.
 
 
 \subsubsection{Responsible Disclosure}
 
-The findings were reported to Telegram security team on 7 December 2016 with a kind request for comments. In particular, two points were discussed, the obfuscation method and the Replay attack scenario. The first response from Telegram was received on 12 December 2016.
+The findings were reported to the Telegram security team on 7 December 2016 with a kind request for comments. In particular, two points were discussed, the obfuscation method and the Replay attack scenario. The first response from Telegram was received on 12 December 2016.
 
-The obfuscation method was commented only briefly as \emph{``unrelated to data security and is used to counter some of the less sophisticated attempts at banning our service in certain countries''}. In October 2015 Pavel Durov (the founder of Telegram) stated on its Twitter account that Telegram was blocked temporarily in Iran as a result of denied collaboration with the Iranian government~\cite{telegram-durov-iran}. This most likely concerns other countries applying some form of internet censorship but illustrates well that Telegram indeed faces censorship issues.
+The obfuscation method was commented only briefly as \emph{``unrelated to data security and is used to counter some of the less sophisticated attempts at banning our service in certain countries''}. In October 2015, Pavel Durov (the founder of Telegram) stated on its Twitter account that Telegram was blocked temporarily in Iran as a result of denied collaboration with the Iranian government~\cite{telegram-durov-iran}. This most likely concerns other countries applying some form of internet censorship as well but illustrates well that Telegram indeed faces censorship issues.
 
-MTProto has a fixed structure where the \texttt{auth\_key\_id} value is always present at the beginning of the packet and therefore easily recognizable which may be considered as a design flaw of the protocol itself. Another solution to this might be wrapping the protocol into SSL/TLS. The traffic would be then unrecognizable from other protocols based on SSL/TLS such as the very common HTTPS making it even harder to identify. Telegram developers dismissed this proposal considering SSL/TLS as too performance heavy.
+MTProto has a fixed structure where the \texttt{auth\_key\_id} value is always present at the beginning of the packet and therefore easily recognizable which may be considered as a design flaw of the protocol itself. Another solution to this might be wrapping the protocol into SSL/TLS. The traffic would be then unrecognizable from the other protocols based on SSL/TLS, such as the very common HTTPS, making it even harder to identify. Telegram developers dismissed this proposal considering SSL/TLS as too performance heavy.
 
 Under these circumstances it is understandable why the obfuscation method is not officially documented in any form.
 
-Secondly, Telegram responded to our attack scenario from Section \ref{analysis-attacks} and actually accepted some of our claims. According to the Telegram team the Android application (as opposed allegedly to the other clients such as Telegram for iOS, Telegram Desktop etc.) does not perform one of the the security checks as is required by the protocol, defined in the Security Guidelines for Client Developers in particular \cite{telegram-security-guideline}.
+Secondly, Telegram responded to our attack scenario from Section \ref{analysis-attacks} and actually accepted some of our claims. According to the Telegram team the Android application (as opposed allegedly to the other clients, such as Telegram for iOS, Telegram Desktop etc.) does not perform one of the the security checks as is required by the protocol, defined in the Security Guidelines for Client Developers in particular \cite{telegram-security-guideline}.
 
-Among other checks, the Security Guideline requires \cite{telegram-security-guideline} the message ID to be checked against the stored ones and Telegram performs that. However, it requires one more additional check -- if the incoming message has lower or equal ID than all the stored IDs such message is to be discarded. This action does indeed mitigate the risk, but Telegram for Android did not carry out this check.
+Among other checks, the Security Guideline requires \cite{telegram-security-guideline} the message ID to be checked against the stored ones and Telegram performs that. However, it requires one more additional check -- if the incoming message has lower or equal ID than all the stored IDs, such message is to be discarded. This action does indeed mitigate the risk but Telegram for Android did not carry out this check.
  
-The Telegram team further elaborated that this vulnerability does not allow the attacker to cause any severe damage because of the additional protection on the side of the Telegram API. Message actions (sending, editing, deleting, and changing read status), group membership, secret chats, and other important areas are not be affected\footnote{According to Telegram this is due to the checks done in the \texttt{MessagesController.java} class on lines 5731, 5561, 5765, 5817 and other.}. Nevertheless, the Telegram team confirmed the attack would work for nonessential service updates like online or typing statuses. For example, the scenario allowed the attacker to alter the statuses of victim's friends (as seen in the Android application, not in the Telegram network) or spoofing the victim to see typing statuses from contacts not performing such action in reality.
+The Telegram team further elaborated that this vulnerability does not allow the attacker to cause any severe damage because of the additional protection on the side of the Telegram API. Message actions (sending, editing, deleting, and changing read status), group membership, secret chats, and other important areas are not be affected\footnote{According to Telegram this is due to the checks done in the \texttt{MessagesController.java} class on lines 5731, 5561, 5765, 5817 and other.}. Nevertheless, the Telegram team confirmed the attack would work for nonessential service updates like online or typing statuses. For example the scenario allowed the attacker to alter the statuses of victim's friends (as seen in the Android application, not in the Telegram network) or spoofing the victim to see typing statuses from contacts not performing such action in reality.
 
-We briefly reviewed theses claims and concluded that the Java part of Telegram application indeed does deal with additional identifiers, such as \texttt{qts}, \texttt{pts} and other. These values do seem to provide additional protection. It is important to note that we did not perform a deeper kind of research.
+We briefly reviewed theses claims and concluded that the Java part of the Telegram application indeed does deal with additional identifiers, such as \texttt{qts}, \texttt{pts} and other. These values do seem to provide additional protection. It is important to note that we did not perform a deeper kind of research.
 
 Telegram promised this will be fixed in the next Android update and offered a financial reward for our findings.
 
