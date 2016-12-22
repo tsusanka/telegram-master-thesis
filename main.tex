@@ -97,7 +97,7 @@ This chapter contains thorough description of five selected Instant Messengers a
 
 \section{Selection}
 
-We selected the following five Instant Messenger applications. The selection was based on various criterions to create a diverse mixture of messengers. The criterions among others were user base, geographical origin, authors, proclaimed security, license and price. However, we did not want to simply sort the IMs by one of those criterions. We wanted to present an indeed diverse collection. That's why we omitted Facebook Messenger and Apple's iMessage since the first is owned by the very same company as WhatsApp~\cite{facebookwhatsappbuy} and the later is yet another US-based company.
+We selected the following five Instant Messenger applications. The selection was based on various criterions to create a diverse mixture of messengers. The criterions among others were user base, geographical origin, authors, proclaimed security, license and price. However, we did not want to simply sort the IMs by one of those criterions. We wanted to present an indeed diverse collection. That is why we omitted Facebook Messenger and Apple's iMessage since the first is owned by the very same company as WhatsApp~\cite{facebookwhatsappbuy} and the later is yet another US-based company.
 
 For ease of comparison we decided to select messengers with support for mobile platforms. Particular software versions are mostly an estimate based on a date some findings were published and the software changelog.
 
@@ -108,7 +108,7 @@ Large user base and overall popularity of the application is one of the main rea
 
 \subsection{Signal\protect\footnote{https://www.whispersystems.org}}
 
-Signal was endorsed by the community in several occasions and is by many considered as the most secure messenger. It's the only messenger completely open-sourced in this collection.
+Signal was endorsed by the community in several occasions and is by many considered as the most secure messenger. It is the only messenger completely open-sourced in this collection.
 
 \subsection{Threema\protect\footnote{https://www.threema.ch}}
 
@@ -758,7 +758,7 @@ It should be noted that since this was introduced in the 3.2.2 version (Septembe
 
 We decided to analyze the code quality using static code analysis tools to avoid opinion-based reviews. Android Studio itself comes with a code scanning tool \emph{lint}~\cite{android-studio-lint}. The tool seeks for potential bugs, optimization improvements, security, performance and other.
 
-Lint was run using the default settings, and yielded 20 errors and 286 warnings. The full output is attached in the appendix. Android Studio can as well perform code inspections. It runs lint and adds number of checks, such as error handling, security, code style, javadoc coverage, spelling etc. It found over 650 000 issues in the Telegram project. The results are as well available in the appendix. % TODO
+Lint was run using the default settings and yielded 20 errors and 286 warnings. The full output is available on the attached CD. Android Studio can as well perform code inspections. It runs Lint and adds number of checks, such as error handling, security, code style, javadoc coverage, spelling etc. It found over 650,000 issues in the Telegram project. The results are as well available on the CD.
 
 It is important to note that the code analysis concerns the project as whole meaning it includes all the dependencies. Some issues may therefore relate to the libraries Telegram uses, not to Telegram itself.
 
@@ -1144,7 +1144,7 @@ We have analyzed many security-related incidents and presented their impact on t
 
 Moreover, we have studied the Telegram IM and its MTProto protocol. We have thoroughly documented the protocol's internal working, its initialization and the encryption process. Since Telegram has two types of chat environment (regular and secret chats), we have covered both, and stressed out how they relate to each other. We have noted the cryptographic primitives it uses as well.
 
-We have setup a testing laboratory using various tools, and analyzed the network traffic Telegram produces. We have scrutinized the code base of the official application for Android, and concluded the state of the application is at serious odds with the documentation. This concerns mainly the undocumented obfuscation method Telegram uses. The MTProto traffic is encrypted one more time with the key and IV appended in front of the data. This has no effect on the data security, and is easily debunked by the deobfuscation program we have implemented. When the Telegram team was confronted with these claims, they noted the method is used to defy some of the less sophisticated methods of censorship in certain countries.
+We have setup a testing laboratory using various tools, and analyzed the network traffic Telegram produces. We have scrutinized the code base of the official application for Android, and concluded the state of the application is at serious odds with the documentation. This concerns mainly the undocumented obfuscation method Telegram uses. The MTProto traffic is encrypted one more time with the key and IV appended in front of the data. This has no effect on the data security, and is easily debunked by the deobfuscation program we have implemented. When the Telegram team was confronted with these claims, they noted the method is used to circumvent some of the less sophisticated methods of censorship in certain countries.
 
 Finally, we have localized an exploitable vulnerability and drafted an attack scenario. We concluded the Android application does not check message identification numbers properly, and that a Replay attack might be feasible. Although our primary scenario of the attack turned out not to be applicable, we have drafted a new altered scenario which we believe could be. We have reported our findings to the Telegram security team which accepted our remarks and agreed, to a certain degree, this might be exploitable. Telegram promised to fix this issue in the next software release.
 
