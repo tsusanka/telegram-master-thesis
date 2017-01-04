@@ -1056,7 +1056,7 @@ To further simplify the process we limited the test messages to the length of 20
 
 When sending such message using Telegram, its length is always equal to 201 bytes under regular conditions.
 
-\subsubsection{Execution}
+\subsubsection{Execution}\label{analysis-trudy-execution}
 
 We implemented the Trudy module as shown in Listing \ref{lst:analysis-replay-module}. The \texttt{DoMangle()} function checks if the source IP address is equal to one of the Telegram datacenters (\texttt{149.154.167.91:80}). We confirmed our testing application is communicating with this server using Wireshark, and also the configuration details extracted from the \texttt{tgnet.dat} file (see Section \ref{analysis-storage-scripts}) contained a datacenter with such IP address. Furthermore, the size of the packet is checked to select the testing messages only.
 
@@ -1159,29 +1159,21 @@ Our work mainly focuses on the protocol and the Android client, but there are st
 
 \chapter{Contents of CD}\label{app:CDcontent}
 
-Visualise the contents of enclosed media. Use of \verb|dirtree| is recommended. Note that directories src and text with appropriate contents are mandatory.
-
 
 \begin{figure}
 	\dirtree{%
 		.1 readme.txt\DTcomment{the file with CD contents description}.
-		.1 data\DTcomment{the data files directory}.
-		.2 graphs\DTcomment{the directory of graphs of experiments}.
-		.3 *.eps\DTcomment{the B/W graphs}.
-		.3 *.png\DTcomment{the color g<raphs}.
-		.3 *.dat\DTcomment{the graphs data files}.
-		.1 exe\DTcomment{the directory with executable WBDCM program}.
-		.2 wbdcm\DTcomment{the WBDCM program executable (UNIX)}.
-		.2 wbdcm.exe\DTcomment{the WBDCM program executable (Windows)}.
+		.1 data\DTcomment{the working data files directory}.
+		.2 Telegram\DTcomment{Telegram 3.13.1 source code}.
 		.1 src\DTcomment{the directory of source codes}.
-		.2 wbdcm\DTcomment{the directory of WBDCM program}.
-		.3 Makefile\DTcomment{the makefile of WBDCM program (UNIX)}.
-		.2 thesis\DTcomment{the directory of \LaTeX{} source codes of the thesis}.
-		.3 figures\DTcomment{the thesis figures directory}.
-		.3 *.tex\DTcomment{the \LaTeX{} source code files of the thesis}.
-		.1 text\DTcomment{the thesis text directory}.
-		.2 thesis.pdf\DTcomment{the Diploma thesis in PDF format}.
-		.2 thesis.ps\DTcomment{the Diploma thesis in PS format}.
+		.2 Telegram Deobfuscator\DTcomment{Deobfuscator source code; see Section \ref{analysis-obf-program}}.
+		.2 Telegram Extractor\DTcomment{Extractor source code; see Section \ref{analysis-storage-scripts}}.
+		.2 Trudy module\DTcomment{written Trudy module; see Section \ref{analysis-trudy-execution}}.
+		.2 thesis\DTcomment{\LaTeX{} source codes of the thesis}.
+		.2 diagrams\DTcomment{illustrations source code}.
+		.1 text\DTcomment{this thesis text directory}.
+		.2 appendices\DTcomment{thesis appendices as mentioned in the text}.
+		.2 thesis.pdf\DTcomment{this thesis in PDF format}.
 	}
 \end{figure}
 
