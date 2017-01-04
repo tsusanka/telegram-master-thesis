@@ -64,8 +64,8 @@
 \authorWithDegrees{Bc. Tom{\' a}{\v s} Su{\v s}{\' a}nka} %author's name with academic degrees
 \supervisor{Ing. Josef Kokeš}
 \acknowledgements{I would like to thank my thesis supervisor Ing. Josef Kokeš for his essential help, guidance and an incredible response time. Many thanks to Jakob Bjerre Jakobsen from the Aarhus University for sharing his source codes of the MTProto illustrations that I partially modified. Thanks to Prof.~Dr.-Ing.~Christof Paar and Dr.-Ing.~Juraj Somorovsky from the Ruhr-University Bochum for encouraging me to pursue this topic. Special thanks to Miriam for proofreading and last but not least, I would like to thank my family for supporting me during my studies.}
-\abstractCS{Tato diplomová práce se zabývá studiem programu Telegram a s ním souvisejícího protokolu MTProto. Zaměřuje se především na kryptografické zázemí protokolu, zdrojový kód Android aplikace, zkoumá datový přenos a porovnává stav aplikace s oficiální dokumentací. Dále analyzuje potencionální bezpečnostní slabiny a případně demonstruje jejich zneužití.}
-\abstractEN{This thesis is devoted to an analysis of the Telegram Messenger and the related MTProto protocol. It studies the cryptographic background of MTProto, the Android client source code and the produced traffic. It compares the application with its official documentation. Finally it discusses potential vulnerabilities, their discoveries and various attempts to exploit them.}
+\abstractCS{Tato diplomová práce se zabývá studiem programu Telegram a s ním souvi\-sejícího protokolu MTProto. Zaměřuje se především na kryptografické zázemí protokolu, zdrojový kód Android aplikace, zkoumá datový přenos a porovnává stav aplikace s oficiální dokumentací. Dále analyzuje potencionální bezpeč\-nostní slabiny a případně demonstruje jejich zneužití.}
+\abstractEN{This thesis is devoted to an analysis of the Telegram Messenger and the related MTProto protocol. It studies the cryptographic background of MTProto, the Android client source code and the generated network traffic. Additionally, it compares the application to its official documentation. Finally it discusses potential vulnerabilities and various attempts to exploit them.}
 \placeForDeclarationOfAuthenticity{Žižkov, Prague} %where you have signed the declaration
 \keywordsCS{instant messaging, Telegram, MTProto, bezpečná komunikace, bezpečnostní analýza}
 \keywordsEN{instant messaging, Telegram, MTProto, secure communication, security analysis}
@@ -75,28 +75,28 @@
 
 \begin{introduction}
 
-Instant messaging is a form of a real-time online communication. The history of Instant Messengers (IM) dates back as far as 1960s, but the modern IMs, as we currently know them, started in the mid-1990s, with the very popular ICQ or AOL Instant Messenger. Nowadays, the human interaction and communication take place more and more often in the digital realm and instant messaging is the digital version of a spoken dialogue.
+Instant messaging is a form of a real-time online communication. The history of Instant Messengers (IM) dates back as far as 1960s, but the modern IMs as we currently know them started in the mid-1990s with the very popular ICQ or AOL Instant Messenger. Nowadays, the human interaction and communication take place more and more often in the digital realm and instant messaging is the digital version of a spoken dialogue.
 
-A common feature of the IM software is the ability to see if a specific contact is connected and available or not. Further, IMs are primarily designed for a alternating exchange of a number of shorter messages, as opposed to the well-established typically longer emails.
+A common feature of the IM software is the ability to see if a specific contact is online and available for chat. Further, IMs are primarily designed for an alternating exchange of a number of shorter messages, as opposed to the well-established and typically longer emails.
 
-Today, many social networks provide some form of messaging solution as well. The users are very demanding, Instant messengers are de facto required to have both mobile and web access and more advanced capabilities, such as media, voice, or location sharing. Furthermore, the exposure of mass surveillance leaked by the ex-NSA employee Edward Snowden fuelled the demand for a secure and privacy-aware communication.
+Today, many social networks provide some form of messaging solution as well. The users are very demanding. Instant messengers are de facto required to have both mobile and web access and more advanced capabilities, such as media, voice, or location sharing. Furthermore, the exposure of mass surveillance leaked by the ex-NSA employee Edward Snowden fuelled the demand for a secure and privacy-aware communication.
 
-This thesis aims to provide a brief overview of the current Instant Messenger solutions focusing on their security. We will cover the messengers' history, origin, their security-related aspects and other information in order to provide the reader with an insight into the security of today's modern instant messaging applications.
+This thesis aims to provide a brief overview of the current Instant Messenger solutions, focusing on their security. We will cover the messengers' history, origin, their security-related aspects and other information in order to provide the reader with an insight into the security of today's modern instant messaging applications.
 
-Following this summary we will focus in more depth on Telegram in particular which stresses out the need for users' privacy. Telegram has 100 million active users and is especially popular in Iran, but also in the US, Germany, India, Uzbekistan, Russia, Italy or Brazil~\cite{telegram-countries}. Telegram introduces its own cryptographic protocol MTProto instead of using already known solutions which was criticised by a significant part of the cryptographic community~\cite{telegram-community-vice,telegram-community-register}. We will devote ourselves to its in-depth investigation, study of the cryptography behind the protocol, how the protocol deals with a key negotiation, message authentication, integrity and other topics.
+Following this summary we will focus in more depth on Telegram, which stresses the need for users' privacy. Telegram has 100 million active users and is especially popular in Iran, but also in the US, Germany, India, Uzbekistan, Russia, Italy or Brazil~\cite{telegram-countries}. Telegram introduces its own cryptographic protocol MTProto instead of using already known solutions; this was criticised by a significant part of the cryptographic community~\cite{telegram-community-vice,telegram-community-register}. We will devote ourselves to its in-depth investigation, study of the cryptography behind the protocol, how the protocol deals with a key negotiation, message authentication, integrity and other topics.
 
-Furthermore, we will dive into the code of Telegram itself, focusing primarily on the official Android application. We will verify its consistency with the official documentation, focus on its code base, evaluate how it proceeds with storing user's data, and finally in case some inconsistencies are found, we will draft an attack scenario and attempt to execute it.
+Furthermore, we will dive into the code of Telegram itself, focusing primarily on the official Android application. We will verify its consistency with the official documentation, focus on its code base, evaluate how it proceeds with storing user's data, and finally we will draft an attack scenario and attempt to execute it.
 
 \end{introduction}
 
 
 \chapter{Current security status of major IMs}\label{compar}
 
-This chapter contains a thorough description of five selected Instant Messengers and their security related discoveries. For an easier comparison we decided to select messengers with support for mobile platforms. Individual software versions mentioned are mostly an estimate based on a date some findings were published and the software changelog.
+This chapter contains a thorough description of five selected Instant Messengers and their security related discoveries. For an easier comparison we decided to select messengers with support for mobile platforms. Individual software versions mentioned are mostly an estimate based on a date some findings were published and on the software changelog.
 
 \section{Selection}
 
-We selected the following five Instant Messenger applications. The selection was based on various criteria to create a diverse mixture of messengers. These criteria were amongst others user base, geographical origin, authors, proclaimed security, license and price. However, we did not want to simply sort the IMs according to either one of those criteria. We wanted to present a diverse collection. That is why we omitted the Facebook Messenger and Apple's iMessage, since the first is owned by the very same company as WhatsApp~\cite{facebookwhatsappbuy} and the second is yet another US-based company.
+For our evaluation we selected five Instant Messenger applications. The selection was based on various criteria to create a diverse mixture of messengers. These criteria were amongst others: user base, geographical origin, authors, proclaimed security, license and price. However, we did not want to simply sort the IMs according to either one of those criteria. We wanted to present a diverse collection. That is why we omitted the Facebook Messenger and Apple's iMessage, since the first is owned by the very same company as WhatsApp~\cite{facebookwhatsappbuy} and the second is yet ano ther US-based company.
 
 
 \subsection{WhatsApp\protect\footnote{https://www.whatsapp.com}}
@@ -105,7 +105,7 @@ A large user base and overall popularity of the application is one of the main r
 
 \subsection{Signal\protect\footnote{https://www.whispersystems.org}}
 
-Signal was endorsed by the community on several occasions and is considered as the most secure messenger by many. It is the only completely open-sourced messenger in this collection.
+Signal was endorsed by the community on several occasions and is considered the most secure messenger by many \cite{signal-recommend}. It is the only completely open-source messenger in this collection.
 
 \subsection{Threema\protect\footnote{https://www.threema.ch}}
 
@@ -113,11 +113,11 @@ Threema is the only paid application in this selection. Furthermore, Threema com
 
 \subsection{WeChat\protect\footnote{https://www.wechat.com/en/}}
 
-WeChat is a China-based messenger and with its 700 million active users the most popular there~\cite{wechat-users}. As with Threema we include WeChat mainly for its distinct origin.
+WeChat is a China-based messenger and with its 700 million active users the most popular there~\cite{wechat-users}. As with Threema, we include WeChat mainly for its distinct origin.
 
 \subsection{Telegram\protect\footnote{https://www.telegram.org}}
 
-Telegram paints itself as safer than WhatsApp. It uses its own messaging protocol MTProto and argues for its security. Telegram's clients are open-source but the server side is proprietary. The creators of Telegram are Nikolaj and Pavel Durov, the authors of the Russian social network VK.
+Telegram developers proclaim it is safer than WhatsApp. It uses its own messaging protocol MTProto and argues for its security. Telegram's clients are open-source but the server side is proprietary. The creators of Telegram are Nikolaj and Pavel Durov, the authors of the Russian social network VK.
 
 
 \begin{table}[htb]\centering
@@ -126,8 +126,8 @@ Telegram paints itself as safer than WhatsApp. It uses its own messaging protoco
 	\begin{tabular}{|l|l|l|l|l|}
 		\hline
 		 \textbf{Name} & \textbf{First release} & \textbf{License} & \textbf{User base} \\ \hline
-		WhatsApp & January 2010 & Proprietary & 1 billion\tablefootnote{\label{foot-sep2015}As of February 2016.} \\ \hline
-		 Telegram & August 2013 & GPLv2/GPLv3/Proprietary & 100 million\tablefootnote{As of February 2016} \\ \hline
+		WhatsApp & January 2010 & Proprietary & 1 billion\tablefootnote{As of February 2016.}\addtocounter{footnote}{-1}\addtocounter{Hfootnote}{-1} \\ \hline
+		 Telegram & August 2013 & GPLv2/GPLv3/Proprietary & 100 million\footnotemark \\ \hline
 		 Signal & July 2014 & GPLv3 & 10 million\tablefootnote{Signal's predecessor TextSecure as of December 2013.} \\ \hline
 		 Threema & 	December 2012  & Proprietary & 3.5 million  \tablefootnote{As of June 2015.} \\ \hline
 		 WeChat & January 2011 & Proprietary & 700 million\tablefootnote{As of April 2016.} \\ \hline
@@ -137,18 +137,18 @@ Telegram paints itself as safer than WhatsApp. It uses its own messaging protoco
 
 \section{Security aspects}
 
-The Electronic Frontier Foundation maintains a scoreboard of messaging applications' security. The scoreboard was initially released November 2014 and last updated on 5 June 2016.
+The Electronic Frontier Foundation maintains a scoreboard of messaging applications' security. The scoreboard was initially released on November 2014 and last updated on 5th June 2016.
 
 It evaluates messengers based on these seven criteria~\cite{eff-score}:
 
 \begin{itemize}
 	\item \textbf{Are messages encrypted in transit?} All user communication is required to be encrypted. Encryption of metadata, such as phone numbers, usernames or dates, is not required. % commas ok
-	\item \textbf{Are messages encrypted so the provider cannot access it?} All user messages need to be end-to-end encrypted from the moment user sends a message to the moment the other party receives it. No decrypting and re-encrypting may occur during that process. The private keys need to be generated at the endpoints, not on a centralized server. Bulk data collection is therefore meaningless and no third-party can access the messages unless one party allows it.
-	\item \textbf{Can user verify contacts' identities?} This requires a verification mechanism of the opposite side's identity to prevent Man-in-the-Middle attacks. 
+	\item \textbf{Are messages encrypted in such a way the provider cannot access it?} All user messages need to be end-to-end encrypted from the moment user sends a message to the moment the other party receives it. No decrypting and re-encrypting may occur during that process. The private keys need to be generated at the endpoints, not at a centralized server. Bulk data collection is therefore meaningless and no third-party can access the messages unless one party allows it.
+	\item \textbf{Can user verify contacts' identities?} This requires a verification mechanism of the opposite side's identity to prevent Man-in-the-Middle attacks.
 	\item \textbf{If the keys are stolen, are past communications secure?} All messages need to be encrypted with routinely changing keys. The forward secrecy minimizes the consequences in a case a private key is stolen because each key has only a short-time validity. This criterion requires end-to-end encryption and is therefore directly dependent on the second criterion.
 	\item \textbf{Is the code open to an independent review?} A sufficient amount of source-code needs to be available to perform an independent code review. This provides protection from unintentional encryption flaws, backdoors or bugs.
 	\item \textbf{Is the cryptography design properly documented?} The cryptography behind the application needs to be placed on record in detailed documentation.
-	\item \textbf{Has there been any recent code audit?} An independent security review of the application is not older than 12 months. This does not require the audit to be publicly available.
+	\item \textbf{Has there been any recent code audit?} An independent security review of the application must not be older than 12 months. It is not required that the audit is publicly available.
 \end{itemize}
 
 At the end of each chapter dedicated to one messenger a small note about the received score will be made.
@@ -157,7 +157,7 @@ At the end of each chapter dedicated to one messenger a small note about the rec
 
 WhatsApp is a mobile messaging application. Besides text it enables users to send pictures, videos, voice and locations. WhatsApp Messenger is available for iPhone, BlackBerry, Windows Phone, Android and Symbian~\cite{whatsapphomepage}.
 
-In February 2016, WhatsApp has reached 1 billion active users per month and was the most used messenger to date~\cite{whatsappusers}. Its large user base and overall popularity of the application is one of the main reasons WhatsApp is included in this comparison.
+In February 2016, WhatsApp has reached 1 billion active users per month and was the most used messenger to date~\cite{whatsappusers}. Its large user base and overall popularity of the application is one of the main reasons WhatsApp was included in this comparison.
 
 Following section describes WhatsApp's security-related incidents.
 
@@ -165,7 +165,7 @@ Following section describes WhatsApp's security-related incidents.
 
 \subsubsection{Flaws in the registration process}\label{whatsapp-registration}
 
-WhatsApp's user identity is bound to the user's phone number. In order to verify the connection every user has to enter his phone number during the first start-up. WhatsApp server then sends SMS with a verification code to this number. User submits the code from the received text message and WhatsApp creates his account.  
+WhatsApp's user identity is bound to the user's phone number. In order to verify the connection every user has to enter their phone number during the first start-up. WhatsApp server then sends SMS with a verification code to this number. User submits the code from the received text message and WhatsApp creates their account.
 
 \begin{figure}[htb]
 	\centering
@@ -198,7 +198,7 @@ The author of the attack scenario notified WhatsApp developers beforehand and Wh
 
 \subsubsection{Password generation}
 
-WhatsApp uses a slightly modified version of the XMPP protocol~\cite{whatsapp-xmpp}. During the registration process it creates a username based on the user's phone number. In newer versions than 2.10 the password is generated on server's side~\cite{whatsapp-imei}. However, older versions used the phone's IMEI number as a password~\cite{whatsapp-imei, whatsapp-imei2}.
+WhatsApp uses a slightly modified version of the XMPP protocol~\cite{whatsapp-xmpp}. During the registration process it creates a username based on the user's phone number. In versions newer than 2.10 the password is generated server-side~\cite{whatsapp-imei}, older versions however, used the phone's IMEI number as a password~\cite{whatsapp-imei, whatsapp-imei2}. Any phone number and IMEI was therefore everything an attacker needed to send messages on victim's behalf. Numerous applications are collecting plenty of user data, and the IMEI and phone number might be amongst them. Any database leak of such information would lead directly to a mass accounts abuse.
 
 \begin{listing}[htb]
 \caption{Pseudo-code of the password generation on Android in older versions of WhatsApp.}
@@ -209,13 +209,11 @@ md5(revert(<IMEI>))
 \end{listing}
 
 
-Any phone number and IMEI was therefore everything an attacker needed to send messages on victim's behalf. Numerous applications are collecting plenty of user data, and the IMEI and phone number might be amongst them. Any database leak of such information would lead directly to a mass accounts abuse.
-
 \subsubsection{Messages encryption}
 
-Up to approximately the version 2.8, WhatsApp did not use any message encryption. The messenger used port 443 (commonly used for HTTPS) to send content, however it did not encrypt anything whatsoever~\cite{whatsapp-plaintext}. Using a simple network sniffer like the Wireshark an attacker was able to read all of the user's messages.
+Up to approximately version 2.8, WhatsApp did not use any message encryption. The messenger used port 443 (commonly used for HTTPS) to send content, but it did not encrypt anything at all~\cite{whatsapp-plaintext}. Using a simple network sniffer like Wireshark an attacker was able to read all of the user's messages.
 
-In May 2012, an application called WhatsAppSniffer was released~\cite{whatsapp-sniffer, whatsapp-sniffer2}. It exploited the previously described flaw and enabled the attacker to see all the victim's messages in an easy and comprehensible user interface.
+In May 2012, an application called WhatsAppSniffer was released~\cite{whatsapp-sniffer, whatsapp-sniffer2}. It exploited the previously described flaw and enabled the attacker to see all of the victim's messages in an easy and comprehensible user interface.
 
 \begin{figure}[htb]
 	\centering
@@ -227,9 +225,9 @@ In May 2012, an application called WhatsAppSniffer was released~\cite{whatsapp-s
 
 In August 2012, WhatsApp first started to use some sort of encryption. The developers did not reveal which protocol they used or any other information about it. Reports showed that simple message sniffing, as described in the previous paragraph, ceased to work~\cite{whatsapp-sniffernomore}. Some sources claim the  RC4 stream cipher was used for encryption~\cite{whatsapp-rc4,whatsapp-rc42}.
 
-On November 18, 2014, the creators behind Signal messenger, Open Whisper Systems, announced a partnership with WhatsApp. The partnership should have resulted into incorporating OWS' encryption protocol into WhatsApp bringing the end-to-end encryption to all WhatsApp clients. Open Whisper Systems stated: \emph{``we are moving quickly towards a world where all WhatsApp users will get end-to-end encryption by default''}~\cite{openwhisperwhatsapp}. At the time WhatsApp confirmed the partnership, however did not comment on it any further nor offered any further information. WhatsApp's FAQ only briefly stated that \emph{``WhatsApp communication between your phone and our server is encrypted''}~\cite{whatsapp-faq}.
+On November 18th, 2014, the creators behind Signal messenger, Open Whisper Systems (OWS), announced a partnership with WhatsApp. The partnership should have resulted in incorporating OWS' encryption protocol into WhatsApp, bringing the end-to-end encryption to all WhatsApp clients. Open Whisper Systems stated: \emph{``We are moving quickly towards a world where all WhatsApp users will get end-to-end encryption by default''}~\cite{openwhisperwhatsapp}. At the time WhatsApp confirmed the partnership, but did not comment on it any further or offered any further information. WhatsApp's FAQ only briefly stated that \emph{``WhatsApp communication between your phone and our server is encrypted''}~\cite{whatsapp-faq}.
 
-In April 2015, \emph{heise.de} investigated the current state of WhatsApp's encryption. The journalists were sniffing messages using the Man-in-the-Middle technique. They showed that Android versions used end-to-end encryption and that the messages were encrypted according to the TextSecure protocol~\cite{whatsapp-encstate}. However, during an analysis of the iOS client they concluded the messages weren't protected in such manner. Finally, they concluded that they are unsure whether end-to-end encryption was actually used in all cases.
+In April 2015, \emph{heise.de} investigated the current state of WhatsApp's encryption. The journalists were sniffing messages using the Man-in-the-Middle technique. They showed that Android versions used end-to-end encryption and that the messages were encrypted according to the TextSecure protocol~\cite{whatsapp-encstate}. However, during an analysis of the iOS client they concluded the messages weren't protected in such a manner. Finally, they concluded that they were unsure whether end-to-end encryption was actually used in all cases.
 
 In April 2016, WhatsApp finally released an official white paper confirming all its messages are end-to-end encrypted with the use of Signal Protocol. The document thoroughly described all aspects and encryption methods. It stated \emph{``WhatsApp messages, voice and video calls between a sender and receiver that use WhatsApp client software released after March 31, 2016 are end-to-end encrypted.''} \cite{whatsapp-whitepaper}.
 
@@ -259,13 +257,13 @@ At the time of writing, WhatsApp has six points out of seven in the EFF's secure
 
 Signal is an open-source voice calling and messaging application. It is available for both Android and iOS. Its messages are end-to-end encrypted. During a voice call a simple identity check is available when a given word is to be pronounced by both sides of the call.
 
-Signal uses its own Signal Protocol (previously called Axolotl) based on cryptographic primitives such as Elliptic Curves (Curve25519), AES and HMAC-SHA256~\cite{signal-bochum}. As mentioned in Section~\ref{whatsapp} WhatsApp currently uses the very same protocol.
+Signal uses its own Signal Protocol (previously called Axolotl) based on cryptographic primitives such as Elliptic Curves (Curve25519), AES and HMAC-SHA256~\cite{signal-bochum}. As mentioned in Section~\ref{whatsapp}, WhatsApp currently uses the very same protocol.
 
 \subsection{Security-related incidents}
 
 In late 2014, \emph{Der Spiegel} published several articles claiming NSA considered Signal's encrypted voice calling combined with other tools as a serious hindrance to theirs surveilance missions~\cite{signal-spiegel}. Edward Snowden recommended Signal on various occasions~\cite{signal-snowden,signal-snowden2}.
 
-A research team from the Ruhr-University Bochum provided a security analysis of the former Signal version titled \emph{``How Secure is TextSecure?''}~\cite{signal-bochum}. They came to a conclusion that the protocol is susceptible to an Unknown key-share attack and proposed a correction. The researchers pronounced Signal as secure in case the suggested patch was implemented which it eventually was.
+A research team from the Ruhr-University Bochum provided a security analysis of the former Signal version titled \emph{``How Secure is TextSecure?''}~\cite{signal-bochum}. They came to a conclusion that the protocol is susceptible to an Unknown key-share attack and proposed a correction. The researchers pronounced Signal as secure in case the suggested patch was implemented, which it eventually was.
 
 Up to this date no other security-related incidents or further analysis of Signal messenger are known.
 
@@ -292,9 +290,9 @@ Signal fulfilled all the requirments in the EFF's secure messaging scorecard and
 
 \section{Threema}
 
-Threema is a paid IM application available for all of the three major platforms -- Android, iOS and Windows Phone. Text messaging, multimedia, locations, voice messages and file sharing are all supported. Threema is native to Switzerland and all servers are located there.
+Threema is a paid IM application available for three major platforms -- Android, iOS and Windows Phone. Text messaging, multimedia, locations, voice messages and file sharing are all supported. Threema is native to Switzerland and all servers are located there.
 
-Threema is a paid application. As of December 2016 the price was set to \euro2.99. Threema is using user IDs and linking user's phone number and email address is not required.
+Threema is a paid application. As of December 2016, the price was set to a single payment of \euro2.99. Threema is using user IDs and linking user's phone number and email address is not required.
 
 \subsection{Security-related incidents}
 
@@ -327,7 +325,7 @@ In the EFF's comparison Threema missed a single point for not completing an inde
 
 WeChat is a Chinese mobile messenger available to all major mobile platforms including iOS, Android, Windows Phone and BlackBerry. Besides regular text messages, WeChat offers media, location, video sharing and even games. As of May 2016, WeChat had 700 million active users~\cite{wechat-users}.
 
-A special business versions of WeChat was introduced in April 2016 named Enterprise WeChat designed for communication within companies and offering few additional features.
+A special business versions of WeChat named Enterprise WeChat was introduced in April 2016, designed for communication within companies and offering few additional features.
 
 \subsection{Censorship}
 
@@ -337,11 +335,11 @@ Since WeChat's servers are located in China, it is subjected to these restrictio
 
 \subsection{Security-related incidents}
 
-WeChat operators are capable of accessing messages, contacts and even user's location. Numerous states including United States, India and even China itself expressed concerns over WeChat being a threat to their national security issues~\cite{wechat-states}.
+WeChat operators are capable of accessing messages, contacts and even user's location. Numerous countries including United States, India and even China itself expressed concerns over WeChat being a threat to their national security issues~\cite{wechat-states}.
 
 \subsubsection{XcodeGhost malware}
 
-In 2015, Apple reported WeChat was infected with XcodeGhost malware~\cite{wechat-xcodemalware}. The malware was able to obtain user device information, read clipboard, prompt alert dialog and other. Apple claimed the malware was not able to induce any significant damage, and could not access any user data.
+In 2015, Apple reported WeChat was infected with XcodeGhost malware~\cite{wechat-xcodemalware}. The malware was able to obtain user device information, read clipboard, prompt alert dialog and other. Apple claimed the malware was not able to cause any significant damage and could not access any user data.
 
 \subsection{EFF's secure messaging score}
 
@@ -350,9 +348,9 @@ Regrettably, WeChat was not included in the EFF secure messaging survey.
 
 \section{Telegram}
 
-Telegram is an instant messaging service enabling users to send messages, photos, videos, stickers and files. Telegram describes itself as fast and secure solution for instant messaging and claims to be safer than WhatsApp. Compared to WhatsApp, Telegram is more cloud-based because it stores all messages on its servers, and synchronizes them with all of the user's devices~\cite{telegramfaq}.
+Telegram is an instant messaging service enabling users to send messages, photos, videos, stickers and files. Telegram describes itself as fast and secure solution for instant messaging and claims to be safer than WhatsApp. Compared to WhatsApp, Telegram is more cloud-based because it stores all messages on its servers and synchronizes them with all of the user's devices~\cite{telegramfaq}.
 
-Nikolaj and Pavel Durov are the authors of Telegram. After leaving the social network VK founded by Pavel Durov they focused on creating safe forms of communication eventually resulting in Telegram.
+Nikolaj and Pavel Durov are the authors of Telegram. After leaving the social network VK founded by Pavel Durov, they focused on creating safe forms of communication, eventually resulting in Telegram.
 
 Telegram provides two modes of messaging. Apart from the regular chat, Telegram provides so-called \emph{secret chats}. Secret chat messages are end-to-end encrypted and are not stored on the Telegram's servers for longer periods of time than absolutely necessary~\cite{telegramfaq}.
 
@@ -375,11 +373,11 @@ Telegram provides two modes of messaging. Apart from the regular chat, Telegram 
 	\caption[Telegram chat modes]{Telegram has two chat modes. Regular chat is meant to be used for traditional communication and its messages are stored on Telegram's servers. Secret chats are supposed to provide another layer of protection and are end-to-end encrypted.}
 \end{figure}
 
-Similar to WhatsApp, user can contact someone using his phone number but Telegram provides classical username-focused approach as well. User needs to know the recipient's phone number or Telegram username in order to communicate with them.
+Similar to WhatsApp, user can contact someone using his phone number, but Telegram provides classical username-focused approach as well. User needs to know the recipient's phone number or Telegram username in order to communicate with them.
 
-All clients are licensed under GPLv2 or GPLv3 license, the server-side part of Telegram is close-sourced and proprietary~\cite{telegram-server}.
+All clients are licensed under GPLv2 or GPLv3 license, the server-side part of Telegram is a closed-source and proprietary software~\cite{telegram-server}.
 
-In 2015, a Brazilian judiciary commanded WhatsApp to shut down its services for 48 hours. During this event, which was ultimately lowered to only 12 hours, Telegram welcomed 5 million new users \cite{whatsappbrazil}. It may therefore be considered a direct competitor of WhatsApp.
+In 2015, a Brazilian judiciary commanded WhatsApp to shut down its services for 48 hours. During this period, which was ultimately lowered to only 12 hours, Telegram welcomed 5 million new users \cite{whatsappbrazil}. It may therefore be considered a direct competitor of WhatsApp.
 
 In May 2015, Telegram had 62 million active users~\cite{telegram-users}.
 
@@ -390,17 +388,17 @@ In May 2015, Telegram had 62 million active users~\cite{telegram-users}.
 
 In Section~\ref{whatsapp-registration} we described how the WhatsApp's registration process using SMS works. Telegram works on a similar basis and allows logging in using a simple SMS as well.
 
-The text messages are fully accessible for mobile network operators which can and usually do cooperate with the corresponding government. Furthermore, SMS can be intercepted using inexpensive IMSI catchers. If an attacker is able to steal the authenticating SMS, he is able to login on the user's behalf. What is worse, Telegram stores the whole of user's message history, thus it allows the attacker to read older messages as well.
+The text messages are fully accessible for mobile network operators who can and usually do cooperate with the corresponding government. Furthermore, SMS can be intercepted using inexpensive IMSI catchers. If an attacker is able to steal the authenticating SMS, he is able to login on the user's behalf. What is worse, Telegram stores the whole of user's message history, thus it allows the attacker to read older messages as well.
 
 In early 2016, it was shown to be a legitimate concern~\cite{telegram-smsiran}. Some Telegram users experienced an erasure of their accounts and blamed Telegram of enforcing political censorship which Telegram denied. Russian activist Oleg Kozlovsky described in his Facebook post~\cite{telegram-russia} how his account was allegedly hacked.
 
 First, the Russia's mobile operator disabled SMS service on Oleg's phone number. Upon the disconnection the attacker tried to log to the victim's Telegram account. Because intercepting the SMS is all the attacker needs he simply entered the authorization code he sniffed and got full access to Oleg's account. Telegram recommended to turn on two-factor authentication for additional security.
 
-These concerns raise serious questions if SMS authentication is a valid instrument security-wise.
+These concerns raise a serious question whether SMS authentication is a valid instrument security-wise.
 
 \subsubsection{Cracking Contest}
 
-On November 4, 2014, Telegram arranged a contest with a winning price of~\$300,000 for cracking its encryption. The contest became quite known in the community, and probably provided a bit of an advertisement for Telegram.
+On November 4th, 2014, Telegram arranged a contest with a winning price of~\$300,000 for cracking its encryption. The contest became quite known in the community, and probably provided a bit of an advertisement for Telegram.
 
 The contest remained unsolved until its closure. Number of authors considered it rigged and stated that the contest does not provide any proof of Telegram's overall security whatsoever~\cite{telegramcontestfail,telegramcontestfail2}.
 
@@ -455,7 +453,7 @@ As mentioned Telegram has two types of messages. Telegram is therefore evaluated
 
 \chapter{Cryptography behind Telegram}\label{telegramcrypto}
 
-Telegram authors decided to craft a brand new encryption scheme in order to supposedly achieve better delivery times and stability, MTProto. In this section we will describe in detail how the protocol should work based on the official Telegram documentation and on the research from Aarhus University~\cite{telegram-aarhus}.
+Telegram authors decided to craft a brand new encryption scheme, MTProto, in order to supposedly achieve better delivery times and stability. In this section we will describe in detail how the protocol should work based on the official Telegram documentation and on the research from Aarhus University~\cite{telegram-aarhus}.
 
 
 \section{Initialization}\label{crypto-initialization}
@@ -469,18 +467,18 @@ Suppose a client $C$ is registering to a server $S$:
 	\item $S$ responds with another 128-bit random integer \emph{server\_nonce}, composite number \emph{pq} and a fingerprint of a RSA public key.
 	\item $C$ provides a proof of work by decomposing \emph{pq} into prime factors \emph{p} and \emph{q} such that $\emph{p} < \emph{q}$.
 	\item $C$ has several RSA public keys stored locally, and chooses the appropriate one based on the received fingerprint.
-	\item $C$ crafts a payload of \emph{p}, \emph{q}, \emph{pq}, \emph{nonce}, \emph{server\_nonce} and another new 256-bit random integer \emph{new\_nonce}. The payload including its hash is then encrypted by the RSA key, and sent to $S$.
-	\item $S$ responds with $g$, $g_a$ and $p$ encrypted AES-IGE using a key derived from \emph{new\_nonce} and \emph{server\_nonce}.\label{crypto-initialization-6}
-	\item $C$ generates random 2048-bit $b$, and computes $g_b = g^b \bmod p$ and $K = g_a^b \bmod p$. The $g_b$ value is sent to $S$ encrypted as previously.
-	\item $S$ calculates $K = g_b^a \bmod p$. Both $C$ and $S$ now share a common key $K$ noted as \texttt{auth\_key}.
+	\item $C$ crafts a payload of \emph{p}, \emph{q}, \emph{pq}, \emph{nonce}, \emph{server\_nonce} and another new 256-bit random integer \emph{new\_nonce}. The payload including its hash is then encrypted by the RSA key and sent to $S$.
+	\item $S$ responds with Diffie-Hellman parameters $g$, $p$ and $g_a$ encrypted with AES-IGE using a key derived from \emph{new\_nonce} and \emph{server\_nonce}.\label{crypto-initialization-6}
+	\item $C$ generates a random 2048-bit $b$, and computes $g_b = g^b \bmod p$ and $K = g_a^b \bmod p$. The $g_b$ value is sent to $S$ encrypted as previously described.
+	\item $S$ calculates $K = g_b^a \bmod p$. Both $C$ and $S$ now share a common key $K$ called as \texttt{auth\_key}.
 \end{enumerate}
 
-Some details were omitted for simplification. During the exchange the client should check following requirements:\label{crypto-prime-req}
+Some details were omitted for simplification. During the exchange the client should check the following requirements:\label{crypto-prime-req}
 
 \begin{itemize}
-	\item $p$ is a safe prime, meaning $q = \frac{p-1}{2}$ needs to be prime as well
+	\item $p$ is a safe prime, meaning $\frac{p-1}{2}$ needs to be prime as well
 	\item $2^{2047} < p < 2^{2048}$
-	\item $g$ is equal to 2, 3, 4, 5, 6 or 7 and it generates a cyclic subgroup of prime order $q$
+	\item $g$ is equal to 2, 3, 4, 5, 6 or 7 and it generates a cyclic subgroup of prime order $\frac{p-1}{2}$
 	\item $1 < g_a, g_b < p-1$
 	\item and finally, it is recommended to check $2^{2048-64} < g_a, g_b < p - 2^{2048-64}$
 \end{itemize}
@@ -500,7 +498,7 @@ With the connection to the server established in the previous section we can now
 
 \subsection{Payload}\label{crypto-regular-payload}
 
-First, let us describe the content of a single message further referred to as a payload. The payload prior to encryption is depicted in Figure \ref{img:regular-payload} and it contains:
+First, let us describe the content of a single message further referred to as a \emph{payload}. The payload prior to encryption is depicted in Figure \ref{img:regular-payload} and it contains:
 
 \begin{figure}[htb]
 	\centering
@@ -511,11 +509,11 @@ First, let us describe the content of a single message further referred to as a 
 
 \begin{itemize}
 	\item \textbf{salt} Periodically changed number used for various protection purposes.
-	\item \textbf{session\_id} Unique number to identify the user and its device.
+	\item \textbf{session\_id} Unique number to identify the user and their device.
 	\item \textbf{msg\_id} Unique ID of the message within a session.
 	\item \textbf{seq\_no} Message sequence counter.
 	\item \textbf{length} Length of the actual message.
-	\item \textbf{message} Text of the actual message.
+	\item \textbf{message} Content of the actual message.
 \end{itemize}
 
 
@@ -523,9 +521,9 @@ First, let us describe the content of a single message further referred to as a 
 
 The whole encryption process is visualized in Figure \ref{img:crypto-regular-enc}.
 
-First, the message key \texttt{msg\_key} is calculated. It is composed of the first 128 least significant bits of the SHA-1 hash of the payload to be encrypted. Next, the array is padded with 0-120 random bits in order to be divisible by the AES block size -- 128 bits.
+First, the message key \texttt{msg\_key} is calculated. It is composed of the 128 least significant bits of the SHA-1 hash of the payload to be encrypted. Next, the array is padded with 0-120 random bits in order to be divisible by the AES block size -- 128 bits.
 
-This \texttt{msg\_key} along with the \texttt{auth\_key} described in Section \ref{crypto-initialization} are taken as input for the Key Derivation Function (KDF) which performs number of SHA-1 hashes and truncation yielding two 256-bit values: the AES key and the IGE initialization vector (IV) used for encrypting this particular message.
+This \texttt{msg\_key} along with the \texttt{auth\_key} described in Section \ref{crypto-initialization} are taken as input for the Key Derivation Function (KDF) which performs a number of SHA-1 hashes and truncations, yielding two 256-bit values: the AES key and the IGE initialization vector (IV) used for encrypting this particular message.
 
 \begin{figure}[htb]
 	\centering
@@ -538,11 +536,13 @@ Finally, two other values are added on top of the encrypted data array: the alre
 
 \subsubsection{Advanced Encryption Standard}
 
-The Advanced Encryption Standard (AES) is a symmetric block cipher with a key lengths of 128, 192 and 256 bits respectively, and a block size of 128 bits. Telegram uses 256 bit key. AES is currently the most widely used symmetric cipher and is used in many internet standards such as IPsec, TLS, SSH and number of others~\cite{understanding-crypto}.
+The Advanced Encryption Standard (AES) is a symmetric block cipher with key lengths of 128, 192 and 256 bits respectively, and a block size of 128 bits. Telegram uses 256 bit key. AES is currently the most widely used symmetric cipher and is used in many internet standards such as IPsec, TLS, SSH and number of others~\cite{understanding-crypto}.
 
-AES was selected through a worldwide open competition and finally defined in the FIPS-197 publication by the US National Institute of Standards and Technology (NIST) in 2001. As of today AES is secure against brute-force attacks and no viable analytic attacks are currently known~\cite{understanding-crypto}.
+AES was selected through a worldwide open competition and finally defined in the FIPS-197 publication by the US National Institute of Standards and Technology (NIST) in 2001. As of today, AES is secure against brute-force attacks and no viable analytic attacks are currently known~\cite{understanding-crypto}.
 
 \subsubsection{Infinite Garble Extension}
+
+\footnotetext[11]{The SHA-1 output is truncated to the first 128 bits.}\addtocounter{footnote}{1}\addtocounter{Hfootnote}{1}
 
 Infinite Garble Extension (IGE) is a lesser-known block cipher mode. It is shown on Figure \ref{img:crypto-regular-ige-enc} and defined by the following formula~\cite{telegram-openssl-ige}:
 
@@ -552,7 +552,7 @@ c_i = f_K(m_i \oplus c_{i-1}) \oplus m_{i-1}
 
 where $f_K$ stands for the encrypting function with key $K$ (AES in our case), and $i$ goes from 1 to $n$ -- the number of plaintext blocks.
 
-A careful reader notices that for the first output block we need two initialisation values $m_0$ and $c_0$. Both are taken from the IV values described earlier. The original paper described $m_0$ as a random block and $c_0$ its encrypted counterpart. The OpenSSL implementation however, uses a more general implementation where both $m_0$ and $c_0$ are provided by the user~\cite{telegram-openssl-ige}.
+A careful reader notices that for the first output block we need two initialisation values $m_0$ and $c_0$. Both are taken from the IV values described earlier. The original paper described $m_0$ as a random block and $c_0$ its encrypted counterpart. The OpenSSL implementation, however, uses a more general implementation where both $m_0$ and $c_0$ are provided by the user~\cite{telegram-openssl-ige}.
 
 \begin{figure}[htb]
 	\centering
@@ -563,7 +563,7 @@ A careful reader notices that for the first output block we need two initialisat
 
 \subsubsection{SHA-1}
 
-SHA-1 is a cryptographic hash function and the most widely used one too~\cite{understanding-crypto}. It produces 160-bit digest of a message. The authors opted for SHA-1 because of its low resource consumption~\cite{telegram-sha1}. Some experts consider SHA-1 as outdated and recommend its replacement by SHA-2 or SHA-3~\cite{telegram-sha1}.
+SHA-1 is the most widely used cryptographic hash function~\cite{understanding-crypto}. It produces a 160-bit digest of a message. The authors opted for SHA-1 because of its low resource consumption~\cite{telegram-sha1}. Some experts consider SHA-1 as outdated and recommend its replacement by SHA-2 or SHA-3~\cite{telegram-sha1}.
 
 \subsection{Decryption}\label{crypto-regular-dec}
 
@@ -596,11 +596,11 @@ It is essential to note that all the secret chat communication is done using the
 
 \subsection{Key exchange}\label{crypto-keyexchange}
 
-The exchange performs traditional Diffie-Hellman key exchange (DH). The DH parameters are received from the Telegram server and the client verifies them in the very same manner as in Section \ref{crypto-prime-req}. The exchange proceeds similarly as earlier, however with the connection already established, is a little more straightforward. Suppose user $A$ initiates secret chat with $B$:
+The exchange performs traditional Diffie-Hellman key exchange (DH). The DH parameters are received from the Telegram server and the client verifies them in the very same manner as in Section \ref{crypto-prime-req}. The exchange proceeds similarly as earlier, however, with the connection already established is a little more straightforward. Suppose user $A$ initiates a secret chat with user $B$:
 
 \begin{enumerate}
 	\item $A$ computes a random 2048-bit number $a$ and sets $g_a = g^a \bmod p$.\label{enum:DH-a}
-	\item $B$ receives the request on all of its authorized devices and an exclusive one accepts it.
+	\item $B$ receives the request on all authorized devices and a single one accepts it.
 	\item $B$ generates random $b$ and sets $g_b = g^b \bmod p$\label{enum:DH-b}.
 	\item Both users calculate the master key $K = g_a^b \bmod p = g_b^a \bmod p$. $K$ is the secret chat's master key denoted \texttt{auth\_key} as well.
 \end{enumerate}
@@ -610,7 +610,7 @@ What is worth mentioning, in secret chats key exchange the client generates its 
 a = r_{client} \oplus r_{server}
 \end{gather*}
 
-Where $r_{client}$ is a 2048-bit random integer generated on the client's side and $r_{server}$ is 2048-bit random integer generated on the server's side. These values are then XORed constructing the client's secret value. This is performed to mitigate the client's poor capabilities to generate a cryptographically secure random number. This concerned the Android platform in August 2013~\cite{telegram-android-securerandom}.
+Where $r_{client}$ is a 2048-bit random integer generated on the client's side and $r_{server}$ is 2048-bit random integer generated on the server's side. These values are then XORed, constructing the client's secret value. This is done to mitigate the client's poor capabilities to generate a cryptographically secure random number. This concerned the Android platform in August 2013~\cite{telegram-android-securerandom}.
 
 \begin{figure}[htb]
 	\centering
@@ -619,15 +619,15 @@ Where $r_{client}$ is a 2048-bit random integer generated on the client's side a
 	\label{img:telegram-keybox}
 \end{figure}
 
-The DH by itself does not provide any authentication of the communicating parties and is therefore susceptible to an active Man-in-the-Middle attack. To mitigate this issue the user is provided with an option to display their counterpart's encryption key. Telegram creates a white-blue box to visualize the key as may be seen on Figure~\ref{img:telegram-keybox}. To make sure no malicious mediator is present users are supposed to meet in person and verify that the keys are identical. There is no such mechanism in regular chats.
+The DH by itself does not provide any authentication of the communicating parties and is therefore susceptible to an active Man-in-the-Middle attack. To mitigate this issue the user is provided with an option to display their counterpart's encryption key. Telegram creates a white-blue box to visualize the key as may be seen in Figure~\ref{img:telegram-keybox}. To make sure no malicious mediator is present users are supposed to meet in person and verify that the keys are identical. There is no such mechanism in regular chats.
 
-The visualisation used to be based on a 128-bit fingerprint\footnote{Not to be confused with the 64-bit \texttt{auth\_key\_id} fingerprint.} of the secret key. An~article published in January 2015 showed~\cite{telegram-264} that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat a MiM attack is possible only with $2^{64}$ operations, rather than $2^{128}$, based on the Birthday paradox. The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions of USD. Telegram's FAQ addresses this issue and states its cost is around a trillion dollars to achieve a result in one month. Nevertheless, Telegram later decided to use additional 160 bits from the key summing up to 288 bits~\cite{telegram-techfaq}. This improvement should make this attack impossible.
+The visualisation used to be based on a 128-bit fingerprint\footnote{Not to be confused with the 64-bit \texttt{auth\_key\_id} fingerprint.} of the secret key. An~article published in January 2015 showed~\cite{telegram-264} that when the attacker forces (e.g. socially engineers) both sides to initiate the secret chat, a MitM attack is possible only with $2^{64}$ operations rather than $2^{128}$, thanks to the Birthday paradox. The article claims the attack is possible for a well financed adversary and estimates the attack to cost tens of millions of USD. Telegram's FAQ addresses this issue and states the cost is around a trillion dollars to achieve a result in one month. Nevertheless, Telegram later decided to use additional 160 bits from the key -- summing the fingerpint up to 288 bits~\cite{telegram-techfaq}. This improvement should make this attack impossible.
 
 The article reasons as well that in a real-world scenario the users do not actually meet to verify the key. Most of them probably ignore the verification altogether, some send the image via regular chat or using another -- possibly insecure -- channel.
 
-To accomplish the Perfect Forward Secrecy model the key is renegotiated each time it has been used for more than 100 messages or has been used for more than one week. For the renegotiation the already established chat is used in order to send the $g_a$ and $g_b$ values. The server does not help with the randomness here, and the same DH parameters are used. The \emph{auth\_key} visualization does not change and is therefore based on the first negotiated key.
+To accomplish the Perfect Forward Secrecy model the key is renegotiated each time it has been used for more than 100 messages or has been used for more than one week. For the renegotiation the already established chat is used to send the $g_a$ and $g_b$ values. The server does not help with the randomness here, and the same DH parameters are used. The \emph{auth\_key} visualization does not change and is therefore based on the first negotiated key.
 
-It is unclear whether Telegram applies the Trust on First Use mechanism.
+It is unclear whether Telegram applies the Trust on First Use mechanism\footnote{Trust on First Use is a security mechanism used by a client software which unconditionally trusts the other side's identity during the first use. If the key changes later on, the user is alerted.}.
 
 
 \subsection{Payload}
@@ -644,7 +644,7 @@ With the key negotiated we may now focus on the message encryption itself. The p
 \begin{itemize}
 	\item  \textbf{length} The length of the payload excluding padding and the length itself.
 	\item  \textbf{payload type} Header related to the protocol version and the message type.
-	\item  \textbf{random bits} 120 random bits generated by the author followed by 8 bits to specify the length of it in bytes.
+	\item  \textbf{random bits} Up to 120 random bits generated by the author followed by 8 bits to specify the length of it in bytes.
 	\item  \textbf{layer} Integer specifying the protocol version.
 	\item  \textbf{in\_seq} Message counter for incoming messages.
 	\item  \textbf{out\_seq} Message counter for outgoing messages.
@@ -652,7 +652,7 @@ With the key negotiated we may now focus on the message encryption itself. The p
 	\item  \textbf{serialized message object} Containing other values and the message itself as depicted in Figure \ref{img:crypto-secret-messageobject}.
 \end{itemize}
 
-Both payload and message types are not described rigorously in the documentation. The Aarhus research \cite{telegram-aarhus} states they are both \emph{''headers related to the version of the protocol``}. The serialized message object contains four subsequent values:
+Both payload and message types are not described rigorously in the documentation. The Aarhus research \cite{telegram-aarhus} states they are both \emph{''headers related to the version of the protocol``}. The serialized message object contains four values:
 
 \begin{figure}[htb]
 	\centering
@@ -672,7 +672,7 @@ Throughout this paper we assume that no media attachments are present, and there
 
 \subsection{Encryption}\label{crypto-secret-enc}
 
-The encryption process is the same as described in Figure \ref{img:crypto-regular-enc}. As mentioned at the beginning the outcome of the encryption then serves as an input for MTProto regular communication.
+The encryption process is the same as described in Figure \ref{img:crypto-regular-enc}. As mentioned at the beginning, the outcome of the encryption then serves as an input for MTProto regular communication.
 
 \subsection{Decryption}\label{crypto-secret-dec}
 
@@ -684,12 +684,12 @@ Decryption is the same as well. First the \texttt{auth\_key\_id}s are validated.
 
 \chapter{The Analysis}\label{analysis}
 
-In this chapter we present our analysis approach and share some of our findings. These findings are based primarily on these three sources:
+In this chapter we present our analysis approach and share our findings. These findings are based primarily on these three sources:
 
 \begin{itemize}
 	\item The official open-sourced Telegram application for Android
 	\item The official Telegram documentation
-	\item The already cited~\cite{telegram-aarhus}
+	\item The Aarhus research~\cite{telegram-aarhus}
 \end{itemize}
 
 We commenced by installing Telegram for Android and analyzed it with various tools in order to perform a comparison with the other sources mentioned above. The following section describes our actions.
@@ -698,40 +698,40 @@ We commenced by installing Telegram for Android and analyzed it with various too
 
 First, we cloned the official Telegram repository. Because we realized a simple code exploration is not satisfactory due to both its complexity and a poor code quality, we installed the following software:
 
-To run and potentially debug the application the Android SDK is needed. Furthermore, the Android NDK is required as well since Telegram uses the Java Native Interface (JNI) which enables the program to incorporate low-level programming languages, such as C. For a complete developer-like experience the Android Studio was installed. Android Studio is the official IDE for Android platform and is based on the popular IntelliJ IDEA platform~\cite{android-studio}.
+To run and potentially debug the application, the Android SDK is needed. Furthermore, the Android NDK is required as well since Telegram uses the Java Native Interface (JNI) which enables the program to incorporate low-level programming languages, such as C. For a complete developer-like experience the Android Studio was installed. Android Studio is the official IDE for Android platform and is based on the popular IntelliJ IDEA platform~\cite{android-studio}.
 
 A mobile phone running a rooted Android operating system was connected to a computer with the mentioned software. The Android Studio itself deals with the phone-computer connection (using the \emph{adb} software) and performs building, compiling and transferring the final .apk file to the phone. It enables the developer to debug the software as well which was crucial for better understanding of the Telegram's code.
 
-Next, we wanted to sniff the data sent from the application. To achieve that two approaches were used.
+Next, we wanted to sniff the data sent from the application. To achieve that two different approaches were used.
 
-\subsection{Sniffing using wireless hotspot}
+\subsection{Sniffing using a wireless hotspot}
 
-In the first scenario we set up a wireless network on the computer, and instructed the mobile to connect to it. Even though this does require the victim to connect to the network, there are ways to achieve this by using special dedicated devices~\cite{pineapple}. The Diagram \ref{img:analysis-setup-hotspot} shows this setup.
+In the first scenario we set up a wireless network on the computer, and instructed the cell phone to connect to it. Even though this does require the victim to connect to the network, there are ways to achieve this by using special dedicated devices~\cite{pineapple}. The Diagram \ref{img:analysis-setup-hotspot} shows this setup.
 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=1\textwidth]{setup-hotspot.pdf}
-	\caption[Analysis setup 1]{Computer running analysis software is connected to the internet on one interface and creates a WiFi hotspot using the other one. Mobile phone running Telegram connects to the computer's WiFi, and all data are therefore routed through the computer.}
+	\caption[Analysis setup 1]{Computer running the analysis software is connected to the internet on one interface and creates a WiFi hotspot using another one. Cell phone running Telegram connects to the computer's WiFi, and all data are therefore routed through the computer.}
 	\label{img:analysis-setup-hotspot}
 \end{figure}
 
-This scenario is easy to set up because most Operating Systems support this functionality out of the box. The only downside is that we need two network interfaces -- one for creating the hotspot and another one to connect to the internet.
+This scenario is easy to set up because most operating systems support this functionality out of the box. The only downside is that we need two network interfaces -- one for creating the hotspot and another one for internet connection.
 
 
 \subsection{Sniffing using ARP Poisoning}
 
-To demonstrate we can omit the hotspot setup and perform the analysis without forcing the mobile to change its network we are introducing second scenario shown in Figure \ref{img:analysis-setup-arp}. In this case the computer and the mobile phone are in the same network.
+To demonstrate that we can omit the hotspot setup and perform the analysis without forcing the cell phone to change its network we are introducing a second scenario shown in Figure \ref{img:analysis-setup-arp}. In this case the computer and the mobile phone are in the same network.
 
 \begin{figure}[htb]
 	\centering
-	\includegraphics[width=1\textwidth]{setup-arp.pdf}
-	\caption[Analysis setup 2]{Both the computer and the mobile are connected to the same network. Computer runs ARP Poisoning software inducing the mobile to send traffic through the computer.}
+	\includegraphics[width=0.9\textwidth]{setup-arp.pdf}
+	\caption[Analysis setup 2]{Both the computer and the cell phone are connected to the same network. Computer runs ARP Poisoning software inducing the phone to send traffic through the computer.}
 	\label{img:analysis-setup-arp}
 \end{figure}
 
 By using Ettercap, a \emph{``comprehensive suite for man in the middle attacks''}~\cite{ettercap-homepage} available in Kali Linux, we launched an ARP Poisoning attack against the phone.
 
-The Address Resolution Protocol (ARP) is a protocol which transforms an Internet layer address into a link layer address. Typically, this is the mapping of an IPv4 address to an Ethernet address. ARP Poising, or ARP spoofing, is a technique by which the attacker sends a fake ARP packets to the victim, claiming his Ethernet address is associated with an IP address different than the one that is truly his.
+The Address Resolution Protocol (ARP) is a protocol which transforms an Internet layer address into a link layer address. Typically, this is the mapping of an IPv4 address to an Ethernet address. ARP Poising, or ARP spoofing, is a technique by which the attacker sends fake ARP packets to the victim, claiming his Ethernet address is associated with an IP address different than the one that is truly his.
 
 We launched this attack against the phone and the router, meaning the phone sent all of the communication to the computer instead of directly sending it to the gateway and vice versa. Since all communication is now flowing through the computer we may thoroughly analyze it.
 
@@ -739,11 +739,11 @@ This setup is also convenient if we are not able to use a WiFi as a hotspot, for
 
 \section{Code}
 
-The application is publicly available on Github~\cite{github-telegram} with the first commit dating back to late October 2013. This thesis is concerned with the latest Telegram version 3.13.1 as up to date in October 2016, the \texttt{64e8ec3} commit in particular.
+The application is publicly available on Github~\cite{github-telegram} with the first commit dating back to late October 2013. This thesis is concerned with the latest Telegram version 3.13.1 as of October 2016, the \texttt{64e8ec3} commit in particular.
 
-The application's main programming language is Java but it uses the already mentioned JNI to incorporate C libraries such as borringssl, ffmpeg, sqlite and others. Since the 3.2.2 version Telegram moved a significant portion of the logic into a separate C library called \emph{tgnet}. The library is responsible for many connection-related actions including communication with the server and sending of messages. The codebase closely resembles the previous Java code. The secret messages are still dealt with within the Java part of the application.
+The application's main programming language is Java but it uses the already mentioned JNI to incorporate C libraries such as boringssl, ffmpeg, sqlite and others. Since version 3.2.2, Telegram moved a significant portion of the logic into a separate C library called \emph{tgnet}. The library is responsible for many connection-related actions including communication with the server and sending of messages. The codebase closely resembles the previous Java code. The secret messages are still dealt with within the Java part of the application.
 
-It should be noted that since this was introduced in the 3.2.2 version (September 2015) whereas the Aarhus analysis~\cite{telegram-aarhus} is based on the 2.7.0 (April 2015) and therefore was not concerned with the \emph{tgnet} library at all.
+It should be noted that this was introduced in the 3.2.2 version (September 2015) whereas the Aarhus analysis~\cite{telegram-aarhus} is based on the 2.7.0 (April 2015) and therefore was not concerned with the \emph{tgnet} library at all.
 
 \subsection{Code quality}
 
@@ -753,7 +753,7 @@ Lint was run using the default settings and generated 20 errors and 286 warnings
 
 It is important to note that the code analysis concerns the project as a whole, meaning it includes all the dependencies. Some issues may therefore relate to the libraries Telegram uses, not to Telegram itself.
 
-Furthermore, some files contain up to thousands of lines and multiple classes in one file. For example the \emph{TLRPC.java} has 23,010 lines containing 873 static classes. For a brief comparison we are including Table \ref{tab:analysis-storage-metrics} comparing some of the Telegram metrics with Signal. The comparison excludes all libraries, binaries, assets etc. and discusses the source code related files only. We leave it to the reader to draw their own conclusions.
+Furthermore, some files contain thousands of lines and multiple classes in one file. For example, the \emph{TLRPC.java} has 23,010 lines containing 873 static classes. For a brief comparison we are including Table \ref{tab:analysis-storage-metrics} comparing some of the Telegram metrics with Signal. The comparison excludes all libraries, binaries, assets etc. and discusses the source code related files only. We leave it to the reader to draw their own conclusions.
 
 \begin{table}[htb]\centering
 	\caption{Telegram vs Signal code metrics}
@@ -763,16 +763,16 @@ Furthermore, some files contain up to thousands of lines and multiple classes in
 					& \textbf{Telegram} & \textbf{Signal} \\ \hline
 %		Project size\tablefootnote{The project as a whole, including all libraries, assets etc.} & 188,6 MB & 138,6 MB \\ \hline
 		Largest file by size & 714.6 KB\tablefootnote{\path{TMessagesProj/src/main/java/org/telegram/tgnet/TLRPC.java}} & 87.4 KB\tablefootnote{\path{src/org/thoughtcrime/securesms/util/Base64.java}} \\ \hline
-		Largest file by lines count & 23,009 &  2,096 \\ \hline
+		Largest file by line-count & 23,009 &  2,096 \\ \hline
 		Number of test files\tablefootnote{Number of files each including at least one unit test.} & 0 & 13 \\ \hline
 	\end{tabular}
 \end{table}
 
-It should be noted that Signal's files are well documented which affects its size. That is not the case with Telegram at all.
+It should be noted that Signal's files are well documented which affects their size. That is not the case with Telegram at all.
 
 \section{Storage}\label{analysis-storage}
 
-In this section we briefly look on how Telegram stores its data. All data are stored in the phone's \path{org.telegram.messenger/files} folder. Two types of files are present -- SQLite database file and \path{.dat} files which are in a Telegram's own configuration format:
+In this section we briefly look at how Telegram stores its data. All data are stored in the phone's \path{org.telegram.messenger/files} folder. Two types of files are present -- SQLite database files and \path{.dat} files which are in a Telegram's own configuration format:
 
 \begin{itemize}
 	\item \path{cache4.db} SQLite database file.
@@ -780,31 +780,31 @@ In this section we briefly look on how Telegram stores its data. All data are st
 	\item \path{dcXconf.db} Number of Datacenter specific configuration files.
 \end{itemize}
 
-The \path{cache4.db} file is a SQLite database file. It contains 38 tables in total containing contacts, messages, chat information and all other user data. Messages are stored in bytes and therefore de facto in plaintext. Since the database is available only by physical access to the phone, we do not see this as a malpractice.
+The \path{cache4.db} file is a SQLite database file. It contains 38 tables in total, containing contacts, messages, chat information and all other user data. Messages are stored in bytes and therefore de facto in plaintext. Since the database is available only by physical access to the phone, we do not see this as a malpractice.
 
 The \path{tgnet.dat} file is a place where Telegram stores its configuration directives. It contains configuration version, currently used datacenter ID, session IDs, time synchronization values, timestamps and other. For each datacenter -- Telegram stored 5 during our analysis -- it stores its ID, IPv4 and IPv6 addresses, salts and most importantly the secret \texttt{auth\_key} and \texttt{auth\_key\_id} fingerprint.
 
 \subsection{Extraction scripts}\label{analysis-storage-scripts}
 
-To properly analyze the data Telegram stores we wrote three scripts, all in Python 3. The first script addresses the \path{tgnet.dat} file, the second the regular messages and the third the encrypted chat information, last two working with the SQLite database. Examples of those files are included in the \path{examples} folder of the project and a brief readme file describing how to run the scripts is present as well. Some values' meaning is unclear therefore the scripts print a simple question mark in such cases to indicate this.
+To properly analyze the data Telegram stores we wrote three scripts, all in Python 3. The first script addresses the \path{tgnet.dat} file, the second the regular messages and the third the encrypted chat information, the last two work with the SQLite database. Examples of those files are included in the \path{examples} folder of the project and a brief readme file describing how to run the scripts is present as well. Some values' meaning is unclear, therefore the scripts print a simple question mark in such cases to indicate this.
 
 \subsubsection{Extracting tgnet.dat}
 
-The \path{tgnet-extractor.py} parses the \path{tgnet.dat} file and prints all the values to the standard output. This file has Telegram's own binary format and is, in a nutshell, a collection of values simply written one by one with no keys, formatting or structure. The most useful values for this research were the datacenter's IP addresses and the \texttt{auth\_key} secrets, mainly the \texttt{auth\_key\_id} we expected to see in the sniffed traffic, more on that in the following Section~\ref{analysis-obf}.
+The \path{tgnet-extractor.py} parses the \path{tgnet.dat} file and prints all the values to the standard output. This file has Telegram's own binary format and is, in a nutshell, a collection of values simply written one by one with no keys, formatting or structure. The most useful values for this research were the datacenter's IP addresses and the \texttt{auth\_key} secrets, mainly the \texttt{auth\_key\_id} we expected to see in the sniffed traffic; more on that in Section~\ref{analysis-obf}.
 
 \subsubsection{Extracting messages}
 
 The script \path{message-extractor.py} works with the bytes stored in the SQLite database, the column \emph{data} in table \emph{messages} in particular. Those bytes store information on one single message sent in a regular chat.
 
-The script extracts values, such as a message ID, values to identify both the sender and the receiver, timestamps, flags and most importantly the UTF-8 encoded string of the message itself.
+The script extracts values, such as a message ID, values that identify both the sender and the receiver, timestamps, flags and most importantly the UTF-8 encoded string of the message itself.
 
 \subsubsection{Extracting secret chat information}
 
-Last but not least, the \path{encrypted-chat-extractor.py} script is responsible for the bytes in the column \emph{data} of the \emph{enc\_chats} table. Amongst other things it describes a secret chat instance and contains ID, dates, identification values and yet again an \texttt{auth\_key} secret. Take notice that this \texttt{auth\_key} is used for this particular secret chat which is then encrypted with the regular chat \texttt{auth\_key} as described in Section \ref{crypto-secret}.
+Last but not least, the \path{encrypted-chat-extractor.py} script is responsible for the bytes in the column \emph{data} of the \emph{enc\_chats} table. Amongst other things it describes a secret chat instance and contains ID, dates, identification values and yet again an \texttt{auth\_key} secret. Notice that this \texttt{auth\_key} is used for this particular secret chat which is then encrypted with the regular chat \texttt{auth\_key} as described in Section \ref{crypto-secret}.
 
 \section{Undocumented obfuscation}\label{analysis-obf}
 
-During the data collection the received data did not correspond with the documentation. We expected the data to be in a form of \texttt{auth\_key\_id}, \texttt{msg\_key} and encrypted data; see Figure \ref{img:analysis-obf-expected}.
+During the data collection we found that the received data did not correspond with the documentation. We expected the data to be in a form of \texttt{auth\_key\_id}, \texttt{msg\_key} and encrypted data as per Figure \ref{img:analysis-obf-expected}.
 
 \begin{figure}[htb]
 	\centering
@@ -817,14 +817,14 @@ Using the scripts described in \ref{analysis-storage-scripts} we extracted our t
 
 We examined the code and discovered the function responsible for this behavior is the \texttt{Connection::sendData} function located in \path{TMessagesProj/jni/tgnet/Connection.cpp} file. Before sending the data in the expected manner, they are encrypted one more time with a random key attached in front of the data. Interestingly, the Counter block mode is used instead of the IGE endorsed by Telegram.
 
-To properly explain the obfuscation method we are introducing our own terminology first to add a little more clarity because Telegram does not practise a great job in naming variables. Perhaps intentionally, to make the deobfuscation process even harder.
+To properly explain the obfuscation method we are introducing our own terminology first to add a little more clarity because Telegram does not practise a great job in naming variables. The reason is unclear but it may be done intentionally to make the deobfuscation process even harder.
 
 \subsection{Terminology}
 
 Since the variables are explained in more detail in the following sections, reader may skip this list and use it as a reference later on. The titles we are introducing are:
 
 \begin{itemize}
-	\item \textbf{obf\_enc\_key\_bytes} 64 random bytes storing \textbf{obf\_enc\_key} and \textbf{obf\_enc\_iv} used for obfuscation. Telegram calls this plainly \emph{bytes}.
+	\item \textbf{obf\_enc\_key\_bytes} 64 random bytes (512 bits) storing \textbf{obf\_enc\_key} and \textbf{obf\_enc\_iv} used for obfuscation. Telegram calls this simply \emph{bytes}.
 	\item \textbf{obf\_enc\_key} The key used for encryption to obfuscate data.
 	\item \textbf{obf\_enc\_iv} The IV used for encryption to obfuscate data.
 	\item \textbf{obf\_dec\_key\_bytes} 64 bytes derived from \textbf{obf\_enc\_key\_bytes} storing the server's encryption key and IV. Labeled in Telegram as \emph{temp}.
@@ -832,7 +832,7 @@ Since the variables are explained in more detail in the following sections, read
 
 \subsubsection{Temporary encryption key}\label{code-obf-enc-key}
 
-The process starts by generating 64 random bytes \texttt{obf\_enc\_key\_bytes}. The first 8 bytes are unused. The bytes 8 -- 40 are used as an encryption key and bytes 41 -- 56 as an IV. Bytes 57 -- 64 are composed of the last 8 bytes of \texttt{obf\_enc\_key\_bytes} encryption of itself. It is unclear what are those bytes used for. The final \texttt{obf\_enc\_key\_bytes} to be sent is visualized in Figure \ref{img:code-obfuscation-bytes-sent}.
+The process starts by generating 64 random bytes \texttt{obf\_enc\_key\_bytes}. The first 8 bytes are unused. Bytes 8 -- 39 are used as an encryption key and bytes 40 -- 55 as an IV. Bytes 56 -- 63 are composed of the last 8 bytes of \texttt{obf\_enc\_key\_bytes} encryption of itself. It is unclear what are those bytes used for. The final \texttt{obf\_enc\_key\_bytes} to be sent is visualized in Figure \ref{img:code-obfuscation-bytes-sent}.
 
 \begin{figure}[htb]
 	\centering
@@ -845,9 +845,9 @@ The length of the packet, yet again encrypted, and the real data to be transmitt
 
 \subsubsection{Temporary decryption key}
 
-Besides the \texttt{obf\_enc\_key\_bytes} setup the very same function deals with setting up the \texttt{obf\_dec\_key\_bytes}. This temporary key is used for decrypting the incoming traffic.
+Besides the \texttt{obf\_enc\_key\_bytes} setup, the very same function deals with setting up the \texttt{obf\_dec\_key\_bytes}. This temporary key is used for decrypting the incoming traffic.
 
-The \texttt{obf\_dec\_key\_bytes} is derived from the \texttt{obf\_enc\_key\_bytes}. Totally 48 bytes are reversed from \texttt{obf\_enc\_key\_bytes} starting at position 8. This may be seen in Listing \ref{lst:code-obf-dec}. The first 32 bytes are then used as a key and the next 16 bytes as an IV for the incoming traffic decryption.
+The \texttt{obf\_dec\_key\_bytes} is derived from the \texttt{obf\_enc\_key\_bytes}. 48 bytes are reversed from \texttt{obf\_enc\_key\_bytes}, starting at position 8. This may be seen in Listing \ref{lst:code-obf-dec}. The first 32 bytes are then used as a key and the next 16 bytes as an IV for the incoming traffic decryption.
 
 \begin{listing}[htb]
 \caption{Temporary decryption key deduction from the \texttt{obf\_enc\_key\_bytes} array. First 32 bytes are used as a decryption key, next 16 bytes for an IV.
@@ -866,7 +866,7 @@ We believe Telegram server receives the \texttt{obf\_enc\_key\_bytes}, tampers w
 To sum up, the whole function is depicted in Listing \ref{lst:analysis-obfuscation} in its simplified version. It also uses our own terminology to comply with this section.
 
 \begin{listing}[htb]
-\caption{The function starts by generating random bytes. The decryption key is then derived, and both encrypt and decrypt keys are set. Finally, the length of the payload (as well obfuscated), the \texttt{obf\_enc\_key\_bytes} and the actual IGE encrypted payload are sent. The function's argument -- the payload -- is in the expected form as depicted in Figure \ref{img:analysis-obf-expected}.
+\caption{The function starts by generating random bytes. The decryption key is then derived, and both encrypt and decrypt keys are set. Finally, the length of the payload (obfuscated), the \texttt{obf\_enc\_key\_bytes} and the actual IGE encrypted payload are sent. The function's argument -- the payload -- is in the form expected by Figure \ref{img:analysis-obf-expected}.
 \protect\linebreak Telegram for Android source code, file \texttt{Connection.cpp}, line 289, redacted.}
 \label{lst:analysis-obfuscation}
 \begin{minted}{C++}
@@ -901,7 +901,7 @@ void sendData(payload)
 
 \subsection{Deobfuscation program}\label{analysis-obf-program}
 
-To verify these findings and to continue the analysis we created a software to deobfuscate the traffic. Even though the first language of choice was Python to contain all the scripts in one package, we finally opted for \cpp. This has two major advantages, one we can be directly inspired by the Telegram code, and second we can access OpenSSL functions directly the same way Telegram does\footnote{Telegram actually uses BoringSSL -- a fork of OpenSSL by Google but for our case the distinction was not relevant.}.
+To verify these findings and to continue the analysis we created a software to deobfuscate the traffic. Even though the first choice of language was Python to keep all the scripts in one package, we finally opted for \cpp. This has two major advantages: one, we can be directly inspired by the Telegram code, and second, we can access OpenSSL functions directly the same way Telegram does\footnote{Telegram actually uses BoringSSL -- a fork of OpenSSL by Google but for our case the distinction was not relevant.}.
 
 The program is capable of fetching the obfuscation key and transforming the data to its deobfuscated form and to further analyze it. It takes two or three arguments as an input:
 
@@ -915,35 +915,36 @@ The program is capable of fetching the obfuscation key and transforming the data
 
 The first and second argument are binary files of the sniffed traffic. Since the \texttt{obf\_enc\_key\_bytes} value is sent by the client, it is stored in the outgoing stream, and it is therefore not possible to deobfuscate any traffic without these data. We used Wireshark repeatedly to follow the TCP stream and then saved both the incoming and outgoing data into a binary file. We then ran the program with those files which proved to be a viable technique.
 
-The third argument is optional. It is the user's secret \texttt{auth\_key}. This is obviously not available for an attacker, but it is helpful for study purposes. When extracted, user may see the real traffic Telegram generates and what actions are taken.
+The third argument is optional. It is the user's secret \texttt{auth\_key}. This is obviously not available to an attacker, but it is helpful for study purposes. When extracted, the user may see the real traffic Telegram generates and what actions are taken.
 
 Readme file is present describing how to build and run the program.
 
 
 
+
 \section{Replay attack}\label{analysis-attacks}
 
-During the analysis we examined some parts of the code in an attempt to discover some potential vulnerabilities to exploit. To provide a little bit of a context let us now briefly describe how Telegram processes all incoming data.
+During the analysis we examined some parts of the code in an attempt to discover potential vulnerabilities to exploit. To provide a little bit of a context, let us now briefly describe how Telegram processes all incoming data.
 
 \subsection{Incoming data processing}
 
 The Figure \ref{img:analysis-replay-incoming} shows how Telegram handles all incoming data. First, the \texttt{Connection::onReceivedData()} function is called, and incoming data are deobfuscated in the way described in Section \ref{analysis-obf}.
 
-Next, the \texttt{ConnectionsManager::onConnectionDataReceived()} function is called. If the \texttt{auth\_key\_id} is not set to 0 (which is only the case of the key exchange process; see Section \ref{crypto-keyexchange}), the \texttt{Datacenter::decryptServerResponse()} is invoked. This function checks the \texttt{auth\_key\_id} and if valid, decrypts the actual payload using the master secret \texttt{auth\_key} and derived \texttt{msg\_key}. Afterwards, the message ID and other fields are verified.
+Next, the \texttt{ConnectionsManager::onConnectionDataReceived()} function is called. If the \texttt{auth\_key\_id} is not set to 0 (which is only the case during the key exchange process; see Section \ref{crypto-keyexchange} for more details), the function \texttt{Datacenter::decryptServerResponse()} is invoked. This function checks the \texttt{auth\_key\_id} and if valid, decrypts the actual payload using the master secret \texttt{auth\_key} and the derived \texttt{msg\_key}. Afterwards, the message ID and other fields are verified.
 
-If the decryption succeeds, the \texttt{onConnectionDataReceived()} function proceeds and further processes the decrypted payload, and several other checks are performed. Finally, if all checks succeed, the whole process is finalized by the \texttt{ConnectionsManager::processServerResponse} function.
+If the decryption succeeds, the \texttt{onConnectionDataReceived()} function proceeds to further process the decrypted payload, and several other checks are performed. Finally, if all checks succeed, the whole process is finalized by the \texttt{ConnectionsManager::processServerResponse} function.
 
 \begin{figure}[htb]
 	\centering
 	\includegraphics[width=0.99\textwidth]{incoming-flow.pdf}
-	\caption[Incoming data processing]{The incoming data are first deobfuscated. If the non-zero \texttt{auth\_key\_id} is valid the message is decrypted and checked if valid. The process is completed by the \texttt{processServerResponse()} function.}
+	\caption[Incoming data processing]{The incoming data are first deobfuscated. If the non-zero \texttt{auth\_key\_id} is valid, the message gets decrypted and checked for validity. The process is completed by the \texttt{processServerResponse()} function.}
 	\label{img:analysis-replay-incoming}
 \end{figure}
 
 
 \subsection{Vulnerability}
 
-A replay attack is an attack where an attacker sniffs data sent by the application and then maliciously resends them at a different time. By doing so, the attacker can repeat any message without the user noticing; curiously the attacker does not actually know the message. Protection might be realized by implementing a message counter keeping track of the order the messages appear in.
+A replay attack is an attack where an attacker sniffs data sent by the application and then maliciously resends them at a different time. By doing so, the attacker can repeat any message without the user noticing; curiously, the attacker does not actually know the message. A protection might be realized by implementing a message counter to keep track of the order the messages appear in.
 
 We analyzed how Telegram deals with this issue, see Listing \ref{lst:analysis-replay-check}. After the decryption it checks if the message was already processed. The function \texttt{ConnectionSession} holds an internal array of the already processed messages. If the message is accepted and processed, the message ID is then added into the array.
 
@@ -964,7 +965,7 @@ if (!doNotProcess) {
 \end{listing}
 
 
-The behavior we believe might be exploitable is the \texttt{addProcessedMessageId()} function. The function checks the size of the array, and if it exceeds 300 it erases the first 100 messages as seen in Listing \ref{lst:analysis-replay-add-processed}.
+The behavior we believe might be exploitable concerns the \texttt{addProcessed\ MessageId()} function. The function checks the size of the array and if it exceeds 300, it erases the first 100 messages as seen in Listing \ref{lst:analysis-replay-add-processed}.
 
 
 \begin{listing}[htb]
@@ -992,23 +993,25 @@ The attack scenario is drafted as follows:
 	\item Telegram processes the first message again
 \end{enumerate}
 
-If Telegram does not provide any additional checks and actually deletes the first 100 IDs, the message would be accepted twice. With the attack scenario drafted it is desired to perform the attack.
+If Telegram does not provide any additional checks and actually deletes the first 100 IDs, the message would be accepted twice.
+
+With the attack scenario drafted we attempted to perform the attack.
 
 \subsection{Exploit attempt}
 
-To perform the attack it was first decided to inject a new TCP packet containing the payload copied from the very first packet. That proved to be rather difficult since it is not possible to inject a new TCP packet without interfering with the TCP connection. We finally opted for replacing the payload of the next message (i.e. the 301st) meaning we would drop its payload and replace it with the first one. That should result in the victim receiving the first message again instead of the new one.
+To perform the attack we first decided to inject a new TCP packet containing the payload copied from the very first packet. That proved to be rather difficult since it is not possible to inject a new TCP packet without interfering with the TCP connection. We finally opted for replacing the payload of the next message (i.e. the 301st), meaning we would drop its payload and replace it with the first one. That should result in the victim receiving the first message again instead of the new one.
 
 \subsubsection{Required tools}
 
-As we found out neither Scapy nor Wireshark are the right tools. Both are useful for passive sniffing, and Scapy is capable of sending additional packets but does not allow for a modification of the packets in real time as it does not reside in the middle of the traffic as described in the Setup, Section \ref{analysis-setup}.
+As we found out, neither Scapy nor Wireshark are the right tools for this task. Both are useful for passive sniffing, and while Scapy is capable of sending additional packets, it does not allow for a modification of the packets in real time as it does not reside in the middle of the traffic as described in the Setup, Section \ref{analysis-setup}.
 
 Furthermore, since Telegram uses its own Application layer protocol, we were unable to use popular tools such as Fiddler, Burp Suite or OWASP ZAP which are built for HTTP~\cite{fiddler-homepage, burp-homepage}.
 
-The already mentioned Ettercap, used to perform the MiM, provides a simple filtering interface allowing to modify the data routed through. We tried this approach but Ettercap requires the filters to be written in its own language which is very limiting and unfortunately insufficient for our needs.
+Ettercap, already mentioned earlier to perform the MitM, provides a simple filtering interface allowing to modify the data routed through. We tried this approach but Ettercap requires the filters to be written in its own language which is very limiting and unfortunately insufficient for our needs.
 
-The scenario was finally tested with the Trudy software which can modify any TCP traffic. As its documentation states Trudy is \emph{``a transparent proxy that can modify and drop traffic for arbitrary TCP connections''}~\cite{github-trudy}. All traffic is routed through Trudy which then applies so called \emph{modules}. Trudy modules are bulks of preprogrammed code to perform modifications desired by the user. Trudy provides an example stub of such a module, and users are encouraged to implement it. Because Trudy is written in Go, all modules are to be written in Go as well. To route the traffic and setup the environment properly a prepared virtual machine is available~\cite{github-trudy-vm}.
+The scenario was finally tested with the Trudy software which can modify any TCP traffic. As its documentation states, Trudy is \emph{``a transparent proxy that can modify and drop traffic for arbitrary TCP connections''}~\cite{github-trudy}. All traffic is routed through Trudy which then applies so called \emph{modules}. Trudy modules are bulks of preprogrammed code to perform modifications desired by the user. Trudy provides an example stub of such a module, and users are encouraged to implement it. Because Trudy is written in Go, all modules are to be written in Go as well. To route the traffic and setup the environment properly, a prepared virtual machine is available~\cite{github-trudy-vm}.
 
-After setting up the MiM as described in \ref{analysis-setup} a virtual machine is run on the computer using Vagrant\footnote{Vagrant is a simple wrap around a virtualization provider for building complete independent virtual environments.}. The VM installs all the required software and the Trudy itself as well. Then it routes all the traffic in and out of Trudy using \texttt{iptables}. Trudy receives all the traffic, modifies it based on the used module and shifts it back to internet as seen in Figure \ref{img:analysis-trudy-setup}.
+After setting up the MitM as described in \ref{analysis-setup}, a virtual machine is run on the computer using Vagrant\footnote{Vagrant is a simple wrapper around a virtualization provider for building completely independent virtual environments.}. The VM installs all the required software and Trudy itself as well. Then it routes all the traffic in and out of Trudy using \texttt{iptables}. Trudy receives all the traffic, modifies it based on the used module and sends it back to internet as seen in Figure \ref{img:analysis-trudy-setup}.
 
 \begin{figure}[htb]
 	\centering
@@ -1018,7 +1021,7 @@ After setting up the MiM as described in \ref{analysis-setup} a virtual machine 
 \end{figure}
 
 
-The implementation of a module for Trudy is quite straightforward. Trudy calls specific methods in fixed order each designed for one particular action. The methods of a single module are depicted in \ref{img:analysis-trudy-flow} and a description of the methods follows.
+The implementation of a module for Trudy is quite straightforward. Trudy calls specific methods in fixed order, each designed for one particular action. The methods of a single module are depicted in \ref{img:analysis-trudy-flow} and a description of the methods follows.
 
 \begin{wrapfigure}{r}{0.45\textwidth}
 	\centering
@@ -1034,8 +1037,8 @@ The implementation of a module for Trudy is quite straightforward. Trudy calls s
 	\item \textbf{Mangle()} alters the payload
 	\item \textbf{DoIntercept()} if \emph{true} is returned, the data are sent to the Trudy interceptor\footnote{Trudy interceptor is a simple local website the user may use to interfere with the data. It was not investigated further.}
 	\item \textbf{DoPrint()} if \emph{true} is returned, \texttt{PrettyPrint()} is called
-	\item \textbf{PrettyPrint()} prints data in human friendly format
-	\item \textbf{Serialize()} converts back to the raw payload if previously deserialized
+	\item \textbf{PrettyPrint()} prints data in a human friendly format
+	\item \textbf{Serialize()} converts the data back to raw payload if it were previously deserialized
 	\item \textbf{BeforeWriteTo()} actions taken before the data are written to one side or the other
 	\item \textbf{AfterWriteTo()} actions taken after the data are written to one side or the other
 
@@ -1043,9 +1046,9 @@ The implementation of a module for Trudy is quite straightforward. Trudy calls s
 
 \subsubsection{Preliminaries}
 
-To test our settings we didn't wait for the next 300 messages, rather we set up breakpoints on the very lines where Telegram checks if the ID was already processed or not, the line 729 and 859 in the \texttt{ConnectionsManager} file in particular. If the packet was actually send again, these breakpoints would be fired, and the message further rejected by Telegram. This would confirm our surmise and later be adjusted to comply fully with the scenario.
+To test our settings we didn't wait for the next 300 messages; instead we set up breakpoints on the very lines where Telegram checks if the ID was already processed or not, the line 729 and 859 in the \texttt{ConnectionsManager} file in particular. If the packet was actually send again, these breakpoints would be fired, and the message further rejected by Telegram. This would confirm our surmise and later be adjusted to comply fully with the scenario.
 
-To further simplify the process we limited the test messages to the length of 201 bytes to easily identify a message from the other traffic. The length of the message remained the same throughout the testing, we only changed some of the characters each time, to see which messages arrived. The testing message we used reads:
+To further simplify the process we limited the test messages to the length of 201 bytes to easily distinguish a message from the other traffic. The length of the message remained the same throughout the testing, we only changed some of the characters each time, to see which messages arrived. The testing message we used reads:
 
 \begin{displayquote}
 \emph{``To simplify the process we are using a message longer than 200 bytes to easily identify it in the stream of data''}
@@ -1057,7 +1060,7 @@ When sending such message using Telegram, its length is always equal to 201 byte
 
 We implemented the Trudy module as shown in Listing \ref{lst:analysis-replay-module}. The \texttt{DoMangle()} function checks if the source IP address is equal to one of the Telegram datacenters (\texttt{149.154.167.91:80}). We confirmed our testing application is communicating with this server using Wireshark, and also the configuration details extracted from the \texttt{tgnet.dat} file (see Section \ref{analysis-storage-scripts}) contained a datacenter with such IP address. Furthermore, the size of the packet is checked to select the testing messages only.
 
-If those conditions are met, the \texttt{Mangle()} function checks whether some bytes were already saved. If not, it signifies this is the first message and it copies the TCP payload into the \texttt{oldBytes} array and sets the \texttt{saved} flag to \emph{true}. It does not modify the payload in any way. If \texttt{saved} is already set to \emph{true}, it copies the saved bytes into the currently intercepted TCP packet replacing its content. Keep in mind, we are attempting the simplified scenario and therefore not waiting for 300 other messages, we are trying to resend the message as soon as another one comes in which should fire the breakpoints.
+If those conditions are met, the \texttt{Mangle()} function checks whether some bytes were already saved. If not, it signifies this is the first message and it copies the TCP payload into the \texttt{oldBytes} array and sets the \texttt{saved} flag to \emph{true}. It does not modify the payload in any way. If \texttt{saved} is already set to \emph{true}, it copies the saved bytes into the currently intercepted TCP packet, replacing its content. Keep in mind, we are attempting the simplified scenario and therefore not waiting for 300 other messages, we are trying to resend the message as soon as another one comes in, which should fire the breakpoints.
 
 \begin{listing}[htb]
 \caption{The programmed Trudy module code written in Go used to perform a Replay attack on Telegram. The \texttt{DoMangle()} function limits the packet modifications only to our messages. \texttt{Mangle()} actually performs the attack.}
@@ -1089,7 +1092,7 @@ func (input *Data) Mangle() {
 
 \subsubsection{Results and Future Work}
 
-Unfortunately, that was not the case. We confirmed Telegram successfully  receives the repeated traffic but none of the desired breakpoints were fired. Further analysis showed Telegram incorrectly deobfuscated the traffic. This is due to the fact that during the communication the \texttt{obf\_enc\_key\_bytes} changes periodically. The deobfuscated data are therefore completely different and are rejected in various places as nonsense.
+Unfortunately, that was not the case. We confirmed Telegram successfully  receives the repeated traffic but none of the desired breakpoints were fired. Further analysis showed that Telegram incorrectly deobfuscated the traffic. This is due to the fact that during the communication the \texttt{obf\_enc\_key\_bytes} changes periodically. The deobfuscated data are therefore completely different and are rejected in various places as nonsense.
 
 We were unable to continue the attack due to time limitations and the finite scope of this work. However, we still believe this attack is feasible. In order to continue the obfuscation keys would have to be saved as well. The modified scenario goes as follow:
 
@@ -1101,52 +1104,54 @@ We were unable to continue the attack due to time limitations and the finite sco
 	\item Telegram processes the first message again
 \end{enumerate}
 
-This scenario requires to have the obfuscation capabilities introduced in the C program in Section \ref{analysis-obf-program}. Since Go has a native support of C, the codebase could be incorporated into the Trudy module.
+This scenario requires the module to have the obfuscation capabilities introduced in the C program in Section \ref{analysis-obf-program}. Since Go has a native support of C, the codebase could be incorporated into the Trudy module.
 
 
 \subsubsection{Responsible Disclosure}
 
-The findings were reported to the Telegram security team on 7 December 2016 with a kind request for comments. Two points were discussed in particular, the obfuscation method and the Replay attack scenario. The first response from Telegram was received on 12 December 2016.
+The findings were reported to the Telegram security team on December 7th, 2016 with a kind request for comments. Two points were discussed in particular, the obfuscation method and the Replay attack scenario. The first response from Telegram was received on 12th December 2016.
 
 The obfuscation method was commented only briefly as \emph{``unrelated to data security and is used to counter some of the less sophisticated attempts at banning our service in certain countries''}. In October 2015, Pavel Durov (the founder of Telegram) stated on his Twitter account that Telegram was blocked temporarily in Iran as a result of Telegram refusing to collaborate with the Iranian government~\cite{telegram-durov-iran}. This most likely concerns other countries applying some form of internet censorship as well but illustrates well that Telegram indeed faces censorship issues.
 
-MTProto has a fixed structure where the \texttt{auth\_key\_id} value is always present at the beginning of the packet and therefore easily recognizable which may be considered as a design flaw of the protocol itself. Another solution to this might be wrapping the protocol into SSL/TLS. The traffic would be then unrecognizable from the other protocols based on SSL/TLS, such as the very common HTTPS, making it even harder to identify. Telegram developers dismissed this proposal considering SSL/TLS too performance heavy.
+MTProto has a fixed structure where the \texttt{auth\_key\_id} value is always present at the beginning of the packet and therefore easily recognizable, which may be considered as a design flaw of the protocol itself. Another solution to this might be wrapping the protocol into SSL/TLS. The traffic would be indistinguishable from other protocols based on SSL/TLS, such as the very common HTTPS, making it even harder to identify. Telegram developers dismissed this proposal claiming SSL/TLS too performance heavy.
 
 Under these circumstances it is understandable why the obfuscation method is not officially documented in any form.
 
 Secondly, Telegram responded to our attack scenario from Section \ref{analysis-attacks} and actually accepted some of our remarks. According to the Telegram team the Android application (as opposed, allegedly, to the other clients, such as Telegram for iOS, Telegram Desktop etc.) does not perform one of the the security checks as is required by the protocol, defined in the Security Guidelines for Client Developers in particular \cite{telegram-security-guideline}.
 
-Among other checks, the Security Guideline requires \cite{telegram-security-guideline} the message ID to be checked against the stored ones and Telegram performs that. However, it requires one more additional check -- if the incoming message has lower or equal ID than all the stored IDs, such message is to be discarded. This action does indeed diminish the risk but Telegram for Android did not carry out this check.
+Among other checks, the Security Guidelines require \cite{telegram-security-guideline} the message ID to be checked against the stored ones and Telegram performs that. However, it requires one more additional check -- if the incoming message has an ID lower than all or equal to any of the stored IDs, such message is to be discarded. This action does indeed diminish the risk but Telegram for Android did not carry out this check.
  
-The Telegram team further specified that this vulnerability does not allow the attacker to cause any severe damage because of the additional protection on the side of the Telegram API. Message actions (sending, editing, deleting, and changing read status), group membership, secret chats, and other important areas are not to be affected\footnote{According to Telegram this is because of the checks done in the \texttt{MessagesController.java} class on lines 5731, 5561, 5765, 5817 and others.}. Nevertheless, the Telegram team confirmed the attack would work for nonessential service updates like online or typing statuses. For example the scenario allowed the attacker to alter the statuses of victim's friends (as seen in the Android application, not in the Telegram network) or spoofing the victim to see typing statuses from contacts not performing such action in reality.
+The Telegram team further commented that this vulnerability does not allow the attacker to cause any severe damage because of the additional protection on the side of the Telegram API. Message actions (sending, editing, deleting, and changing read status), group membership, secret chats, and other important areas are not affected\footnote{According to Telegram, this is because of the checks done in the \texttt{MessagesController.java} class on lines 5731, 5561, 5765, 5817 and others.}. Nevertheless, the Telegram team confirmed the attack would work for nonessential service updates like online or typing statuses. For example, the scenario would allow the attacker to alter the statuses of victim's friends (as seen in the Android application, not in the Telegram network) or spoof the victim to see typing statuses from contacts not performing such action in reality.
 
-We briefly reviewed theses claims and concluded that the Java part of the Telegram application indeed does deal with additional identifiers, such as \texttt{qts}, \texttt{pts} and others. These values do seem to provide additional protection. It is important to mention that we did not perform any deeper research.
+We briefly reviewed these claims and concluded that the Java part of the Telegram application does indeed deal with additional identifiers, such as \texttt{qts}, \texttt{pts} and others. These values do seem to provide additional protection. It is important to mention that we did not perform any deeper research.
 
-Telegram promised this will be fixed in the next Android update and offered a financial reward for our findings.
+Telegram promised this will be fixed in the next Android update -- most likely in the 3.16 version which should be released in early January 2017. Telegram also offered a financial reward for our findings.
 
 
 
 
 \begin{conclusion}
 
-In the scope of this thesis our objective was to describe a selection of currently used Instant Messenger solutions and discuss its security aspects. Furthermore, it aims to investigate the Telegram Instant Messenger in more detail, mainly its homebrew protocol MTProto and its code.
+In the scope of this thesis our objective was to describe a selection of currently used Instant Messenger solutions and discuss their security aspects. Furthermore, the thesis aims to investigate the Telegram Instant Messenger in more detail, mainly its homebrew protocol MTProto and its code.
 
-We have analyzed many security-related incidents and presented their impact on the end user. We have indicated how the messengers respond to such incidents, and whether they try to improve on their security. A number of security related problems still remain. Many messengers are close-sourced thus not providing an opportunity for an independent code review and insufficient or completely missing documentation raises severe questions as well.
+We have analyzed many security-related incidents and presented their impact on the end user. We have indicated how the messengers respond to such incidents, and whether they try to improve on their security. A number of security-related problems still remain. Many messengers are closed-source, thus not providing an opportunity for an independent code review, and insufficient or completely missing documentation raises severe questions as well.
 
-Moreover, we have studied the Telegram IM and its MTProto protocol. We have thoroughly documented the protocol's internal working, its initialization and the encryption process. Since Telegram has two types of chat environment (regular and secret chats), we have covered both, and stressed out how they relate to each other. We have noted the cryptographic primitives it uses as well.
+Moreover, we have studied the Telegram IM and its MTProto protocol. We have thoroughly documented the protocol's internal working, its initialization and the encryption process. Since Telegram has two types of chat environment (regular and secret chats), we have covered both and stressed out how they relate to each other. We have noted the cryptographic primitives it uses as well.
 
-We set up a testing laboratory using various tools, and analyzed the network traffic Telegram produces. We have scrutinized the code base of the official application for Android and concluded that the state of the application is at serious odds with the documentation. This concerns mainly the undocumented obfuscation method Telegram uses. The MTProto traffic is encrypted one more time with the key and IV appended in front of the data. This has no effect on the data security and is easily debunked by the deobfuscation program we have implemented. When the Telegram team was confronted with these claims, they noted the method is used to circumvent some of the less sophisticated methods of censorship in certain countries.
+We set up a testing laboratory using various tools and analyzed the network traffic Telegram produces. We have scrutinized the code base of the official application for Android and concluded that the state of the application is at serious odds with the documentation. This concerns mainly the undocumented obfuscation method Telegram uses. The MTProto traffic is encrypted one more time with the key and IV prepended to the data. This has no effect on the data security and is easily debunked by the deobfuscation program we have implemented. When the Telegram team was confronted with these claims, they noted the method is used to circumvent some of the less sophisticated methods of censorship in certain countries.
 
-Finally, we have localized an exploitable vulnerability and drafted an attack scenario. We concluded that the Android application does not check the message identification numbers properly, and that a Replay attack might be feasible. Although our primary scenario of the attack turned out not to be applicable, we have drafted an altered scenario which we believe could be. We have also reported our findings to the Telegram security team which accepted our remarks and agreed, to a certain degree, that this might be exploitable. Telegram promised to fix this issue in the next software release.
+Finally, we have localized an exploitable vulnerability and drafted an attack scenario. We concluded that the Android application does not check the message identification numbers properly and that a Replay attack might be feasible. Although our primary scenario of the attack turned out not to be applicable, we have drafted an altered scenario which we believe would work. We have also reported our findings to the Telegram security team which accepted our remarks and agreed, to a certain degree, that this might be exploitable. Telegram promised to fix this issue in the next software release.
 
 Our work mainly focuses on the protocol and the Android client, but there are still many areas where further research might be required. Additional research might focus on the other Telegram clients, such as the desktop or iOS version, studying the protocol as a whole, or administering other forms of attacks.
 
 
 \end{conclusion}
 
+\interlinepenalty=10000 % no page break in a single bibliography entry
 
 \bibliographystyle{iso690}
 \bibliography{ref}
+
 
 \appendix
 
